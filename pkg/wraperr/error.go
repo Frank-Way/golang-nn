@@ -11,6 +11,12 @@ type WrapErr struct {
 }
 
 func NewWrapErr(wrap error, err error) *WrapErr {
+	if errors.Is(err, wrap) { // this check prevents multi-wrapping error with same wrap
+		return &WrapErr{
+			wrap: err,
+			err:  errors.Unwrap(err),
+		}
+	}
 	return &WrapErr{wrap: wrap, err: err}
 }
 
@@ -24,4 +30,8 @@ func (e *WrapErr) Is(err error) bool {
 	}
 
 	return errors.Is(e.err, err)
+}
+
+func (e *WrapErr) Unwrap() error {
+	return e.err
 }
