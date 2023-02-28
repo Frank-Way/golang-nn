@@ -15,7 +15,7 @@ type Matrix struct {
 
 func NewMatrix(vectors []*vector.Vector) (*Matrix, error) {
 	res, err := func(vectors []*vector.Vector) (*Matrix, error) {
-		if len(vectors) < 1 {
+		if vectors == nil || len(vectors) < 1 {
 			return nil, fmt.Errorf("no vectors provided: %v", vectors)
 		}
 
@@ -51,7 +51,9 @@ func NewMatrix(vectors []*vector.Vector) (*Matrix, error) {
 
 func NewMatrixFlat(rows, cols int, flat *vector.Vector) (*Matrix, error) {
 	vectors, err := func(rows, cols int, flat *vector.Vector) ([]*vector.Vector, error) {
-		if rows < 1 {
+		if flat == nil {
+			return nil, fmt.Errorf("no vector provided: %v", flat)
+		} else if rows < 1 {
 			return nil, fmt.Errorf("negative or zero rows count: %d", rows)
 		} else if cols < 1 {
 			return nil, fmt.Errorf("negative or zero cols count: %d", cols)
@@ -81,6 +83,9 @@ func NewMatrixFlat(rows, cols int, flat *vector.Vector) (*Matrix, error) {
 }
 
 func NewMatrixRaw(values [][]float64) (*Matrix, error) {
+	if values == nil {
+		return nil, wraperr.NewWrapErr(ErrCreate, fmt.Errorf("no values provided: %v", values))
+	}
 	var vectors []*vector.Vector
 	for _, row := range values {
 		vec, err := vector.NewVector(row)

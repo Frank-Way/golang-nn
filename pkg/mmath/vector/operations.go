@@ -12,10 +12,12 @@ func (v *Vector) doOperation(
 	description string,
 ) (*Vector, error) {
 	res, err := func(vector *Vector, operation func(a, b float64) float64, description string) (*Vector, error) {
-		n := vector.size
-		if vector.size != v.size {
+		if vector == nil {
+			return nil, fmt.Errorf("no second vector provided: %v", vector)
+		} else if vector.size != v.size {
 			return nil, fmt.Errorf("can not %s vectors sized %d and %d", description, v.size, vector.size)
 		}
+		n := vector.size
 
 		values := make([]float64, n)
 		for i := 0; i < n; i++ {
@@ -107,20 +109,24 @@ func (v *Vector) Stack(count int) (*Vector, error) {
 	return res, nil
 }
 
-func (v *Vector) Concatenate(another *Vector) (*Vector, error) {
-	res, err := func(another *Vector) (*Vector, error) {
-		values := make([]float64, v.size+another.size)
+func (v *Vector) Concatenate(vector *Vector) (*Vector, error) {
+	res, err := func(vector *Vector) (*Vector, error) {
+		if vector == nil {
+			return nil, fmt.Errorf("no second vector provided: %v", vector)
+		}
+
+		values := make([]float64, v.size+vector.size)
 
 		for i, value := range v.values {
 			values[i] = value
 		}
-		for j, value := range another.values {
+		for j, value := range vector.values {
 			values[v.size+j] = value
 		}
 
 		return NewVector(values)
 
-	}(another)
+	}(vector)
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -136,19 +142,21 @@ func (v *Vector) Sum() (sum float64) {
 	return sum
 }
 
-func (v *Vector) MulScalar(another *Vector) (float64, error) {
-	res, err := func(another *Vector) (float64, error) {
-		if v.size != another.size {
-			return 0, fmt.Errorf("vectors sizes for scalar multiplication does no match: %d != %d", v.size, another.size)
+func (v *Vector) MulScalar(vector *Vector) (float64, error) {
+	res, err := func(vector *Vector) (float64, error) {
+		if vector == nil {
+			return 0, fmt.Errorf("no second vector provided: %v", vector)
+		} else if v.size != vector.size {
+			return 0, fmt.Errorf("vectors sizes for scalar multiplication does no match: %d != %d", v.size, vector.size)
 		}
 
-		mul, err := v.Mul(another)
+		mul, err := v.Mul(vector)
 		if err != nil {
 			return 0, err
 		}
 
 		return mul.Sum(), nil
-	}(another)
+	}(vector)
 
 	if err != nil {
 		return 0, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -318,7 +326,7 @@ func (v *Vector) Split(partSize int) ([]*Vector, error) {
 
 func Join(vectors ...*Vector) (*Vector, error) {
 	res, err := func(vectors ...*Vector) (*Vector, error) {
-		if len(vectors) < 1 {
+		if vectors == nil || len(vectors) < 1 {
 			return nil, fmt.Errorf("no vectors provided to join: %v", vectors)
 		}
 
@@ -341,13 +349,15 @@ func Join(vectors ...*Vector) (*Vector, error) {
 	return res, nil
 }
 
-func (v *Vector) Equal(another *Vector) bool {
-	if v.size != another.size {
+func (v *Vector) Equal(vector *Vector) bool {
+	if vector == nil {
+		return false
+	} else if v.size != vector.size {
 		return false
 	}
 
 	for i := 0; i < v.size; i++ {
-		if v.values[i] != another.values[i] {
+		if v.values[i] != vector.values[i] {
 			return false
 		}
 	}

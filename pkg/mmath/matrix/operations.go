@@ -23,6 +23,10 @@ func (m *Matrix) T() *Matrix {
 const ParallelThreshold = 64
 
 func (m *Matrix) MatMul(matrix *Matrix) (*Matrix, error) {
+	if matrix == nil {
+		return nil, wraperr.NewWrapErr(ErrOperationExec,
+			fmt.Errorf("no second matrix provided for matrix multiplication: %v", matrix))
+	}
 	if m.rows*matrix.cols > ParallelThreshold {
 		return m.matMulImplMulti(matrix)
 	}
@@ -122,10 +126,12 @@ func (m *Matrix) matMulImplMulti(matrix *Matrix) (*Matrix, error) {
 
 func (m *Matrix) doOperation(matrix *Matrix, operation func(a, b float64) float64, description string) (*Matrix, error) {
 	res, err := func(matrix *Matrix, operation func(a, b float64) float64) (*Matrix, error) {
-		rows, cols := matrix.Size()
-		if rows != m.rows || cols != m.cols {
-			return nil, fmt.Errorf("matrix size mismatces: %dx%d != %dx%d", m.rows, m.cols, rows, cols)
+		if matrix == nil {
+			return nil, fmt.Errorf("no second matrix provided: %v", matrix)
+		} else if matrix.Rows() != m.rows || matrix.Cols() != m.cols {
+			return nil, fmt.Errorf("matrix size mismatces: %dx%d != %dx%d", m.rows, m.cols, matrix.Rows(), matrix.Cols())
 		}
+		rows, cols := matrix.Size()
 
 		values := make([][]float64, rows)
 		for i := 0; i < rows; i++ {
@@ -143,7 +149,7 @@ func (m *Matrix) doOperation(matrix *Matrix, operation func(a, b float64) float6
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec,
-			fmt.Errorf("can not perform '%s'", description))
+			fmt.Errorf("can not perform '%s': %w", description, err))
 	}
 
 	return res, nil
@@ -185,18 +191,34 @@ func stackRow(row *vector.Vector, count int) *Matrix {
 }
 
 func (m *Matrix) AddRow(row *vector.Vector) (*Matrix, error) {
+	if row == nil {
+		return nil, wraperr.NewWrapErr(ErrOperationExec,
+			fmt.Errorf("no row provided for matrix addition: %v", row))
+	}
 	return m.Add(stackRow(row, m.rows))
 }
 
 func (m *Matrix) SubRow(row *vector.Vector) (*Matrix, error) {
+	if row == nil {
+		return nil, wraperr.NewWrapErr(ErrOperationExec,
+			fmt.Errorf("no row provided for matrix substraction: %v", row))
+	}
 	return m.Sub(stackRow(row, m.rows))
 }
 
 func (m *Matrix) MulRow(row *vector.Vector) (*Matrix, error) {
+	if row == nil {
+		return nil, wraperr.NewWrapErr(ErrOperationExec,
+			fmt.Errorf("no row provided for matrix multiplication: %v", row))
+	}
 	return m.Mul(stackRow(row, m.rows))
 }
 
 func (m *Matrix) DivRow(row *vector.Vector) (*Matrix, error) {
+	if row == nil {
+		return nil, wraperr.NewWrapErr(ErrOperationExec,
+			fmt.Errorf("no row provided for matrix division: %v", row))
+	}
 	return m.Div(stackRow(row, m.rows))
 }
 
@@ -212,18 +234,34 @@ func stackCol(col *vector.Vector, count int) *Matrix {
 }
 
 func (m *Matrix) AddCol(col *vector.Vector) (*Matrix, error) {
+	if col == nil {
+		return nil, wraperr.NewWrapErr(ErrOperationExec,
+			fmt.Errorf("no col provided for matrix addition: %v", col))
+	}
 	return m.Add(stackCol(col, m.cols))
 }
 
 func (m *Matrix) SubCol(col *vector.Vector) (*Matrix, error) {
+	if col == nil {
+		return nil, wraperr.NewWrapErr(ErrOperationExec,
+			fmt.Errorf("no col provided for matrix substraction: %v", col))
+	}
 	return m.Sub(stackCol(col, m.cols))
 }
 
 func (m *Matrix) MulCol(col *vector.Vector) (*Matrix, error) {
+	if col == nil {
+		return nil, wraperr.NewWrapErr(ErrOperationExec,
+			fmt.Errorf("no col provided for matrix multiplication: %v", col))
+	}
 	return m.Mul(stackCol(col, m.cols))
 }
 
 func (m *Matrix) DivCol(col *vector.Vector) (*Matrix, error) {
+	if col == nil {
+		return nil, wraperr.NewWrapErr(ErrOperationExec,
+			fmt.Errorf("no col provided for matrix division: %v", col))
+	}
 	return m.Div(stackCol(col, m.cols))
 }
 
@@ -479,7 +517,7 @@ func (m *Matrix) SubMatrix(rowsStart, rowsStop, rowsStep, colsStart, colsStop, c
 
 func (m *Matrix) HStack(matrices []*Matrix) (*Matrix, error) {
 	res, err := func(matrices []*Matrix) (*Matrix, error) {
-		if len(matrices) < 1 {
+		if matrices == nil || len(matrices) < 1 {
 			return nil, fmt.Errorf("no matrices provided for horizontal stacking")
 		}
 
@@ -511,7 +549,7 @@ func (m *Matrix) HStack(matrices []*Matrix) (*Matrix, error) {
 
 func (m *Matrix) VStack(matrices []*Matrix) (*Matrix, error) {
 	res, err := func(matrices []*Matrix) (*Matrix, error) {
-		if len(matrices) < 1 {
+		if matrices == nil || len(matrices) < 1 {
 			return nil, fmt.Errorf("no matrices provided for vertical stacking")
 		}
 
@@ -531,7 +569,7 @@ func (m *Matrix) VStack(matrices []*Matrix) (*Matrix, error) {
 }
 
 func (m *Matrix) Equal(matrix *Matrix) bool {
-	if m.rows != matrix.rows {
+	if matrix == nil || m.rows != matrix.rows {
 		return false
 	}
 
@@ -546,7 +584,9 @@ func (m *Matrix) Equal(matrix *Matrix) bool {
 
 func (m *Matrix) Order(indices []int) (*Matrix, error) {
 	res, err := func(indices []int) (*Matrix, error) {
-		if len(indices) != m.rows {
+		if indices == nil {
+			return nil, fmt.Errorf("no indices provided for ordering matrix: %v", indices)
+		} else if len(indices) != m.rows {
 			return nil, fmt.Errorf("wrong indices count for ordering matrix %dx%d: %d != %d",
 				m.rows, m.cols, len(indices), m.rows)
 		}
