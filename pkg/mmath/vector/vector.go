@@ -60,7 +60,7 @@ func (v *Vector) String() string {
 }
 
 func (v *Vector) PrettyString() string {
-	lu, ld, l, lo, ru, rd, r, ro := "⸢", "⸤", "|", "[", "⸣", "⸥", "|", "]"
+	lu, ld, l, lo, ru, rd, r, ro := "⸢", "⸤", "│", "[", "⸣", "⸥", "│", "]"
 
 	if v.size == 1 {
 		return fmt.Sprintf("%s %v %s", lo, v.values[0], ro)
