@@ -365,6 +365,24 @@ func (v *Vector) Equal(vector *Vector) bool {
 	return true
 }
 
+const Epsilon = 0.000001
+
+func (v *Vector) EqualApprox(vector *Vector) bool {
+	if vector == nil {
+		return false
+	} else if v.size != vector.size {
+		return false
+	}
+
+	for i := 0; i < v.size; i++ {
+		if math.Abs(v.values[i]-vector.values[i]) > Epsilon {
+			return false
+		}
+	}
+
+	return true
+}
+
 func LinSpace(start, stop float64, count int) (*Vector, error) {
 	res, err := func(start, stop float64, count int) (*Vector, error) {
 		if start >= stop {

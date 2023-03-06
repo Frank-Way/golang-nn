@@ -110,6 +110,13 @@ func (d *Dataset) Equal(dataset *Dataset) bool {
 	return d.Train.Equal(dataset.Train) && d.Tests.Equal(dataset.Tests) && d.Valid.Equal(dataset.Valid)
 }
 
+func (d *Dataset) EqualApprox(dataset *Dataset) bool {
+	if dataset == nil {
+		return false
+	}
+	return d.Train.EqualApprox(dataset.Train) && d.Tests.EqualApprox(dataset.Tests) && d.Valid.EqualApprox(dataset.Valid)
+}
+
 func (d *Dataset) String() string {
 	return fmt.Sprintf("{Train: %s, Tests: %v, Valid: %v}", d.Train.String(), d.Tests.String(), d.Valid.String())
 }

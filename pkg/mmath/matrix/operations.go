@@ -582,6 +582,20 @@ func (m *Matrix) Equal(matrix *Matrix) bool {
 	return true
 }
 
+func (m *Matrix) EqualApprox(matrix *Matrix) bool {
+	if matrix == nil || m.rows != matrix.rows {
+		return false
+	}
+
+	for i := 0; i < m.rows; i++ {
+		if !m.vectors[i].EqualApprox(matrix.vectors[i]) {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (m *Matrix) Order(indices []int) (*Matrix, error) {
 	res, err := func(indices []int) (*Matrix, error) {
 		if indices == nil {

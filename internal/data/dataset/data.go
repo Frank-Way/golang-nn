@@ -85,6 +85,18 @@ func (d *Data) Equal(data *Data) bool {
 	return d.Y.Equal(data.Y)
 }
 
+func (d *Data) EqualApprox(data *Data) bool {
+	if data == nil {
+		return false
+	} else if d.X.Rows() != data.X.Rows() {
+		return false
+	} else if !d.X.EqualApprox(data.X) {
+		return false
+	}
+
+	return d.Y.EqualApprox(data.Y)
+}
+
 // Split return two *Data, first contains values in [0; pivot), second - in [pivot; Data.Rows()).
 // Split is a row-based function.
 // If fail, Split returns ErrSplit error wrapper.
