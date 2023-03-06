@@ -13,11 +13,11 @@ type MatrixParameters struct {
 	Values []float64
 }
 
-func NewMatrix(t *testing.T, params MatrixParameters) *matrix.Matrix {
-	if params.Values == nil {
-		params.Values = utils.RandomArray(params.Rows * params.Cols)
+func NewMatrix(t *testing.T, parameters MatrixParameters) *matrix.Matrix {
+	if parameters.Values == nil {
+		parameters.Values = utils.RandomArray(parameters.Rows * parameters.Cols)
 	}
-	mat, err := matrix.NewMatrixRawFlat(params.Rows, params.Cols, params.Values)
+	mat, err := matrix.NewMatrixRawFlat(parameters.Rows, parameters.Cols, parameters.Values)
 	require.NoError(t, err)
 
 	return mat
