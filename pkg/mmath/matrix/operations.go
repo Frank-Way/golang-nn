@@ -155,141 +155,272 @@ func (m *Matrix) doOperation(matrix *Matrix, operation func(a, b float64) float6
 	return res, nil
 }
 
+func add(a, b float64) float64 {
+	return a + b
+}
+
+func sub(a, b float64) float64 {
+	return a - b
+}
+
+func mul(a, b float64) float64 {
+	return a * b
+}
+
+func div(a, b float64) float64 {
+	return a / b
+}
+
 func (m *Matrix) Add(matrix *Matrix) (*Matrix, error) {
-	return m.doOperation(matrix, func(a, b float64) float64 {
-		return a + b
-	}, "add")
+	return m.doOperation(matrix, add, "add")
 }
 
 func (m *Matrix) Sub(matrix *Matrix) (*Matrix, error) {
-	return m.doOperation(matrix, func(a, b float64) float64 {
-		return a - b
-	}, "sub")
+	return m.doOperation(matrix, sub, "sub")
 }
 
 func (m *Matrix) Mul(matrix *Matrix) (*Matrix, error) {
-	return m.doOperation(matrix, func(a, b float64) float64 {
-		return a * b
-	}, "mul")
+	return m.doOperation(matrix, mul, "mul")
 }
 
 func (m *Matrix) Div(matrix *Matrix) (*Matrix, error) {
-	return m.doOperation(matrix, func(a, b float64) float64 {
-		return a / b
-	}, "div")
+	return m.doOperation(matrix, div, "div")
 }
 
-func stackRow(row *vector.Vector, count int) *Matrix {
-	rows := make([]*vector.Vector, count)
-	for i := 0; i < count; i++ {
-		rows[i] = row.Copy()
+func (m *Matrix) doRowOperation(row *vector.Vector, operation func(a, b float64) float64, description string) (*Matrix, error) {
+	res, err := func(row *vector.Vector, operation func(a, b float64) float64) (*Matrix, error) {
+		if row == nil {
+			return nil, fmt.Errorf("no row provided: %v", row)
+		} else if row.Size() != m.cols {
+			return nil, fmt.Errorf("matrix size mismatces: %dx%d != %dx%d", m.rows, m.cols, 1, row.Size())
+		}
+		rows, cols := m.Size()
+
+		values := make([][]float64, rows)
+		for i := 0; i < rows; i++ {
+			rowRaw := make([]float64, cols)
+			for j := 0; j < cols; j++ {
+				a, _ := m.Get(i, j)
+				b, _ := row.Get(j)
+				rowRaw[j] = operation(a, b)
+			}
+			values[i] = rowRaw
+		}
+
+		return NewMatrixRaw(values)
+	}(row, operation)
+
+	if err != nil {
+		return nil, wraperr.NewWrapErr(ErrOperationExec,
+			fmt.Errorf("can not perform '%s': %w", description, err))
 	}
 
-	matrix, _ := NewMatrix(rows)
-
-	return matrix
+	return res, nil
 }
 
 func (m *Matrix) AddRow(row *vector.Vector) (*Matrix, error) {
-	if row == nil {
-		return nil, wraperr.NewWrapErr(ErrOperationExec,
-			fmt.Errorf("no row provided for matrix addition: %v", row))
-	}
-	return m.Add(stackRow(row, m.rows))
+	return m.doRowOperation(row, add, "add")
 }
 
 func (m *Matrix) SubRow(row *vector.Vector) (*Matrix, error) {
-	if row == nil {
-		return nil, wraperr.NewWrapErr(ErrOperationExec,
-			fmt.Errorf("no row provided for matrix substraction: %v", row))
-	}
-	return m.Sub(stackRow(row, m.rows))
+	return m.doRowOperation(row, sub, "sub")
 }
 
 func (m *Matrix) MulRow(row *vector.Vector) (*Matrix, error) {
-	if row == nil {
-		return nil, wraperr.NewWrapErr(ErrOperationExec,
-			fmt.Errorf("no row provided for matrix multiplication: %v", row))
-	}
-	return m.Mul(stackRow(row, m.rows))
+	return m.doRowOperation(row, mul, "mul")
 }
 
 func (m *Matrix) DivRow(row *vector.Vector) (*Matrix, error) {
-	if row == nil {
-		return nil, wraperr.NewWrapErr(ErrOperationExec,
-			fmt.Errorf("no row provided for matrix division: %v", row))
-	}
-	return m.Div(stackRow(row, m.rows))
+	return m.doRowOperation(row, div, "div")
 }
 
-func stackCol(col *vector.Vector, count int) *Matrix {
-	cols := make([]*vector.Vector, count)
-	for i := 0; i < count; i++ {
-		cols[i] = col.Copy()
+func (m *Matrix) doColOperation(col *vector.Vector, operation func(a, b float64) float64, description string) (*Matrix, error) {
+	res, err := func(col *vector.Vector, operation func(a, b float64) float64) (*Matrix, error) {
+		if col == nil {
+			return nil, fmt.Errorf("no col provided: %v", col)
+		} else if col.Size() != m.rows {
+			return nil, fmt.Errorf("matrix size mismatces: %dx%d != %dx%d", m.rows, m.cols, col.Size(), 1)
+		}
+		rows, cols := m.Size()
+
+		values := make([][]float64, rows)
+		for i := 0; i < rows; i++ {
+			rowRaw := make([]float64, cols)
+			b, _ := col.Get(i)
+			for j := 0; j < cols; j++ {
+				a, _ := m.Get(i, j)
+				rowRaw[j] = operation(a, b)
+			}
+			values[i] = rowRaw
+		}
+
+		return NewMatrixRaw(values)
+	}(col, operation)
+
+	if err != nil {
+		return nil, wraperr.NewWrapErr(ErrOperationExec,
+			fmt.Errorf("can not perform '%s': %w", description, err))
 	}
 
-	matrix, _ := NewMatrix(cols)
-
-	return matrix.T()
+	return res, nil
 }
 
 func (m *Matrix) AddCol(col *vector.Vector) (*Matrix, error) {
-	if col == nil {
-		return nil, wraperr.NewWrapErr(ErrOperationExec,
-			fmt.Errorf("no col provided for matrix addition: %v", col))
-	}
-	return m.Add(stackCol(col, m.cols))
+	return m.doColOperation(col, add, "add")
 }
 
 func (m *Matrix) SubCol(col *vector.Vector) (*Matrix, error) {
-	if col == nil {
-		return nil, wraperr.NewWrapErr(ErrOperationExec,
-			fmt.Errorf("no col provided for matrix substraction: %v", col))
-	}
-	return m.Sub(stackCol(col, m.cols))
+	return m.doColOperation(col, sub, "sub")
 }
 
 func (m *Matrix) MulCol(col *vector.Vector) (*Matrix, error) {
-	if col == nil {
-		return nil, wraperr.NewWrapErr(ErrOperationExec,
-			fmt.Errorf("no col provided for matrix multiplication: %v", col))
-	}
-	return m.Mul(stackCol(col, m.cols))
+	return m.doColOperation(col, mul, "mul")
 }
 
 func (m *Matrix) DivCol(col *vector.Vector) (*Matrix, error) {
-	if col == nil {
+	return m.doColOperation(col, div, "div")
+}
+
+func (m *Matrix) doRowMOperation(row *Matrix, operation func(a, b float64) float64, description string) (*Matrix, error) {
+	res, err := func(row *Matrix, operation func(a, b float64) float64) (*Matrix, error) {
+		if row == nil {
+			return nil, fmt.Errorf("no row provided: %v", row)
+		} else if row.rows != 1 {
+			return nil, fmt.Errorf("matrix is not row: %dx%d", row.rows, row.cols)
+		} else if row.cols != m.cols {
+			return nil, fmt.Errorf("matrix size mismatces: %dx%d != %dx%d", m.rows, m.cols, row.rows, row.cols)
+		}
+		rows, cols := m.Size()
+
+		values := make([][]float64, rows)
+		for i := 0; i < rows; i++ {
+			rowRaw := make([]float64, cols)
+			for j := 0; j < cols; j++ {
+				a, _ := m.Get(i, j)
+				b, _ := row.Get(0, j)
+				rowRaw[j] = operation(a, b)
+			}
+			values[i] = rowRaw
+		}
+
+		return NewMatrixRaw(values)
+	}(row, operation)
+
+	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec,
-			fmt.Errorf("no col provided for matrix division: %v", col))
+			fmt.Errorf("can not perform '%s': %w", description, err))
 	}
-	return m.Div(stackCol(col, m.cols))
+
+	return res, nil
+}
+
+func (m *Matrix) AddRowM(row *Matrix) (*Matrix, error) {
+	return m.doRowMOperation(row, add, "add")
+}
+
+func (m *Matrix) SubRowM(row *Matrix) (*Matrix, error) {
+	return m.doRowMOperation(row, sub, "sub")
+}
+
+func (m *Matrix) MulRowM(row *Matrix) (*Matrix, error) {
+	return m.doRowMOperation(row, mul, "mul")
+}
+
+func (m *Matrix) DivRowM(row *Matrix) (*Matrix, error) {
+	return m.doRowMOperation(row, div, "div")
+}
+
+func (m *Matrix) doColMOperation(col *Matrix, operation func(a, b float64) float64, description string) (*Matrix, error) {
+	res, err := func(col *Matrix, operation func(a, b float64) float64) (*Matrix, error) {
+		if col == nil {
+			return nil, fmt.Errorf("no col provided: %v", col)
+		} else if col.cols != 1 {
+			return nil, fmt.Errorf("matrix is not col: %dx%d", col.rows, col.cols)
+		} else if col.rows != m.rows {
+			return nil, fmt.Errorf("matrix size mismatces: %dx%d != %dx%d", m.rows, m.cols, col.rows, col.cols)
+		}
+		rows, cols := m.Size()
+
+		values := make([][]float64, rows)
+		for i := 0; i < rows; i++ {
+			rowRaw := make([]float64, cols)
+			b, _ := col.Get(i, 0)
+			for j := 0; j < cols; j++ {
+				a, _ := m.Get(i, j)
+				rowRaw[j] = operation(a, b)
+			}
+			values[i] = rowRaw
+		}
+
+		return NewMatrixRaw(values)
+	}(col, operation)
+
+	if err != nil {
+		return nil, wraperr.NewWrapErr(ErrOperationExec,
+			fmt.Errorf("can not perform '%s': %w", description, err))
+	}
+
+	return res, nil
+}
+
+func (m *Matrix) AddColM(col *Matrix) (*Matrix, error) {
+	return m.doColMOperation(col, add, "add")
+}
+
+func (m *Matrix) SubColM(col *Matrix) (*Matrix, error) {
+	return m.doColMOperation(col, sub, "sub")
+}
+
+func (m *Matrix) MulColM(col *Matrix) (*Matrix, error) {
+	return m.doColMOperation(col, mul, "mul")
+}
+
+func (m *Matrix) DivColM(col *Matrix) (*Matrix, error) {
+	return m.doColMOperation(col, div, "div")
+}
+
+func (m *Matrix) doNumOperation(number float64, operation func(a, b float64) float64, description string) (*Matrix, error) {
+	res, err := func(number float64, operation func(a, b float64) float64) (*Matrix, error) {
+		rows, cols := m.Size()
+
+		values := make([][]float64, rows)
+		for i := 0; i < rows; i++ {
+			rowRaw := make([]float64, cols)
+			for j := 0; j < cols; j++ {
+				a, _ := m.Get(i, j)
+				rowRaw[j] = operation(a, number)
+			}
+			values[i] = rowRaw
+		}
+
+		return NewMatrixRaw(values)
+	}(number, operation)
+
+	if err != nil {
+		return nil, wraperr.NewWrapErr(ErrOperationExec,
+			fmt.Errorf("can not perform '%s': %w", description, err))
+	}
+
+	return res, nil
 }
 
 func (m *Matrix) AddNum(number float64) *Matrix {
-	matrix, _ := NewMatrixOf(m.rows, m.cols, number)
-	res, _ := m.Add(matrix)
-
+	res, _ := m.doNumOperation(number, add, "add")
 	return res
 }
 
 func (m *Matrix) SubNum(number float64) *Matrix {
-	matrix, _ := NewMatrixOf(m.rows, m.cols, number)
-	res, _ := m.Sub(matrix)
-
+	res, _ := m.doNumOperation(number, sub, "sub")
 	return res
 }
 
 func (m *Matrix) MulNum(number float64) *Matrix {
-	matrix, _ := NewMatrixOf(m.rows, m.cols, number)
-	res, _ := m.Mul(matrix)
-
+	res, _ := m.doNumOperation(number, mul, "mul")
 	return res
 }
 
 func (m *Matrix) DivNum(number float64) *Matrix {
-	matrix, _ := NewMatrixOf(m.rows, m.cols, number)
-	res, _ := m.Div(matrix)
-
+	res, _ := m.doNumOperation(number, div, "div")
 	return res
 }
 

@@ -538,6 +538,286 @@ func TestMatrix_DivCol(t *testing.T) {
 	}
 }
 
+func TestMatrix_AddRowM(t *testing.T) {
+	tests := []twoMatrixTest{
+		{
+			testBase: testBase{name: "1x1 + 1x1 row", expected: []float64{3}},
+			a:        matrixInput{in: []float64{1}, rows: 1, cols: 1},
+			b:        matrixInput{in: []float64{2}, rows: 1, cols: 1},
+		},
+		{
+			testBase: testBase{name: "2x2 + 1x2 row", expected: []float64{6, 8, 8, 10}},
+			a:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			b:        matrixInput{in: []float64{5, 6}, rows: 1, cols: 2},
+		},
+		{
+			testBase: testBase{name: "2x1 + 1x2 row, error", err: ErrOperationExec},
+			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
+			b:        matrixInput{in: []float64{3, 4}, rows: 1, cols: 2},
+		},
+		{
+			testBase: testBase{name: "2x1 + 2x1 row, error", err: ErrOperationExec},
+			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
+			b:        matrixInput{in: []float64{3, 4}, rows: 2, cols: 1},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			a := newMatrix(t, test.a)
+			b := newMatrix(t, test.b)
+
+			matrix, err := a.AddRowM(b)
+			makeAssertions(t, matrixInput{in: test.expected, rows: a.rows, cols: a.cols}, test.err, err, matrix)
+		})
+	}
+}
+
+func TestMatrix_SubRowM(t *testing.T) {
+	tests := []twoMatrixTest{
+		{
+			testBase: testBase{name: "1x1 - 1x1 row", expected: []float64{-1}},
+			a:        matrixInput{in: []float64{1}, rows: 1, cols: 1},
+			b:        matrixInput{in: []float64{2}, rows: 1, cols: 1},
+		},
+		{
+			testBase: testBase{name: "2x2 - 1x2 row", expected: []float64{-4, -4, -2, -2}},
+			a:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			b:        matrixInput{in: []float64{5, 6}, rows: 1, cols: 2},
+		},
+		{
+			testBase: testBase{name: "2x1 - 1x2 row, error", err: ErrOperationExec},
+			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
+			b:        matrixInput{in: []float64{3, 4}, rows: 1, cols: 2},
+		},
+		{
+			testBase: testBase{name: "2x1 - 2x1 row, error", err: ErrOperationExec},
+			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
+			b:        matrixInput{in: []float64{3, 4}, rows: 2, cols: 1},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			a := newMatrix(t, test.a)
+			b := newMatrix(t, test.b)
+
+			matrix, err := a.SubRowM(b)
+			makeAssertions(t, matrixInput{in: test.expected, rows: a.rows, cols: a.cols}, test.err, err, matrix)
+		})
+	}
+}
+
+func TestMatrix_MulRowM(t *testing.T) {
+	tests := []twoMatrixTest{
+		{
+			testBase: testBase{name: "1x1 * 1x1 row", expected: []float64{2}},
+			a:        matrixInput{in: []float64{1}, rows: 1, cols: 1},
+			b:        matrixInput{in: []float64{2}, rows: 1, cols: 1},
+		},
+		{
+			testBase: testBase{name: "2x2 * 1x2 row", expected: []float64{5, 12, 15, 24}},
+			a:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			b:        matrixInput{in: []float64{5, 6}, rows: 1, cols: 2},
+		},
+		{
+			testBase: testBase{name: "2x1 * 1x2 row, error", err: ErrOperationExec},
+			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
+			b:        matrixInput{in: []float64{3, 4}, rows: 1, cols: 2},
+		},
+		{
+			testBase: testBase{name: "2x1 * 2x1 row, error", err: ErrOperationExec},
+			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
+			b:        matrixInput{in: []float64{3, 4}, rows: 2, cols: 1},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			a := newMatrix(t, test.a)
+			b := newMatrix(t, test.b)
+
+			matrix, err := a.MulRowM(b)
+			makeAssertions(t, matrixInput{in: test.expected, rows: a.rows, cols: a.cols}, test.err, err, matrix)
+		})
+	}
+}
+
+func TestMatrix_DivRowM(t *testing.T) {
+	tests := []twoMatrixTest{
+		{
+			testBase: testBase{name: "1x1 / 1x1 row", expected: []float64{1.0 / 2.0}},
+			a:        matrixInput{in: []float64{1}, rows: 1, cols: 1},
+			b:        matrixInput{in: []float64{2}, rows: 1, cols: 1},
+		},
+		{
+			testBase: testBase{name: "2x2 / 1x2 row", expected: []float64{1.0 / 5.0, 2.0 / 6.0, 3.0 / 5.0, 4.0 / 6.0}},
+			a:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			b:        matrixInput{in: []float64{5, 6}, rows: 1, cols: 2},
+		},
+		{
+			testBase: testBase{name: "2x1 / 1x2 row, error", err: ErrOperationExec},
+			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
+			b:        matrixInput{in: []float64{3, 4}, rows: 1, cols: 2},
+		},
+		{
+			testBase: testBase{name: "2x1 / 2x1 row, error", err: ErrOperationExec},
+			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
+			b:        matrixInput{in: []float64{3, 4}, rows: 2, cols: 1},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			a := newMatrix(t, test.a)
+			b := newMatrix(t, test.b)
+
+			matrix, err := a.DivRowM(b)
+			makeAssertions(t, matrixInput{in: test.expected, rows: a.rows, cols: a.cols}, test.err, err, matrix)
+		})
+	}
+}
+
+func TestMatrix_AddColM(t *testing.T) {
+	tests := []twoMatrixTest{
+		{
+			testBase: testBase{name: "1x1 + 1x1 col", expected: []float64{3}},
+			a:        matrixInput{in: []float64{1}, rows: 1, cols: 1},
+			b:        matrixInput{in: []float64{2}, rows: 1, cols: 1},
+		},
+		{
+			testBase: testBase{name: "2x2 + 2x1 col", expected: []float64{6, 7, 9, 10}},
+			a:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			b:        matrixInput{in: []float64{5, 6}, rows: 2, cols: 1},
+		},
+		{
+			testBase: testBase{name: "1x2 + 2x1 col, error", err: ErrOperationExec},
+			a:        matrixInput{in: []float64{1, 2}, rows: 1, cols: 2},
+			b:        matrixInput{in: []float64{3, 4}, rows: 2, cols: 1},
+		},
+		{
+			testBase: testBase{name: "2x1 + 1x2 col, error", err: ErrOperationExec},
+			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
+			b:        matrixInput{in: []float64{3, 4}, rows: 1, cols: 2},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			a := newMatrix(t, test.a)
+			b := newMatrix(t, test.b)
+
+			matrix, err := a.AddColM(b)
+			makeAssertions(t, matrixInput{in: test.expected, rows: a.rows, cols: a.cols}, test.err, err, matrix)
+		})
+	}
+}
+
+func TestMatrix_SubColM(t *testing.T) {
+	tests := []twoMatrixTest{
+		{
+			testBase: testBase{name: "1x1 - 1 col", expected: []float64{-1}},
+			a:        matrixInput{in: []float64{1}, rows: 1, cols: 1},
+			b:        matrixInput{in: []float64{2}, rows: 1, cols: 1},
+		},
+		{
+			testBase: testBase{name: "2x2 - 2 col", expected: []float64{-4, -3, -3, -2}},
+			a:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			b:        matrixInput{in: []float64{5, 6}, rows: 2, cols: 1},
+		},
+		{
+			testBase: testBase{name: "1x2 - 2 col, error", err: ErrOperationExec},
+			a:        matrixInput{in: []float64{1, 2}, rows: 1, cols: 2},
+			b:        matrixInput{in: []float64{3, 4}, rows: 2, cols: 1},
+		},
+		{
+			testBase: testBase{name: "2x1 - 1x2 col, error", err: ErrOperationExec},
+			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
+			b:        matrixInput{in: []float64{3, 4}, rows: 1, cols: 2},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			a := newMatrix(t, test.a)
+			b := newMatrix(t, test.b)
+
+			matrix, err := a.SubColM(b)
+			makeAssertions(t, matrixInput{in: test.expected, rows: a.rows, cols: a.cols}, test.err, err, matrix)
+		})
+	}
+}
+
+func TestMatrix_MulColM(t *testing.T) {
+	tests := []twoMatrixTest{
+		{
+			testBase: testBase{name: "1x1 * 1 col", expected: []float64{2}},
+			a:        matrixInput{in: []float64{1}, rows: 1, cols: 1},
+			b:        matrixInput{in: []float64{2}, rows: 1, cols: 1},
+		},
+		{
+			testBase: testBase{name: "2x2 * 2 col", expected: []float64{5, 10, 18, 24}},
+			a:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			b:        matrixInput{in: []float64{5, 6}, rows: 2, cols: 1},
+		},
+		{
+			testBase: testBase{name: "1x2 * 2 col, error", err: ErrOperationExec},
+			a:        matrixInput{in: []float64{1, 2}, rows: 1, cols: 2},
+			b:        matrixInput{in: []float64{3, 4}, rows: 2, cols: 1},
+		},
+		{
+			testBase: testBase{name: "2x1 * 1x2 col, error", err: ErrOperationExec},
+			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
+			b:        matrixInput{in: []float64{3, 4}, rows: 1, cols: 2},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			a := newMatrix(t, test.a)
+			b := newMatrix(t, test.b)
+
+			matrix, err := a.MulColM(b)
+			makeAssertions(t, matrixInput{in: test.expected, rows: a.rows, cols: a.cols}, test.err, err, matrix)
+		})
+	}
+}
+
+func TestMatrix_DivColM(t *testing.T) {
+	tests := []twoMatrixTest{
+		{
+			testBase: testBase{name: "1x1 / 1 col", expected: []float64{1.0 / 2.0}},
+			a:        matrixInput{in: []float64{1}, rows: 1, cols: 1},
+			b:        matrixInput{in: []float64{2}, rows: 1, cols: 1},
+		},
+		{
+			testBase: testBase{name: "2x2 / 2 col", expected: []float64{1.0 / 5.0, 2.0 / 5.0, 3.0 / 6.0, 4.0 / 6.0}},
+			a:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			b:        matrixInput{in: []float64{5, 6}, rows: 2, cols: 1},
+		},
+		{
+			testBase: testBase{name: "1x2 / 2 col, error", err: ErrOperationExec},
+			a:        matrixInput{in: []float64{1, 2}, rows: 1, cols: 2},
+			b:        matrixInput{in: []float64{3, 4}, rows: 2, cols: 1},
+		},
+		{
+			testBase: testBase{name: "2x1 / 1x2 col, error", err: ErrOperationExec},
+			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
+			b:        matrixInput{in: []float64{3, 4}, rows: 1, cols: 2},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			a := newMatrix(t, test.a)
+			b := newMatrix(t, test.b)
+
+			matrix, err := a.DivColM(b)
+			makeAssertions(t, matrixInput{in: test.expected, rows: a.rows, cols: a.cols}, test.err, err, matrix)
+		})
+	}
+}
+
 func TestMatrix_AddNum(t *testing.T) {
 	tests := []matrixNumberTest{
 		{
