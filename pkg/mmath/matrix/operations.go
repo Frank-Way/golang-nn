@@ -608,6 +608,15 @@ func (m *Matrix) Sqrt() *Matrix {
 	return cp
 }
 
+func (m *Matrix) Tanh() *Matrix {
+	cp := m.Copy()
+	for i := 0; i < m.rows; i++ {
+		cp.vectors[i] = cp.vectors[i].Tanh()
+	}
+
+	return cp
+}
+
 func (m *Matrix) SubMatrix(rowsStart, rowsStop, rowsStep, colsStart, colsStop, colsStep int) (*Matrix, error) {
 	res, err := func(rowsStart, rowsStop, rowsStep, colsStart, colsStop, colsStep int) (*Matrix, error) {
 		l := rowsStop - rowsStart

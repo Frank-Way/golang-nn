@@ -244,6 +244,10 @@ func (v *Vector) Sqrt() *Vector {
 	return v.Pow(1.0 / 2.0)
 }
 
+func (v *Vector) Tanh() *Vector {
+	return v.applyFunc(math.Tanh)
+}
+
 func (v *Vector) Reverse() *Vector {
 	values := make([]float64, v.size)
 
