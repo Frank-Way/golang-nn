@@ -459,6 +459,34 @@ func (m *Matrix) SumAxed(axis Axis) (*vector.Vector, error) {
 	return res, nil
 }
 
+func (m *Matrix) SumAxedM(axis Axis) (*Matrix, error) {
+	res, err := func(axis Axis) (*Matrix, error) {
+		switch axis {
+		case Horizontal:
+			values := make([]float64, m.rows)
+			for i, row := range m.vectors {
+				values[i] = row.Sum()
+			}
+			return NewMatrixRawFlat(m.rows, 1, values)
+		case Vertical:
+			values := make([]float64, m.cols)
+			t := m.T()
+			for j, col := range t.vectors {
+				values[j] = col.Sum()
+			}
+			return NewMatrixRawFlat(1, m.cols, values)
+		default:
+			return nil, fmt.Errorf("unknown axis: %d", axis)
+		}
+	}(axis)
+
+	if err != nil {
+		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
+	}
+
+	return res, nil
+}
+
 func (m *Matrix) Sum() float64 {
 	vec, _ := m.SumAxed(Horizontal)
 	return vec.Sum()
