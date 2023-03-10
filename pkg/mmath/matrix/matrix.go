@@ -249,3 +249,10 @@ func (m *Matrix) GetCol(col int) (*vector.Vector, error) {
 
 	return res, nil
 }
+
+func (m *Matrix) CheckEqualShape(matrix *Matrix) error {
+	if m.rows != matrix.rows || m.cols != matrix.cols {
+		return fmt.Errorf("matrix sizes mismatch: %dx%d != %dx%d", m.rows, matrix.rows, m.cols, matrix.cols)
+	}
+	return nil
+}
