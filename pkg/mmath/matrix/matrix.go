@@ -127,17 +127,11 @@ func (m *Matrix) String() string {
 }
 
 func (m *Matrix) PrettyString() string {
-	lu, ld, lm, l, ru, rd, rm, r := "⸢", "⸤", "│", "[", "⸣", "⸥", "│", "]"
+	l, r := "|", "|"
 
 	if m.cols == 1 {
 		col, _ := m.GetCol(0)
 		return col.PrettyString()
-	}
-	if m.rows == 1 {
-		row, _ := m.GetRow(0)
-		s := row.String()
-		s = s[1 : len(s)-1]
-		return fmt.Sprintf("%s %s %s", l, s, r)
 	}
 
 	strValues := make([]string, m.rows)
@@ -147,7 +141,7 @@ func (m *Matrix) PrettyString() string {
 		pString := col.PrettyString()
 		pStrings := strings.Split(pString, "\n")
 		for i := 0; i < m.rows; i++ {
-			pStrings[i] = pStrings[i][4 : len(pStrings[i])-4]
+			pStrings[i] = pStrings[i][2 : len(pStrings[i])-2]
 			if j == 0 {
 				strValues[i] = pStrings[i]
 			} else {
@@ -156,15 +150,9 @@ func (m *Matrix) PrettyString() string {
 		}
 	}
 
+	format := "%s %s %s"
 	for i, str := range strValues {
-		format := "%s %s %s"
-		if i == 0 {
-			strValues[i] = fmt.Sprintf(format, lu, str, ru)
-		} else if i == m.rows-1 {
-			strValues[i] = fmt.Sprintf(format, ld, str, rd)
-		} else {
-			strValues[i] = fmt.Sprintf(format, lm, str, rm)
-		}
+		strValues[i] = fmt.Sprintf(format, l, str, r)
 	}
 
 	return strings.Join(strValues, "\n")

@@ -153,10 +153,10 @@ func TestVector_PrettyString(t *testing.T) {
 		in       []float64
 		expected string
 	}{
-		{name: "3 int inputs", in: []float64{1, 2, 3}, expected: "⸢ 1 ⸣\n│ 2 │\n⸤ 3 ⸥"},
-		{name: "3 float inputs", in: []float64{1.0 / 2, 1.0 / 3, 1.0 / 4}, expected: "⸢                0.5 ⸣\n│ 0.3333333333333333 │\n⸤               0.25 ⸥"},
-		{name: "1 int input", in: []float64{1}, expected: "[ 1 ]"},
-		{name: "2 int inputs", in: []float64{1, -20}, expected: "⸢   1 ⸣\n⸤ -20 ⸥"},
+		{name: "3 int inputs", in: []float64{1, 2, 3}, expected: "| 1 |\n| 2 |\n| 3 |"},
+		{name: "3 float inputs", in: []float64{1.0 / 2, 1.0 / 3, 1.0 / 4}, expected: "|                0.5 |\n| 0.3333333333333333 |\n|               0.25 |"},
+		{name: "1 int input", in: []float64{1}, expected: "| 1 |"},
+		{name: "2 int inputs", in: []float64{1, -20}, expected: "|   1 |\n| -20 |"},
 	}
 
 	for _, test := range tests {

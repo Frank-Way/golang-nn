@@ -60,11 +60,7 @@ func (v *Vector) String() string {
 }
 
 func (v *Vector) PrettyString() string {
-	lu, ld, l, lo, ru, rd, r, ro := "⸢", "⸤", "│", "[", "⸣", "⸥", "│", "]"
-
-	if v.size == 1 {
-		return fmt.Sprintf("%s %v %s", lo, v.values[0], ro)
-	}
+	l, r := "|", "|"
 
 	strValues := make([]string, v.size)
 	maxLen := 0
@@ -83,15 +79,9 @@ func (v *Vector) PrettyString() string {
 		strValues[i] = pad + str
 	}
 
+	format := "%s %s %s"
 	for i, str := range strValues {
-		format := "%s %s %s"
-		if i == 0 {
-			strValues[i] = fmt.Sprintf(format, lu, str, ru)
-		} else if i == v.size-1 {
-			strValues[i] = fmt.Sprintf(format, ld, str, rd)
-		} else {
-			strValues[i] = fmt.Sprintf(format, l, str, r)
-		}
+		strValues[i] = fmt.Sprintf(format, l, str, r)
 	}
 
 	return strings.Join(strValues, "\n")

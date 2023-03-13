@@ -228,15 +228,15 @@ func TestMatrix_PrettyString(t *testing.T) {
 		cols     int
 		expected string
 	}{
-		{name: "1x1 matrix", in: []float64{1}, rows: 1, cols: 1, expected: "[ 1 ]"},
-		{name: "1x2 matrix", in: []float64{1, 2}, rows: 1, cols: 2, expected: "[ 1 2 ]"},
-		{name: "1x3 matrix", in: []float64{1, 2, 3}, rows: 1, cols: 3, expected: "[ 1 2 3 ]"},
-		{name: "2x1 matrix", in: []float64{1, 2}, rows: 2, cols: 1, expected: "⸢ 1 ⸣\n⸤ 2 ⸥"},
-		{name: "2x2 matrix", in: []float64{1, 2, 3, 4}, rows: 2, cols: 2, expected: "⸢ 1 2 ⸣\n⸤ 3 4 ⸥"},
-		{name: "2x3 matrix", in: []float64{1, 2, 3, 4, 5, 6}, rows: 2, cols: 3, expected: "⸢ 1 2 3 ⸣\n⸤ 4 5 6 ⸥"},
-		{name: "3x1 matrix", in: []float64{1, 2, 3}, rows: 3, cols: 1, expected: "⸢ 1 ⸣\n│ 2 │\n⸤ 3 ⸥"},
-		{name: "3x2 matrix", in: []float64{1, 2, 3, 4, 5, 6}, rows: 3, cols: 2, expected: "⸢ 1 2 ⸣\n│ 3 4 │\n⸤ 5 6 ⸥"},
-		{name: "3x3 matrix", in: []float64{1, -2, 3, 4, -5, 6, 777, 888, 999}, rows: 3, cols: 3, expected: "⸢   1  -2   3 ⸣\n│   4  -5   6 │\n⸤ 777 888 999 ⸥"},
+		{name: "1x1 matrix", in: []float64{1}, rows: 1, cols: 1, expected: "| 1 |"},
+		{name: "1x2 matrix", in: []float64{1, 2}, rows: 1, cols: 2, expected: "| 1 2 |"},
+		{name: "1x3 matrix", in: []float64{1, 2, 3}, rows: 1, cols: 3, expected: "| 1 2 3 |"},
+		{name: "2x1 matrix", in: []float64{1, 2}, rows: 2, cols: 1, expected: "| 1 |\n| 2 |"},
+		{name: "2x2 matrix", in: []float64{1, 2, 3, 4}, rows: 2, cols: 2, expected: "| 1 2 |\n| 3 4 |"},
+		{name: "2x3 matrix", in: []float64{1, 2, 3, 4, 5, 6}, rows: 2, cols: 3, expected: "| 1 2 3 |\n| 4 5 6 |"},
+		{name: "3x1 matrix", in: []float64{1, 2, 3}, rows: 3, cols: 1, expected: "| 1 |\n| 2 |\n| 3 |"},
+		{name: "3x2 matrix", in: []float64{1, 2, 3, 4, 5, 6}, rows: 3, cols: 2, expected: "| 1 2 |\n| 3 4 |\n| 5 6 |"},
+		{name: "3x3 matrix", in: []float64{1, -2, 3, 4, -5, 6, 777, 888, 999}, rows: 3, cols: 3, expected: "|   1  -2   3 |\n|   4  -5   6 |\n| 777 888 999 |"},
 	}
 
 	for _, test := range tests {
