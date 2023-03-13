@@ -153,10 +153,13 @@ func TestVector_Concatenate(t *testing.T) {
 		inA      []float64
 		inB      []float64
 		expected []float64
+		nilCheck bool
+		err      error
 	}{
 		{name: "vector of size 2 concat vector of size 3", inA: []float64{1, 2}, inB: []float64{3, 4, 5}, expected: []float64{1, 2, 3, 4, 5}},
 		{name: "vector of size 1 concat vector of size 1", inA: []float64{1}, inB: []float64{3}, expected: []float64{1, 3}},
 		{name: "vector of size 2 concat vector of size 1", inA: []float64{1, 2}, inB: []float64{3}, expected: []float64{1, 2, 3}},
+		{name: "vector of size 2 concat nil vector", inA: []float64{1, 2}, inB: []float64{3, 4, 5}, nilCheck: true, err: ErrOperationExec},
 	}
 
 	for _, test := range tests {
@@ -165,12 +168,20 @@ func TestVector_Concatenate(t *testing.T) {
 			require.NoError(t, err)
 			b, err := NewVector(test.inB)
 			require.NoError(t, err)
+			if test.nilCheck {
+				b = nil
+			}
 
 			actual, err := a.Concatenate(b)
-			require.NoError(t, err)
-			require.Equal(t, len(test.expected), actual.Size())
-			for i, value := range test.expected {
-				require.Equal(t, value, actual.values[i])
+			if test.err == nil {
+				require.NoError(t, err)
+				require.Equal(t, len(test.expected), actual.Size())
+				for i, value := range test.expected {
+					require.Equal(t, value, actual.values[i])
+				}
+			} else {
+				require.Error(t, err)
+				require.ErrorIs(t, err, test.err)
 			}
 		})
 	}
@@ -192,9 +203,11 @@ func TestVector_MulScalar(t *testing.T) {
 		inB      []float64
 		expected float64
 		err      error
+		nilCheck bool
 	}{
-		{name: "mul scalar vectors of size 3, no error", inA: []float64{1, 2, 3}, inB: []float64{4, 5, 6}, expected: 1*4 + 2*5 + 3*6},
-		{name: "mul scalar vectors of size 1 and 2, error", inA: []float64{1}, inB: []float64{4, 5}, err: ErrOperationExec},
+		{name: "Mul scalar vectors of size 3, no error", inA: []float64{1, 2, 3}, inB: []float64{4, 5, 6}, expected: 1*4 + 2*5 + 3*6},
+		{name: "Mul scalar vectors of size 1 and 2, error", inA: []float64{1}, inB: []float64{4, 5}, err: ErrOperationExec},
+		{name: "Mul scalar of vector and nil, error", inA: []float64{1, 2, 3}, inB: []float64{4, 5, 6}, nilCheck: true, err: ErrOperationExec},
 	}
 
 	for _, test := range tests {
@@ -203,6 +216,9 @@ func TestVector_MulScalar(t *testing.T) {
 			require.NoError(t, err)
 			b, err := NewVector(test.inB)
 			require.NoError(t, err)
+			if test.nilCheck {
+				b = nil
+			}
 
 			actual, err := a.MulScalar(b)
 			if test.err == nil {
@@ -360,6 +376,16 @@ func TestVector_Sqrt(t *testing.T) {
 	require.Equal(t, []float64{math.Sqrt(1), math.Sqrt(2), math.Sqrt(3)}, sqrt.values)
 }
 
+func TestVector_Tanh(t *testing.T) {
+	vector, err := NewVector([]float64{1, 2, 3})
+	require.NoError(t, err)
+
+	tanh := vector.Tanh()
+	require.NotNil(t, tanh)
+	require.Equal(t, 3, tanh.Size())
+	require.Equal(t, []float64{math.Tanh(1), math.Tanh(2), math.Tanh(3)}, tanh.values)
+}
+
 func TestVector_Reverse(t *testing.T) {
 	vector, err := NewVector([]float64{1, 2, 3})
 	require.NoError(t, err)
@@ -465,9 +491,11 @@ func TestJoin(t *testing.T) {
 		name     string
 		in       [][]float64
 		expected []float64
+		nilCheck bool
 		err      error
 	}{
 		{name: "{1, 2} + {3} + {4, 5, 6}, no error", in: [][]float64{{1, 2}, {3}, {4, 5, 6}}, expected: []float64{1, 2, 3, 4, 5, 6}, err: nil},
+		{name: "{1, 2} + {3} + {4, 5, 6} + nil, no error", in: [][]float64{{1, 2}, {3}, {4, 5, 6}}, nilCheck: true, err: ErrOperationExec},
 		{name: "no inputs, error", err: ErrOperationExec},
 	}
 
@@ -478,6 +506,9 @@ func TestJoin(t *testing.T) {
 				vector, err := NewVector(arr)
 				require.NoError(t, err)
 				vectors = append(vectors, vector)
+			}
+			if test.nilCheck {
+				vectors = append(vectors, nil)
 			}
 
 			vector, err := Join(vectors...)
@@ -500,10 +531,15 @@ func TestVector_Equal(t *testing.T) {
 		name     string
 		inA      []float64
 		inB      []float64
+		nilCheck bool
 		expected bool
 	}{
 		{name: "{1,2}=={1,2}", inA: []float64{1, 2}, inB: []float64{1, 2}, expected: true},
 		{name: "{1,2}!={2,1}", inA: []float64{1, 2}, inB: []float64{2, 1}, expected: false},
+		{name: "{1,2}!={1,2,3}", inA: []float64{1, 2}, inB: []float64{1, 2, 3}, expected: false},
+		{name: "{1,2}!={1.00001,2}", inA: []float64{1, 2}, inB: []float64{1.00001, 2}, expected: false},
+		{name: "{1,2}!={1.0000001,2}", inA: []float64{1, 2}, inB: []float64{1.0000001, 2}, expected: false},
+		{name: "{1,2}!=mil", inA: []float64{1, 2}, inB: []float64{1, 2}, nilCheck: true, expected: false},
 	}
 
 	for _, test := range tests {
@@ -511,8 +547,41 @@ func TestVector_Equal(t *testing.T) {
 		require.NoError(t, err)
 		b, err := NewVector(test.inB)
 		require.NoError(t, err)
+		if test.nilCheck {
+			b = nil
+		}
 
 		actual := a.Equal(b)
+		require.Equal(t, test.expected, actual)
+	}
+}
+
+func TestVector_EqualApprox(t *testing.T) {
+	tests := []struct {
+		name     string
+		inA      []float64
+		inB      []float64
+		nilCheck bool
+		expected bool
+	}{
+		{name: "{1,2}=={1,2}", inA: []float64{1, 2}, inB: []float64{1, 2}, expected: true},
+		{name: "{1,2}!={2,1}", inA: []float64{1, 2}, inB: []float64{2, 1}, expected: false},
+		{name: "{1,2}!={1,2,3}", inA: []float64{1, 2}, inB: []float64{1, 2, 3}, expected: false},
+		{name: "{1,2}=={1.0000001,2}", inA: []float64{1, 2}, inB: []float64{1.0000001, 2}, expected: true},
+		{name: "{1,2}!={1.00001,2}", inA: []float64{1, 2}, inB: []float64{1.00001, 2}, expected: false},
+		{name: "{1,2}!=nil", inA: []float64{1, 2}, inB: []float64{1, 2}, nilCheck: true, expected: false},
+	}
+
+	for _, test := range tests {
+		a, err := NewVector(test.inA)
+		require.NoError(t, err)
+		b, err := NewVector(test.inB)
+		require.NoError(t, err)
+		if test.nilCheck {
+			b = nil
+		}
+
+		actual := a.EqualApprox(b)
 		require.Equal(t, test.expected, actual)
 	}
 }

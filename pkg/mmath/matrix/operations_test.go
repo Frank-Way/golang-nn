@@ -49,8 +49,9 @@ func TestMatrix_T(t *testing.T) {
 func TestMatrix_MatMul(t *testing.T) {
 	tests := []struct {
 		testBase
-		a matrixInput
-		b matrixInput
+		a        matrixInput
+		b        matrixInput
+		nilCheck bool
 	}{
 		{
 			testBase: testBase{name: "2x3 matmul 3x4", expected: []float64{38, 44, 50, 56, 83, 98, 113, 128}},
@@ -62,14 +63,39 @@ func TestMatrix_MatMul(t *testing.T) {
 			b:        matrixInput{in: []float64{1, 2, 3, 4, 5, 6}, rows: 2, cols: 3},
 			a:        matrixInput{in: []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, rows: 3, cols: 4},
 		},
+		{
+			testBase: testBase{name: "2x3 matmul nil", err: ErrOperationExec},
+			a:        matrixInput{in: []float64{1, 2, 3, 4, 5, 6}, rows: 2, cols: 3},
+			b:        matrixInput{in: []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, rows: 3, cols: 4},
+			nilCheck: true,
+		},
+		{
+			testBase: testBase{name: "8x1 matmul 1x9", expected: []float64{
+				1, 2, 3, 4, 5, 6, 7, 8, 9,
+				2, 4, 6, 8, 10, 12, 14, 16, 18,
+				3, 6, 9, 12, 15, 18, 21, 24, 27,
+				4, 8, 12, 16, 20, 24, 28, 32, 36,
+				5, 10, 15, 20, 25, 30, 35, 40, 45,
+				6, 12, 18, 24, 30, 36, 42, 48, 54,
+				7, 14, 21, 28, 35, 42, 49, 56, 63,
+				8, 16, 24, 32, 40, 48, 56, 64, 72}},
+			a: matrixInput{in: []float64{1, 2, 3, 4, 5, 6, 7, 8}, rows: 8, cols: 1},
+			b: matrixInput{in: []float64{1, 2, 3, 4, 5, 6, 7, 8, 9}, rows: 1, cols: 9},
+		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			a := newMatrix(t, test.a)
 			b := newMatrix(t, test.b)
+			if test.nilCheck {
+				b = nil
+			}
 
 			matrix, err := a.MatMul(b)
+			if matrix != nil {
+				t.Log("\n" + matrix.PrettyString())
+			}
 			makeAssertions(t, matrixInput{in: test.expected, rows: test.a.rows, cols: test.b.cols}, test.err, err, matrix)
 		})
 	}
@@ -956,6 +982,39 @@ func TestMatrix_SumAxed(t *testing.T) {
 	}
 }
 
+func TestMatrix_SumAxedM(t *testing.T) {
+	tests := []matrixNumberTest{
+		{
+			testBase: testBase{name: "2x3, sum horizontal", expected: []float64{6, 15}},
+			a:        matrixInput{in: []float64{1, 2, 3, 4, 5, 6}, rows: 2, cols: 3},
+			b:        0,
+		},
+		{
+			testBase: testBase{name: "2x3, sum vertical", expected: []float64{5, 7, 9}},
+			a:        matrixInput{in: []float64{1, 2, 3, 4, 5, 6}, rows: 2, cols: 3},
+			b:        1,
+		},
+		{
+			testBase: testBase{name: "2x3, unknown axis, err", err: ErrOperationExec},
+			a:        matrixInput{in: []float64{1, 2, 3, 4, 5, 6}, rows: 2, cols: 3},
+			b:        5,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			a := newMatrix(t, test.a)
+			matrix, err := a.SumAxedM(Axis(uint8(test.b)))
+
+			rows, cols := test.a.rows, 1
+			if test.b == 1 {
+				rows, cols = 1, test.a.cols
+			}
+			makeAssertions(t, matrixInput{in: test.expected, rows: rows, cols: cols}, test.err, err, matrix)
+		})
+	}
+}
+
 func TestMatrix_Max(t *testing.T) {
 	matrix, err := NewMatrixRawFlat(3, 3, []float64{1, 2, 3, 4, 5, 6, 7, 8, 9})
 	require.NoError(t, err)
@@ -1115,6 +1174,19 @@ func TestMatrix_Sqrt(t *testing.T) {
 	flat := res.RawFlat()
 	require.Equal(t, 6, len(flat))
 	f := math.Sqrt
+	for i, value := range []float64{1, 2, 3, 4, 5, 6} {
+		require.Equal(t, f(value), flat[i])
+	}
+}
+
+func TestMatrix_Tanh(t *testing.T) {
+	matrix, err := NewMatrixRawFlat(2, 3, []float64{1, 2, 3, 4, 5, 6})
+	require.NoError(t, err)
+
+	res := matrix.Tanh()
+	flat := res.RawFlat()
+	require.Equal(t, 6, len(flat))
+	f := math.Tanh
 	for i, value := range []float64{1, 2, 3, 4, 5, 6} {
 		require.Equal(t, f(value), flat[i])
 	}
@@ -1392,6 +1464,77 @@ func TestMatrix_Equal(t *testing.T) {
 
 			res1 := a.Equal(b)
 			res2 := b.Equal(a)
+
+			require.Equal(t, res1, res2)
+			require.Equal(t, test.expected, res1)
+		})
+	}
+}
+
+func TestMatrix_EqualApprox(t *testing.T) {
+	tests := []struct {
+		name     string
+		a        matrixInput
+		b        matrixInput
+		expected bool
+	}{
+		{
+			name:     "equal matrices",
+			a:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			b:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			expected: true,
+		},
+		{
+			name:     "different rows count",
+			a:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			b:        matrixInput{in: []float64{1, 2}, rows: 1, cols: 2},
+			expected: false,
+		},
+		{
+			name:     "different cols count",
+			a:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			b:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
+			expected: false,
+		},
+		{
+			name:     "different size",
+			a:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			b:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 1, cols: 4},
+			expected: false,
+		},
+		{
+			name:     "another different size",
+			a:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			b:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 4, cols: 1},
+			expected: false,
+		},
+		{
+			name:     "different values",
+			a:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			b:        matrixInput{in: []float64{1, 2, 5, 4}, rows: 2, cols: 2},
+			expected: false,
+		},
+		{
+			name:     "diff > epsilon",
+			a:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			b:        matrixInput{in: []float64{1.00001, 2, 3, 4}, rows: 2, cols: 2},
+			expected: false,
+		},
+		{
+			name:     "diff < epsilon",
+			a:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			b:        matrixInput{in: []float64{1.0000001, 2, 3, 4}, rows: 2, cols: 2},
+			expected: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			a := newMatrix(t, test.a)
+			b := newMatrix(t, test.b)
+
+			res1 := a.EqualApprox(b)
+			res2 := b.EqualApprox(a)
 
 			require.Equal(t, res1, res2)
 			require.Equal(t, test.expected, res1)

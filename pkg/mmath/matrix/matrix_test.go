@@ -88,19 +88,24 @@ func TestNewMatrixFlat(t *testing.T) {
 
 func TestNewMatrixRaw(t *testing.T) {
 	tests := []struct {
-		name string
-		in   [][]float64
-		err  error
+		name     string
+		in       [][]float64
+		nilCheck bool
+		err      error
 	}{
 		{name: "2x2 matrix, no error", in: [][]float64{{1, 2}, {3, 4}}},
 		{name: "1x1 matrix, no error", in: [][]float64{{1}}},
 		{name: "1x2 matrix, no error", in: [][]float64{{1, 3}}},
 		{name: "empty input, error", err: ErrCreate},
 		{name: "different sizes, error", in: [][]float64{{1, 2}, {3, 4, 5}}, err: ErrCreate},
+		{name: "nil row, error", in: [][]float64{{1, 2}, {3, 4}}, nilCheck: true, err: ErrCreate},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			if test.nilCheck {
+				test.in = append(test.in, nil)
+			}
 			matrix, err := NewMatrixRaw(test.in)
 			if test.err == nil {
 				require.NoError(t, err)
@@ -171,6 +176,10 @@ func TestNewMatrixOf(t *testing.T) {
 			require.Equal(t, 2.0, value)
 		}
 	}
+
+	matrix, err = NewMatrixOf(0, 0, 2)
+	require.Error(t, err)
+	require.ErrorIs(t, err, ErrCreate)
 }
 
 func TestZeros(t *testing.T) {
@@ -477,6 +486,52 @@ func TestMatrix_GetCol(t *testing.T) {
 			} else {
 				require.Error(t, err)
 				require.ErrorIs(t, err, test.err)
+			}
+		})
+	}
+}
+
+func TestMatrix_CheckEqualShape(t *testing.T) {
+	tests := []struct {
+		name     string
+		a        matrixInput
+		b        matrixInput
+		nilCheck bool
+		err      bool
+	}{
+		{
+			name: "2x2 == 2x2",
+			a:    matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			b:    matrixInput{in: []float64{5, 6, 7, 8}, rows: 2, cols: 2},
+		},
+		{
+			name: "2x2 != 1x4",
+			a:    matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			b:    matrixInput{in: []float64{5, 6, 7, 8}, rows: 1, cols: 4},
+			err:  true,
+		},
+		{
+			name:     "2x2 != nil",
+			a:        matrixInput{in: []float64{1, 2, 3, 4}, rows: 2, cols: 2},
+			b:        matrixInput{in: []float64{5, 6, 7, 8}, rows: 2, cols: 2},
+			nilCheck: true,
+			err:      true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			a := newMatrix(t, test.a)
+			b := newMatrix(t, test.b)
+			if test.nilCheck {
+				b = nil
+			}
+
+			check := a.CheckEqualShape(b)
+			if test.err {
+				require.Error(t, check)
+			} else {
+				require.NoError(t, check)
 			}
 		})
 	}
