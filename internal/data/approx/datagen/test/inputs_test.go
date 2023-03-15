@@ -32,3 +32,12 @@ func TestNewInputRange(t *testing.T) {
 		})
 	}
 }
+
+func TestInputRange_Strings(t *testing.T) {
+	inputRange, err := datagen.NewInputRange(0.5, 2, 3)
+	require.NoError(t, err)
+
+	t.Log("ShortString\n" + inputRange.ShortString())
+	t.Log("String\n" + inputRange.String())
+	t.Log("PrettyString\n" + inputRange.PrettyString())
+}

@@ -14,13 +14,13 @@ func TestNewParameters(t *testing.T) {
 	tests := []struct {
 		utils.Base
 		expr   string
-		inputs []*fabrics.InputRangeParameters
+		inputs []fabrics.InputRangeParameters
 		split  *dataset.DataSplitParameters
 	}{
 		{
 			Base:   utils.Base{Name: "sin(x0) for x0 from 0 to 1 (11 values)"},
 			expr:   "(sin x0)",
-			inputs: []*fabrics.InputRangeParameters{{InputRange: &datagen.InputRange{Left: 0, Right: 1, Count: 11}}},
+			inputs: []fabrics.InputRangeParameters{{InputRange: &datagen.InputRange{Left: 0, Right: 1, Count: 11}}},
 			split:  dataset.DefaultDataSplitParameters,
 		},
 	}
@@ -56,7 +56,7 @@ func TestParameters_Generate(t *testing.T) {
 			},
 			params: fabrics.ParametersParameters{
 				Expression: "(sin x0)",
-				Ranges: []*datagen.InputRange{fabrics.NewInputRange(t, &fabrics.InputRangeParameters{
+				Ranges: []*datagen.InputRange{fabrics.NewInputRange(t, fabrics.InputRangeParameters{
 					InputRange: &datagen.InputRange{
 						Left:  1,
 						Right: 2,
@@ -96,4 +96,23 @@ func TestParameters_Generate(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestParameters_Strings(t *testing.T) {
+	parameters := fabrics.NewParameters(t, fabrics.ParametersParameters{
+		Expression: "(x0 + x1)",
+		Ranges: []*datagen.InputRange{
+			{Left: 0, Right: 1, Count: 11},
+			{Left: 0, Right: 10, Count: 101},
+		},
+		Split: &dataset.DataSplitParameters{
+			TrainPercent: dataset.Percent60,
+			TestsPercent: dataset.Percent30,
+			ValidPercent: dataset.Percent10,
+		},
+	})
+
+	t.Log("ShortString\n" + parameters.ShortString())
+	t.Log("String\n" + parameters.String())
+	t.Log("PrettyString\n" + parameters.PrettyString())
 }

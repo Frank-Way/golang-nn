@@ -2,6 +2,7 @@ package datagen
 
 import (
 	"fmt"
+	"nn/internal/utils"
 	"nn/pkg/mmath/vector"
 	"nn/pkg/wraperr"
 )
@@ -31,4 +32,33 @@ func NewInputRange(left float64, right float64, count int) (*InputRange, error) 
 
 func (r *InputRange) inputs() (*vector.Vector, error) {
 	return vector.LinSpace(r.Left, r.Right, r.Count)
+}
+
+func (r *InputRange) toMap() map[string]string {
+	return map[string]string{
+		"Left":  fmt.Sprintf("%f", r.Left),
+		"Right": fmt.Sprintf("%f", r.Right),
+		"Count": fmt.Sprintf("%d", r.Count),
+	}
+}
+
+func (r *InputRange) String() string {
+	if r == nil {
+		return "<nil>"
+	}
+	return utils.FormatObject(r.toMap(), utils.BaseFormat)
+}
+
+func (r *InputRange) PrettyString() string {
+	if r == nil {
+		return "<nil>"
+	}
+	return utils.FormatObject(r.toMap(), utils.PrettyFormat)
+}
+
+func (r *InputRange) ShortString() string {
+	if r == nil {
+		return "<nil>"
+	}
+	return utils.FormatObject(r.toMap(), utils.ShortFormat)
 }

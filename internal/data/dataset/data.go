@@ -6,7 +6,6 @@ import (
 	"nn/internal/utils"
 	"nn/pkg/mmath/matrix"
 	"nn/pkg/wraperr"
-	"strings"
 )
 
 type Data struct {
@@ -39,19 +38,33 @@ func (d *Data) Copy() *Data {
 	return data
 }
 
+func (d *Data) toMap(stringer func(spStringer utils.SPStringer) string) map[string]string {
+	return map[string]string{
+		"X": stringer(d.X),
+		"Y": stringer(d.Y),
+	}
+
+}
+
 func (d *Data) String() string {
-	return fmt.Sprintf("{X: %s, Y: %s}", d.X.String(), d.Y.String())
+	if d == nil {
+		return "<nil>"
+	}
+	return utils.FormatObject(d.toMap(utils.String), utils.BaseFormat)
 }
 
 func (d *Data) PrettyString() string {
-	var sb strings.Builder
-	sb.WriteString(utils.PrettyString("X", d.X) + "\n")
-	sb.WriteString(utils.PrettyString("Y", d.Y))
-	return sb.String()
+	if d == nil {
+		return "<nil>"
+	}
+	return utils.FormatObject(d.toMap(utils.PrettyString), utils.PrettyFormat)
 }
 
 func (d *Data) ShortString() string {
-	return fmt.Sprintf("{X: %dx%d, Y: %dx%d}", d.X.Rows(), d.X.Cols(), d.Y.Rows(), d.Y.Cols())
+	if d == nil {
+		return "<nil>"
+	}
+	return utils.FormatObject(d.toMap(utils.ShortString), utils.ShortFormat)
 }
 
 func (d *Data) Shuffle() (*Data, []int) {

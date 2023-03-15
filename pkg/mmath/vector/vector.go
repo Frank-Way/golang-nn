@@ -56,10 +56,16 @@ func (v *Vector) Get(index int) (float64, error) {
 }
 
 func (v *Vector) String() string {
+	if v == nil {
+		return "<nil>"
+	}
 	return fmt.Sprintf("%v", v.values)
 }
 
 func (v *Vector) PrettyString() string {
+	if v == nil {
+		return "<nil>"
+	}
 	l, r := "|", "|"
 
 	strValues := make([]string, v.size)
@@ -85,6 +91,13 @@ func (v *Vector) PrettyString() string {
 	}
 
 	return strings.Join(strValues, "\n")
+}
+
+func (v *Vector) ShortString() string {
+	if v == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("vector %dx%d", v.size, 1)
 }
 
 func (v *Vector) Raw() []float64 {

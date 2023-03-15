@@ -119,6 +119,9 @@ func Zeros(rows, cols int) (*Matrix, error) {
 }
 
 func (m *Matrix) String() string {
+	if m == nil {
+		return "<nil>"
+	}
 	vecStrings := make([]string, m.rows)
 	for i, vec := range m.vectors {
 		vecStrings[i] = vec.String()
@@ -127,6 +130,9 @@ func (m *Matrix) String() string {
 }
 
 func (m *Matrix) PrettyString() string {
+	if m == nil {
+		return "<nil>"
+	}
 	l, r := "|", "|"
 
 	if m.cols == 1 {
@@ -156,6 +162,13 @@ func (m *Matrix) PrettyString() string {
 	}
 
 	return strings.Join(strValues, "\n")
+}
+
+func (m *Matrix) ShortString() string {
+	if m == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("matrix %dx%d", m.rows, m.cols)
 }
 
 func (m *Matrix) Get(row, col int) (float64, error) {

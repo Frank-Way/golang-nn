@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"nn/internal/data/approx/expression"
 	"nn/internal/data/dataset"
+	"nn/internal/utils"
 	"nn/pkg/mmath/matrix"
 	"nn/pkg/mmath/vector"
 	"nn/pkg/wraperr"
@@ -79,4 +80,44 @@ func (p *Parameters) Generate() (*dataset.Dataset, error) {
 	}
 
 	return dataset.NewDatasetSplit(data, p.DataSplitParameters)
+}
+
+func (p *Parameters) rangesAsSPStringers() []utils.SPStringer {
+	res := make([]utils.SPStringer, len(p.Ranges))
+	for i, rng := range p.Ranges {
+		res[i] = rng
+	}
+	return res
+}
+
+func (p *Parameters) toMap(
+	stringer func(spStringer utils.SPStringer) string,
+	stringers func(spStringers []utils.SPStringer) string,
+) map[string]string {
+	return map[string]string{
+		"Expression":          p.Expression,
+		"Ranges":              stringers(p.rangesAsSPStringers()),
+		"DataSplitParameters": stringer(p.DataSplitParameters),
+	}
+}
+
+func (p *Parameters) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return utils.FormatObject(p.toMap(utils.String, utils.Strings), utils.BaseFormat)
+}
+
+func (p *Parameters) PrettyString() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return utils.FormatObject(p.toMap(utils.PrettyString, utils.PrettyStrings), utils.PrettyFormat)
+}
+
+func (p *Parameters) ShortString() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return utils.FormatObject(p.toMap(utils.ShortString, utils.ShortStrings), utils.ShortFormat)
 }

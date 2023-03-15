@@ -1,5 +1,7 @@
 package dataset
 
+import "fmt"
+
 type Percent uint8
 
 const (
@@ -50,4 +52,16 @@ func (p Percent) GetI(value int) int {
 
 func (p Percent) GetF(value float64) float64 {
 	return value * float64(p.value()) / 100.0
+}
+
+func (p Percent) String() string {
+	return fmt.Sprintf("%d %%", p.GetI(100))
+}
+
+func (p Percent) ShortString() string {
+	return fmt.Sprintf("%d %%", p.GetI(100))
+}
+
+func (p Percent) PrettyString() string {
+	return fmt.Sprintf("%d %%", p.GetI(100))
 }

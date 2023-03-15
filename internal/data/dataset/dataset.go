@@ -5,7 +5,6 @@ import (
 	"math"
 	"nn/internal/utils"
 	"nn/pkg/wraperr"
-	"strings"
 )
 
 type Dataset struct {
@@ -36,26 +35,6 @@ func NewDataset(train *Data, tests *Data, valid *Data) (*Dataset, error) {
 	}
 
 	return &Dataset{Train: train, Tests: tests, Valid: valid}, nil
-}
-
-type DataSplitParameters struct {
-	TrainPercent Percent
-	TestsPercent Percent
-	ValidPercent Percent
-}
-
-var DefaultDataSplitParameters = &DataSplitParameters{
-	TrainPercent: Percent60,
-	TestsPercent: Percent30,
-	ValidPercent: Percent10,
-}
-
-func (p *DataSplitParameters) Copy() *DataSplitParameters {
-	return &DataSplitParameters{
-		TrainPercent: p.TrainPercent,
-		TestsPercent: p.TestsPercent,
-		ValidPercent: p.ValidPercent,
-	}
 }
 
 func NewDatasetSplit(data *Data, parameters *DataSplitParameters) (*Dataset, error) {
@@ -117,20 +96,31 @@ func (d *Dataset) EqualApprox(dataset *Dataset) bool {
 	return d.Train.EqualApprox(dataset.Train) && d.Tests.EqualApprox(dataset.Tests) && d.Valid.EqualApprox(dataset.Valid)
 }
 
+func (d *Dataset) toMap(stringer func(spStringer utils.SPStringer) string) map[string]string {
+	return map[string]string{
+		"Train": stringer(d.Train),
+		"Tests": stringer(d.Tests),
+		"Valid": stringer(d.Valid),
+	}
+}
+
 func (d *Dataset) String() string {
-	return fmt.Sprintf("{Train: %s, Tests: %v, Valid: %v}", d.Train.String(), d.Tests.String(), d.Valid.String())
+	if d == nil {
+		return "<nil>"
+	}
+	return utils.FormatObject(d.toMap(utils.String), utils.BaseFormat)
 }
 
 func (d *Dataset) PrettyString() string {
-	var sb strings.Builder
-	sb.WriteString(utils.PrettyString("Train", d.Train) + "\n")
-	sb.WriteString(utils.PrettyString("Tests", d.Tests) + "\n")
-	sb.WriteString(utils.PrettyString("Valid", d.Valid))
-
-	return sb.String()
+	if d == nil {
+		return "<nil>"
+	}
+	return utils.FormatObject(d.toMap(utils.PrettyString), utils.PrettyFormat)
 }
 
 func (d *Dataset) ShortString() string {
-	return fmt.Sprintf("{Train: %s, Tests: %v, Valid: %v}",
-		d.Train.ShortString(), d.Tests.ShortString(), d.Valid.ShortString())
+	if d == nil {
+		return "<nil>"
+	}
+	return utils.FormatObject(d.toMap(utils.ShortString), utils.ShortFormat)
 }

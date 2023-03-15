@@ -14,6 +14,11 @@ type ParametersParameters struct {
 }
 
 func NewParameters(t *testing.T, parameters ParametersParameters) *datagen.Parameters {
+	if parameters.Expression == "" {
+		parameters.Expression = "(sin x0)"
+		parameters.Ranges = []*datagen.InputRange{NewInputRange(t, InputRangeParameters{})}
+		parameters.Split = dataset.DefaultDataSplitParameters
+	}
 	params, err := datagen.NewParameters(parameters.Expression, parameters.Ranges, parameters.Split)
 	require.NoError(t, err)
 

@@ -68,17 +68,8 @@ func newExpression(tree *sTree) (*Expression, error) {
 		res.symbol = sym
 		return res, nil
 	} else {
-		//operation, err := getOperation(tree.root)
-		//if err != nil {
-		//	return nil, err
-		//}
-		//return &Expression{
-		//	operation:      operation,
-		//	representation: tree.root,
-		//}, nil
 		return nil, fmt.Errorf("error parsing tree to expression:\n$%s", tree.string())
 	}
-	// return nil, fmt.Errorf("error parsing tree to expression:\n$%s", tree.string())
 }
 
 func (e *Expression) Exec(x []float64) (float64, error) {
@@ -115,13 +106,22 @@ func (e *Expression) Equal(expression *Expression) bool {
 }
 
 func (e *Expression) String() string {
+	if e == nil {
+		return "<nil>"
+	}
 	return e.representation.root
 }
 
 func (e *Expression) ShortString() string {
+	if e == nil {
+		return "<nil>"
+	}
 	return e.representation.root
 }
 
 func (e *Expression) PrettyString() string {
+	if e == nil {
+		return "<nil>"
+	}
 	return e.representation.string()
 }
