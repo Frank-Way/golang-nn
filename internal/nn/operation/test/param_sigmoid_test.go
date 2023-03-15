@@ -3,8 +3,8 @@ package test
 import (
 	"github.com/stretchr/testify/require"
 	"nn/internal/nn/operation"
-	"nn/internal/test/utils"
-	"nn/internal/test/utils/fabrics"
+	"nn/internal/testutils"
+	"nn/internal/testutils/fabrics"
 	"testing"
 )
 
@@ -19,35 +19,35 @@ func TestNewSigmoidParam(t *testing.T) {
 
 func TestSigmoidParam_Forward(t *testing.T) {
 	tests := []struct {
-		utils.Base
+		testutils.Base
 		params fabrics.ActivationParameters
 		in     fabrics.MatrixParameters
 	}{
 		{
-			Base:   utils.Base{Name: "5x1 input, [2] params"},
+			Base:   testutils.Base{Name: "5x1 input, [2] params"},
 			params: fabrics.ActivationParameters{SigmoidParamParameters: fabrics.VectorParameters{Values: []float64{2}}},
 			in:     fabrics.MatrixParameters{Rows: 5, Cols: 1, Values: []float64{1, 2, 3, 4, 5}},
 		},
 		{
-			Base:   utils.Base{Name: "5x1 input, [2,3] params, error", Err: operation.ErrExec},
+			Base:   testutils.Base{Name: "5x1 input, [2,3] params, error", Err: operation.ErrExec},
 			params: fabrics.ActivationParameters{SigmoidParamParameters: fabrics.VectorParameters{Values: []float64{2, 3}}},
 			in:     fabrics.MatrixParameters{Rows: 5, Cols: 1, Values: []float64{1, 2, 3, 4, 5}},
 		},
 		{
-			Base:   utils.Base{Name: "5x2 input, [2] params, error", Err: operation.ErrExec},
+			Base:   testutils.Base{Name: "5x2 input, [2] params, error", Err: operation.ErrExec},
 			params: fabrics.ActivationParameters{SigmoidParamParameters: fabrics.VectorParameters{Values: []float64{2}}},
 			in:     fabrics.MatrixParameters{Rows: 5, Cols: 2, Values: []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
 		},
 	}
 
-	for i := range tests {
-		t.Run(tests[i].Name, func(t *testing.T) {
-			activation := fabrics.NewActivation(t, fabrics.SigmoidParamAct, tests[i].params)
-			in := fabrics.NewMatrix(t, tests[i].in)
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			activation := fabrics.NewActivation(t, fabrics.SigmoidParamAct, test.params)
+			in := fabrics.NewMatrix(t, test.in)
 			out, err := activation.Forward(in)
-			if tests[i].Err == nil {
+			if test.Err == nil {
 				require.NoError(t, err)
-				params := fabrics.NewVector(t, tests[i].params.SigmoidParamParameters)
+				params := fabrics.NewVector(t, test.params.SigmoidParamParameters)
 				multiplied, err := in.MulRow(params)
 				require.NoError(t, err)
 				sigmoid := fabrics.NewActivation(t, fabrics.SigmoidAct, fabrics.ActivationParameters{})
@@ -56,7 +56,7 @@ func TestSigmoidParam_Forward(t *testing.T) {
 				require.True(t, out.EqualApprox(expected))
 			} else {
 				require.Error(t, err)
-				require.ErrorIs(t, err, tests[i].Err)
+				require.ErrorIs(t, err, test.Err)
 			}
 		})
 	}

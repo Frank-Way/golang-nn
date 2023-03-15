@@ -21,10 +21,10 @@ func TestNewSymbol(t *testing.T) {
 		{name: "invalid symbol x-1", in: "x-1", err: true},
 	}
 
-	for i := range tests {
-		t.Run(tests[i].name, func(t *testing.T) {
-			_, err := newSymbol(tests[i].in)
-			if tests[i].err {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			_, err := newSymbol(test.in)
+			if test.err {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
@@ -48,16 +48,16 @@ func TestSymbol_exec(t *testing.T) {
 		{name: "symbol x5, args [2 3]", in: "x5", args: []float64{2, 3}, err: true},
 	}
 
-	for i := range tests {
-		t.Run(tests[i].name, func(t *testing.T) {
-			s, err := newSymbol(tests[i].in)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			s, err := newSymbol(test.in)
 			require.NoError(t, err)
-			actual, err := s.exec(tests[i].args)
-			if tests[i].err {
+			actual, err := s.exec(test.args)
+			if test.err {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
-				require.Equal(t, tests[i].expected, actual)
+				require.Equal(t, test.expected, actual)
 			}
 		})
 	}

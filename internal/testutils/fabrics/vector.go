@@ -2,7 +2,7 @@ package fabrics
 
 import (
 	"github.com/stretchr/testify/require"
-	"nn/internal/test/utils"
+	"nn/internal/testutils"
 	"nn/pkg/mmath/vector"
 	"testing"
 )
@@ -16,7 +16,7 @@ func NewVector(t *testing.T, parameters VectorParameters) *vector.Vector {
 	var vec *vector.Vector
 	var err error
 	if parameters.Values == nil {
-		vec, err = vector.NewVector(utils.RandomArray(parameters.Size))
+		vec, err = vector.NewVector(testutils.RandomArray(parameters.Size))
 	} else {
 		vec, err = vector.NewVector(parameters.Values)
 	}

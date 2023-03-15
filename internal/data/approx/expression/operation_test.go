@@ -26,19 +26,19 @@ func TestOperation_exec(t *testing.T) {
 		{name: "sum 1 2 3 4 5", token: "sum", args: []float64{1, 2, 3, 4, 5}, expected: 1 + 2 + 3 + 4 + 5},
 	}
 
-	for i := range tests {
-		t.Run(tests[i].name, func(t *testing.T) {
-			operation, err := getOperation(tests[i].token)
-			if tests[i].err1 {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			operation, err := getOperation(test.token)
+			if test.err1 {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
-				exec, err := operation.exec(tests[i].args)
-				if tests[i].err2 {
+				exec, err := operation.exec(test.args)
+				if test.err2 {
 					require.Error(t, err)
 				} else {
 					require.NoError(t, err)
-					require.Equal(t, tests[i].expected, exec)
+					require.Equal(t, test.expected, exec)
 				}
 			}
 		})
@@ -66,12 +66,12 @@ func TestOperation_checkInputsCount(t *testing.T) {
 		{name: "max 10", token: "max", valueToCheck: 10, expected: true},
 	}
 
-	for i := range tests {
-		t.Run(tests[i].name, func(t *testing.T) {
-			operation, err := getOperation(tests[i].token)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			operation, err := getOperation(test.token)
 			require.NoError(t, err)
-			valid := operation.checkInputsCount(tests[i].valueToCheck)
-			require.Equal(t, tests[i].expected, valid)
+			valid := operation.checkInputsCount(test.valueToCheck)
+			require.Equal(t, test.expected, valid)
 		})
 	}
 }

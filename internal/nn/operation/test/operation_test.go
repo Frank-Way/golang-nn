@@ -4,8 +4,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"math"
 	"nn/internal/nn/operation"
-	"nn/internal/test/utils"
-	"nn/internal/test/utils/fabrics"
+	"nn/internal/testutils"
+	"nn/internal/testutils/fabrics"
 	"nn/pkg/mmath/matrix"
 	"nn/pkg/percent"
 	"testing"
@@ -13,113 +13,113 @@ import (
 
 func TestOperation_Copy(t *testing.T) {
 	tests := []struct {
-		utils.Base
+		testutils.Base
 		oper    interface{}
 		in      *matrix.Matrix
 		outGrad *matrix.Matrix
 	}{
 		{
-			Base: utils.Base{Name: "weight"},
+			Base: testutils.Base{Name: "weight"},
 			oper: fabrics.NewWeight(t, fabrics.WeightParameters{MatrixParameters: fabrics.MatrixParameters{Rows: 2, Cols: 3}}),
 		},
 		{
-			Base: utils.Base{Name: "weight after forward"},
+			Base: testutils.Base{Name: "weight after forward"},
 			oper: fabrics.NewWeight(t, fabrics.WeightParameters{MatrixParameters: fabrics.MatrixParameters{Rows: 2, Cols: 3}}),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
-			Base:    utils.Base{Name: "weight after backward"},
+			Base:    testutils.Base{Name: "weight after backward"},
 			oper:    fabrics.NewWeight(t, fabrics.WeightParameters{MatrixParameters: fabrics.MatrixParameters{Rows: 2, Cols: 3}}),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 3}),
 		},
 		{
-			Base: utils.Base{Name: "bias"},
+			Base: testutils.Base{Name: "bias"},
 			oper: fabrics.NewBias(t, fabrics.BiasParameters{VectorParameters: fabrics.VectorParameters{Size: 3}}),
 		},
 		{
-			Base: utils.Base{Name: "bias after forward"},
+			Base: testutils.Base{Name: "bias after forward"},
 			oper: fabrics.NewBias(t, fabrics.BiasParameters{VectorParameters: fabrics.VectorParameters{Size: 3}}),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 3}),
 		},
 		{
-			Base:    utils.Base{Name: "bias after backward"},
+			Base:    testutils.Base{Name: "bias after backward"},
 			oper:    fabrics.NewBias(t, fabrics.BiasParameters{VectorParameters: fabrics.VectorParameters{Size: 3}}),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 3}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 3}),
 		},
 		{
-			Base: utils.Base{Name: "linear"},
+			Base: testutils.Base{Name: "linear"},
 			oper: fabrics.NewActivation(t, fabrics.LinearAct, fabrics.ActivationParameters{}),
 		},
 		{
-			Base: utils.Base{Name: "linear after forward"},
+			Base: testutils.Base{Name: "linear after forward"},
 			oper: fabrics.NewActivation(t, fabrics.LinearAct, fabrics.ActivationParameters{}),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
-			Base:    utils.Base{Name: "linear after backward"},
+			Base:    testutils.Base{Name: "linear after backward"},
 			oper:    fabrics.NewActivation(t, fabrics.LinearAct, fabrics.ActivationParameters{}),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
-			Base: utils.Base{Name: "sigmoid"},
+			Base: testutils.Base{Name: "sigmoid"},
 			oper: fabrics.NewActivation(t, fabrics.SigmoidAct, fabrics.ActivationParameters{}),
 		},
 		{
-			Base: utils.Base{Name: "sigmoid after forward"},
+			Base: testutils.Base{Name: "sigmoid after forward"},
 			oper: fabrics.NewActivation(t, fabrics.SigmoidAct, fabrics.ActivationParameters{}),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
-			Base:    utils.Base{Name: "sigmoid after backward"},
+			Base:    testutils.Base{Name: "sigmoid after backward"},
 			oper:    fabrics.NewActivation(t, fabrics.SigmoidAct, fabrics.ActivationParameters{}),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
-			Base: utils.Base{Name: "tanh"},
+			Base: testutils.Base{Name: "tanh"},
 			oper: fabrics.NewActivation(t, fabrics.TanhAct, fabrics.ActivationParameters{}),
 		},
 		{
-			Base: utils.Base{Name: "tanh after forward"},
+			Base: testutils.Base{Name: "tanh after forward"},
 			oper: fabrics.NewActivation(t, fabrics.TanhAct, fabrics.ActivationParameters{}),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
-			Base:    utils.Base{Name: "tanh after backward"},
+			Base:    testutils.Base{Name: "tanh after backward"},
 			oper:    fabrics.NewActivation(t, fabrics.TanhAct, fabrics.ActivationParameters{}),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
-			Base: utils.Base{Name: "dropout"},
+			Base: testutils.Base{Name: "dropout"},
 			oper: fabrics.NewDropout(t, fabrics.DropoutParameters{Percent: percent.Percent10}),
 		},
 		{
-			Base: utils.Base{Name: "dropout after forward"},
+			Base: testutils.Base{Name: "dropout after forward"},
 			oper: fabrics.NewDropout(t, fabrics.DropoutParameters{Percent: percent.Percent10}),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
-			Base:    utils.Base{Name: "dropout after backward"},
+			Base:    testutils.Base{Name: "dropout after backward"},
 			oper:    fabrics.NewDropout(t, fabrics.DropoutParameters{Percent: percent.Percent10}),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 	}
 
-	for i := range tests {
-		t.Run(tests[i].Name, func(t *testing.T) {
-			switch oper := tests[i].oper.(type) {
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			switch oper := test.oper.(type) {
 			case *operation.Operation:
-				if tests[i].in != nil {
-					_, err := oper.Forward(tests[i].in)
+				if test.in != nil {
+					_, err := oper.Forward(test.in)
 					require.NoError(t, err)
 
-					if tests[i].outGrad != nil {
-						_, err := oper.Backward(tests[i].outGrad)
+					if test.outGrad != nil {
+						_, err := oper.Backward(test.outGrad)
 						require.NoError(t, err)
 					}
 				}
@@ -130,12 +130,12 @@ func TestOperation_Copy(t *testing.T) {
 				require.True(t, cp.EqualApprox(oper))
 				require.True(t, oper.EqualApprox(cp))
 			case *operation.ParamOperation:
-				if tests[i].in != nil {
-					_, err := oper.Forward(tests[i].in)
+				if test.in != nil {
+					_, err := oper.Forward(test.in)
 					require.NoError(t, err)
 
-					if tests[i].outGrad != nil {
-						_, err := oper.Backward(tests[i].outGrad)
+					if test.outGrad != nil {
+						_, err := oper.Backward(test.outGrad)
 						require.NoError(t, err)
 					}
 				}
@@ -146,12 +146,12 @@ func TestOperation_Copy(t *testing.T) {
 				require.True(t, cp.EqualApprox(oper))
 				require.True(t, oper.EqualApprox(cp))
 			case *operation.ConstOperation:
-				if tests[i].in != nil {
-					_, err := oper.Forward(tests[i].in)
+				if test.in != nil {
+					_, err := oper.Forward(test.in)
 					require.NoError(t, err)
 
-					if tests[i].outGrad != nil {
-						_, err := oper.Backward(tests[i].outGrad)
+					if test.outGrad != nil {
+						_, err := oper.Backward(test.outGrad)
 						require.NoError(t, err)
 					}
 				}
@@ -168,113 +168,113 @@ func TestOperation_Copy(t *testing.T) {
 
 func TestOperation_Strings(t *testing.T) {
 	tests := []struct {
-		utils.Base
+		testutils.Base
 		oper    interface{}
 		in      *matrix.Matrix
 		outGrad *matrix.Matrix
 	}{
 		{
-			Base: utils.Base{Name: "weight"},
+			Base: testutils.Base{Name: "weight"},
 			oper: fabrics.NewWeight(t, fabrics.WeightParameters{MatrixParameters: fabrics.MatrixParameters{Rows: 2, Cols: 3}}),
 		},
 		{
-			Base: utils.Base{Name: "weight after forward"},
+			Base: testutils.Base{Name: "weight after forward"},
 			oper: fabrics.NewWeight(t, fabrics.WeightParameters{MatrixParameters: fabrics.MatrixParameters{Rows: 2, Cols: 3}}),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
-			Base:    utils.Base{Name: "weight after backward"},
+			Base:    testutils.Base{Name: "weight after backward"},
 			oper:    fabrics.NewWeight(t, fabrics.WeightParameters{MatrixParameters: fabrics.MatrixParameters{Rows: 2, Cols: 3}}),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 3}),
 		},
 		{
-			Base: utils.Base{Name: "bias"},
+			Base: testutils.Base{Name: "bias"},
 			oper: fabrics.NewBias(t, fabrics.BiasParameters{VectorParameters: fabrics.VectorParameters{Size: 3}}),
 		},
 		{
-			Base: utils.Base{Name: "bias after forward"},
+			Base: testutils.Base{Name: "bias after forward"},
 			oper: fabrics.NewBias(t, fabrics.BiasParameters{VectorParameters: fabrics.VectorParameters{Size: 3}}),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 3}),
 		},
 		{
-			Base:    utils.Base{Name: "bias after backward"},
+			Base:    testutils.Base{Name: "bias after backward"},
 			oper:    fabrics.NewBias(t, fabrics.BiasParameters{VectorParameters: fabrics.VectorParameters{Size: 3}}),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 3}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 3}),
 		},
 		{
-			Base: utils.Base{Name: "linear"},
+			Base: testutils.Base{Name: "linear"},
 			oper: fabrics.NewActivation(t, fabrics.LinearAct, fabrics.ActivationParameters{}),
 		},
 		{
-			Base: utils.Base{Name: "linear after forward"},
+			Base: testutils.Base{Name: "linear after forward"},
 			oper: fabrics.NewActivation(t, fabrics.LinearAct, fabrics.ActivationParameters{}),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
-			Base:    utils.Base{Name: "linear after backward"},
+			Base:    testutils.Base{Name: "linear after backward"},
 			oper:    fabrics.NewActivation(t, fabrics.LinearAct, fabrics.ActivationParameters{}),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
-			Base: utils.Base{Name: "sigmoid"},
+			Base: testutils.Base{Name: "sigmoid"},
 			oper: fabrics.NewActivation(t, fabrics.SigmoidAct, fabrics.ActivationParameters{}),
 		},
 		{
-			Base: utils.Base{Name: "sigmoid after forward"},
+			Base: testutils.Base{Name: "sigmoid after forward"},
 			oper: fabrics.NewActivation(t, fabrics.SigmoidAct, fabrics.ActivationParameters{}),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
-			Base:    utils.Base{Name: "sigmoid after backward"},
+			Base:    testutils.Base{Name: "sigmoid after backward"},
 			oper:    fabrics.NewActivation(t, fabrics.SigmoidAct, fabrics.ActivationParameters{}),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
-			Base: utils.Base{Name: "tanh"},
+			Base: testutils.Base{Name: "tanh"},
 			oper: fabrics.NewActivation(t, fabrics.TanhAct, fabrics.ActivationParameters{}),
 		},
 		{
-			Base: utils.Base{Name: "tanh after forward"},
+			Base: testutils.Base{Name: "tanh after forward"},
 			oper: fabrics.NewActivation(t, fabrics.TanhAct, fabrics.ActivationParameters{}),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
-			Base:    utils.Base{Name: "tanh after backward"},
+			Base:    testutils.Base{Name: "tanh after backward"},
 			oper:    fabrics.NewActivation(t, fabrics.TanhAct, fabrics.ActivationParameters{}),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
-			Base: utils.Base{Name: "dropout"},
+			Base: testutils.Base{Name: "dropout"},
 			oper: fabrics.NewDropout(t, fabrics.DropoutParameters{Percent: percent.Percent10}),
 		},
 		{
-			Base: utils.Base{Name: "dropout after forward"},
+			Base: testutils.Base{Name: "dropout after forward"},
 			oper: fabrics.NewDropout(t, fabrics.DropoutParameters{Percent: percent.Percent10}),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
-			Base:    utils.Base{Name: "dropout after backward"},
+			Base:    testutils.Base{Name: "dropout after backward"},
 			oper:    fabrics.NewDropout(t, fabrics.DropoutParameters{Percent: percent.Percent10}),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 	}
 
-	for i := range tests {
-		t.Run(tests[i].Name, func(t *testing.T) {
-			switch oper := tests[i].oper.(type) {
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			switch oper := test.oper.(type) {
 			case *operation.Operation:
-				if tests[i].in != nil {
-					_, err := oper.Forward(tests[i].in)
+				if test.in != nil {
+					_, err := oper.Forward(test.in)
 					require.NoError(t, err)
 
-					if tests[i].outGrad != nil {
-						_, err := oper.Backward(tests[i].outGrad)
+					if test.outGrad != nil {
+						_, err := oper.Backward(test.outGrad)
 						require.NoError(t, err)
 					}
 				}
@@ -282,12 +282,12 @@ func TestOperation_Strings(t *testing.T) {
 				t.Log("FormatObject():\n" + oper.String())
 				t.Log("PrettyStringField():\n" + oper.PrettyString())
 			case *operation.ParamOperation:
-				if tests[i].in != nil {
-					_, err := oper.Forward(tests[i].in)
+				if test.in != nil {
+					_, err := oper.Forward(test.in)
 					require.NoError(t, err)
 
-					if tests[i].outGrad != nil {
-						_, err := oper.Backward(tests[i].outGrad)
+					if test.outGrad != nil {
+						_, err := oper.Backward(test.outGrad)
 						require.NoError(t, err)
 					}
 				}
@@ -295,12 +295,12 @@ func TestOperation_Strings(t *testing.T) {
 				t.Log("FormatObject():\n" + oper.String())
 				t.Log("PrettyStringField():\n" + oper.PrettyString())
 			case *operation.ConstOperation:
-				if tests[i].in != nil {
-					_, err := oper.Forward(tests[i].in)
+				if test.in != nil {
+					_, err := oper.Forward(test.in)
 					require.NoError(t, err)
 
-					if tests[i].outGrad != nil {
-						_, err := oper.Backward(tests[i].outGrad)
+					if test.outGrad != nil {
+						_, err := oper.Backward(test.outGrad)
 						require.NoError(t, err)
 					}
 				}

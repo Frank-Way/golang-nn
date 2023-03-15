@@ -4,7 +4,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"math"
 	"nn/internal/nn/operation"
-	"nn/internal/test/utils/fabrics"
+	"nn/internal/testutils/fabrics"
 	"nn/pkg/mmath/matrix"
 	"nn/pkg/percent"
 	"testing"

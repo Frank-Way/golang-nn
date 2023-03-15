@@ -3,68 +3,68 @@ package test
 import (
 	"github.com/stretchr/testify/require"
 	"nn/internal/data/dataset"
-	"nn/internal/test/utils"
-	"nn/internal/test/utils/fabrics"
+	"nn/internal/testutils"
+	"nn/internal/testutils/fabrics"
 	"testing"
 )
 
 func TestNewData(t *testing.T) {
 	tests := []struct {
-		utils.Base
+		testutils.Base
 		x         fabrics.MatrixParameters
 		y         fabrics.MatrixParameters
 		nilCheckX bool
 		nilCheckY bool
 	}{
 		{
-			Base: utils.Base{Name: "2x2 and 2x1 data"},
+			Base: testutils.Base{Name: "2x2 and 2x1 data"},
 			x:    fabrics.MatrixParameters{Rows: 2, Cols: 2, Values: []float64{1, 2, 3, 4}},
 			y:    fabrics.MatrixParameters{Rows: 2, Cols: 1, Values: []float64{5, 6}},
 		},
 		{
-			Base: utils.Base{Name: "2x2 and 3x1 data, error", Err: dataset.ErrCreate},
+			Base: testutils.Base{Name: "2x2 and 3x1 data, error", Err: dataset.ErrCreate},
 			x:    fabrics.MatrixParameters{Rows: 2, Cols: 2, Values: []float64{1, 2, 3, 4}},
 			y:    fabrics.MatrixParameters{Rows: 3, Cols: 1, Values: []float64{5, 6, 7}},
 		},
 		{
-			Base:      utils.Base{Name: "2x2 and 2x1 data, x nil, y nil", Err: dataset.ErrCreate},
+			Base:      testutils.Base{Name: "2x2 and 2x1 data, x nil, y nil", Err: dataset.ErrCreate},
 			x:         fabrics.MatrixParameters{Rows: 2, Cols: 2, Values: []float64{1, 2, 3, 4}},
 			y:         fabrics.MatrixParameters{Rows: 2, Cols: 1, Values: []float64{5, 6}},
 			nilCheckX: true,
 			nilCheckY: true,
 		},
 		{
-			Base:      utils.Base{Name: "2x2 and 2x1 data, x nil", Err: dataset.ErrCreate},
+			Base:      testutils.Base{Name: "2x2 and 2x1 data, x nil", Err: dataset.ErrCreate},
 			x:         fabrics.MatrixParameters{Rows: 2, Cols: 2, Values: []float64{1, 2, 3, 4}},
 			y:         fabrics.MatrixParameters{Rows: 2, Cols: 1, Values: []float64{5, 6}},
 			nilCheckX: true,
 		},
 		{
-			Base:      utils.Base{Name: "2x2 and 2x1 data, y nil", Err: dataset.ErrCreate},
+			Base:      testutils.Base{Name: "2x2 and 2x1 data, y nil", Err: dataset.ErrCreate},
 			x:         fabrics.MatrixParameters{Rows: 2, Cols: 2, Values: []float64{1, 2, 3, 4}},
 			y:         fabrics.MatrixParameters{Rows: 2, Cols: 1, Values: []float64{5, 6}},
 			nilCheckY: true,
 		},
 	}
 
-	for i := range tests {
-		t.Run(tests[i].Name, func(t *testing.T) {
-			x := fabrics.NewMatrix(t, tests[i].x)
-			y := fabrics.NewMatrix(t, tests[i].y)
-			if tests[i].nilCheckX {
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			x := fabrics.NewMatrix(t, test.x)
+			y := fabrics.NewMatrix(t, test.y)
+			if test.nilCheckX {
 				x = nil
 			}
-			if tests[i].nilCheckY {
+			if test.nilCheckY {
 				y = nil
 			}
 
 			data, err := dataset.NewData(x, y)
-			if tests[i].Err == nil {
+			if test.Err == nil {
 				require.NoError(t, err)
 				require.Equal(t, x.Rows(), data.X.Rows())
 			} else {
 				require.Error(t, err)
-				require.ErrorIs(t, err, tests[i].Err)
+				require.ErrorIs(t, err, test.Err)
 			}
 		})
 	}
@@ -123,14 +123,14 @@ func TestData_Shuffle(t *testing.T) {
 
 func TestData_Split(t *testing.T) {
 	tests := []struct {
-		utils.Base
+		testutils.Base
 		source    fabrics.DataParameters
 		pivot     int
 		expectedA fabrics.DataParameters
 		expectedB fabrics.DataParameters
 	}{
 		{
-			Base: utils.Base{Name: "5x1 and 5x3, pivot 1"},
+			Base: testutils.Base{Name: "5x1 and 5x3, pivot 1"},
 			source: fabrics.DataParameters{
 				X: fabrics.MatrixParameters{Rows: 5, Cols: 1, Values: []float64{1, 2, 3, 4, 5}},
 				Y: fabrics.MatrixParameters{Rows: 5, Cols: 3, Values: []float64{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}},
@@ -146,7 +146,7 @@ func TestData_Split(t *testing.T) {
 			},
 		},
 		{
-			Base: utils.Base{Name: "5x1 and 5x3, pivot 2"},
+			Base: testutils.Base{Name: "5x1 and 5x3, pivot 2"},
 			source: fabrics.DataParameters{
 				X: fabrics.MatrixParameters{Rows: 5, Cols: 1, Values: []float64{1, 2, 3, 4, 5}},
 				Y: fabrics.MatrixParameters{Rows: 5, Cols: 3, Values: []float64{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}},
@@ -162,7 +162,7 @@ func TestData_Split(t *testing.T) {
 			},
 		},
 		{
-			Base: utils.Base{Name: "5x1 and 5x3, pivot 4"},
+			Base: testutils.Base{Name: "5x1 and 5x3, pivot 4"},
 			source: fabrics.DataParameters{
 				X: fabrics.MatrixParameters{Rows: 5, Cols: 1, Values: []float64{1, 2, 3, 4, 5}},
 				Y: fabrics.MatrixParameters{Rows: 5, Cols: 3, Values: []float64{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}},
@@ -178,7 +178,7 @@ func TestData_Split(t *testing.T) {
 			},
 		},
 		{
-			Base: utils.Base{Name: "5x1 and 5x3, pivot 0, error", Err: dataset.ErrSplit},
+			Base: testutils.Base{Name: "5x1 and 5x3, pivot 0, error", Err: dataset.ErrSplit},
 			source: fabrics.DataParameters{
 				X: fabrics.MatrixParameters{Rows: 5, Cols: 1, Values: []float64{1, 2, 3, 4, 5}},
 				Y: fabrics.MatrixParameters{Rows: 5, Cols: 3, Values: []float64{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}},
@@ -186,7 +186,7 @@ func TestData_Split(t *testing.T) {
 			pivot: 0,
 		},
 		{
-			Base: utils.Base{Name: "5x1 and 5x3, pivot -1, error", Err: dataset.ErrSplit},
+			Base: testutils.Base{Name: "5x1 and 5x3, pivot -1, error", Err: dataset.ErrSplit},
 			source: fabrics.DataParameters{
 				X: fabrics.MatrixParameters{Rows: 5, Cols: 1, Values: []float64{1, 2, 3, 4, 5}},
 				Y: fabrics.MatrixParameters{Rows: 5, Cols: 3, Values: []float64{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}},
@@ -194,7 +194,7 @@ func TestData_Split(t *testing.T) {
 			pivot: -1,
 		},
 		{
-			Base: utils.Base{Name: "5x1 and 5x3, pivot 5, error", Err: dataset.ErrSplit},
+			Base: testutils.Base{Name: "5x1 and 5x3, pivot 5, error", Err: dataset.ErrSplit},
 			source: fabrics.DataParameters{
 				X: fabrics.MatrixParameters{Rows: 5, Cols: 1, Values: []float64{1, 2, 3, 4, 5}},
 				Y: fabrics.MatrixParameters{Rows: 5, Cols: 3, Values: []float64{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}},
@@ -202,7 +202,7 @@ func TestData_Split(t *testing.T) {
 			pivot: 5,
 		},
 		{
-			Base: utils.Base{Name: "5x1 and 5x3, pivot 10, error", Err: dataset.ErrSplit},
+			Base: testutils.Base{Name: "5x1 and 5x3, pivot 10, error", Err: dataset.ErrSplit},
 			source: fabrics.DataParameters{
 				X: fabrics.MatrixParameters{Rows: 5, Cols: 1, Values: []float64{1, 2, 3, 4, 5}},
 				Y: fabrics.MatrixParameters{Rows: 5, Cols: 3, Values: []float64{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}},
@@ -211,20 +211,20 @@ func TestData_Split(t *testing.T) {
 		},
 	}
 
-	for i := range tests {
-		t.Run(tests[i].Name, func(t *testing.T) {
-			source := fabrics.NewData(t, tests[i].source)
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			source := fabrics.NewData(t, test.source)
 
-			a, b, err := source.Split(tests[i].pivot)
-			if tests[i].Err == nil {
+			a, b, err := source.Split(test.pivot)
+			if test.Err == nil {
 				require.NoError(t, err)
-				expectedA := fabrics.NewData(t, tests[i].expectedA)
-				expectedB := fabrics.NewData(t, tests[i].expectedB)
+				expectedA := fabrics.NewData(t, test.expectedA)
+				expectedB := fabrics.NewData(t, test.expectedB)
 				require.True(t, a.Equal(expectedA))
 				require.True(t, b.Equal(expectedB))
 			} else {
 				require.Error(t, err)
-				require.ErrorIs(t, err, tests[i].Err)
+				require.ErrorIs(t, err, test.Err)
 			}
 		})
 	}

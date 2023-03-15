@@ -22,14 +22,14 @@ func TestNewExpression(t *testing.T) {
 		{name: "illegal character _", in: "(+ _ (sin (+ (* 2 x0) 1)) (* x0 (sin (sum 1 2 3 4))))", err: ErrParse},
 	}
 
-	for i := range tests {
-		t.Run(tests[i].name, func(t *testing.T) {
-			_, err := NewExpression(tests[i].in)
-			if tests[i].err == nil {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			_, err := NewExpression(test.in)
+			if test.err == nil {
 				require.NoError(t, err)
 			} else {
 				require.Error(t, err)
-				require.ErrorIs(t, err, tests[i].err)
+				require.ErrorIs(t, err, test.err)
 			}
 		})
 	}
@@ -63,17 +63,17 @@ func TestExpression_Exec(t *testing.T) {
 		},
 	}
 
-	for i := range tests {
-		t.Run(tests[i].name, func(t *testing.T) {
-			expression, err := NewExpression(tests[i].in)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			expression, err := NewExpression(test.in)
 			require.NoError(t, err)
-			exec, err := expression.Exec(tests[i].args)
-			if tests[i].err == nil {
+			exec, err := expression.Exec(test.args)
+			if test.err == nil {
 				require.NoError(t, err)
-				require.Equal(t, tests[i].expected, exec)
+				require.Equal(t, test.expected, exec)
 			} else {
 				require.Error(t, err)
-				require.ErrorIs(t, err, tests[i].err)
+				require.ErrorIs(t, err, test.err)
 			}
 		})
 	}

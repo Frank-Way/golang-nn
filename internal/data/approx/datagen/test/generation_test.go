@@ -5,40 +5,40 @@ import (
 	"math"
 	"nn/internal/data/approx/datagen"
 	"nn/internal/data/dataset"
-	"nn/internal/test/utils"
-	"nn/internal/test/utils/fabrics"
+	"nn/internal/testutils"
+	"nn/internal/testutils/fabrics"
 	"nn/pkg/percent"
 	"testing"
 )
 
 func TestNewParameters(t *testing.T) {
 	tests := []struct {
-		utils.Base
+		testutils.Base
 		expr   string
 		inputs []fabrics.InputRangeParameters
 		split  *dataset.DataSplitParameters
 	}{
 		{
-			Base:   utils.Base{Name: "sin(x0) for x0 from 0 to 1 (11 values)"},
+			Base:   testutils.Base{Name: "sin(x0) for x0 from 0 to 1 (11 values)"},
 			expr:   "(sin x0)",
 			inputs: []fabrics.InputRangeParameters{{InputRange: &datagen.InputRange{Left: 0, Right: 1, Count: 11}}},
 			split:  dataset.DefaultDataSplitParameters,
 		},
 	}
 
-	for i := range tests {
-		t.Run(tests[i].Name, func(t *testing.T) {
-			inputs := make([]*datagen.InputRange, len(tests[i].inputs))
-			for i, input := range tests[i].inputs {
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			inputs := make([]*datagen.InputRange, len(test.inputs))
+			for i, input := range test.inputs {
 				inputs[i] = fabrics.NewInputRange(t, input)
 			}
 
-			_, err := datagen.NewParameters(tests[i].expr, inputs, tests[i].split)
-			if tests[i].Err == nil {
+			_, err := datagen.NewParameters(test.expr, inputs, test.split)
+			if test.Err == nil {
 				require.NoError(t, err)
 			} else {
 				require.Error(t, err)
-				require.ErrorIs(t, err, tests[i].Err)
+				require.ErrorIs(t, err, test.Err)
 			}
 		})
 	}
@@ -46,12 +46,12 @@ func TestNewParameters(t *testing.T) {
 
 func TestParameters_Generate(t *testing.T) {
 	tests := []struct {
-		utils.Base
+		testutils.Base
 		params   fabrics.ParametersParameters
 		dsParams fabrics.DatasetParameters
 	}{
 		{
-			Base: utils.Base{
+			Base: testutils.Base{
 				Name: "sin(x0), 11 values from 0 to 1",
 				Err:  nil,
 			},
@@ -83,17 +83,17 @@ func TestParameters_Generate(t *testing.T) {
 		},
 	}
 
-	for i := range tests {
-		t.Run(tests[i].Name, func(t *testing.T) {
-			params := fabrics.NewParameters(t, tests[i].params)
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			params := fabrics.NewParameters(t, test.params)
 			ds, err := params.Generate()
-			if tests[i].Err == nil {
+			if test.Err == nil {
 				require.NoError(t, err)
-				expected := fabrics.NewDataset(t, tests[i].dsParams)
+				expected := fabrics.NewDataset(t, test.dsParams)
 				require.True(t, expected.EqualApprox(ds))
 			} else {
 				require.Error(t, err)
-				require.ErrorIs(t, err, tests[i].Err)
+				require.ErrorIs(t, err, test.Err)
 			}
 		})
 	}

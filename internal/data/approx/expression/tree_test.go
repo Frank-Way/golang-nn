@@ -57,15 +57,15 @@ func TestSplitBalanced(t *testing.T) {
 		},
 	}
 
-	for i := range tests {
-		t.Run(tests[i].name, func(t *testing.T) {
-			balanced, err := splitBalanced(tests[i].in, []rune(" ")[0])
-			if tests[i].err {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			balanced, err := splitBalanced(test.in, []rune(" ")[0])
+			if test.err {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
-				require.Equal(t, len(tests[i].expected), len(balanced))
-				for j, str := range tests[i].expected {
+				require.Equal(t, len(test.expected), len(balanced))
+				for j, str := range test.expected {
 					require.Equal(t, str, balanced[j])
 				}
 			}
@@ -140,14 +140,14 @@ func TestSplitRecursively(t *testing.T) {
 		},
 	}
 
-	for i := range tests {
-		t.Run(tests[i].name, func(t *testing.T) {
-			tree, err := splitRecursively(tests[i].in)
-			if tests[i].err {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			tree, err := splitRecursively(test.in)
+			if test.err {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
-				require.True(t, tests[i].expected.equal(tree))
+				require.True(t, test.expected.equal(tree))
 			}
 		})
 	}

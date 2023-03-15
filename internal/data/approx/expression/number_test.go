@@ -26,10 +26,10 @@ func TestNewNumber(t *testing.T) {
 		{name: "invalid number .11", in: ".11", err: true},
 	}
 
-	for i := range tests {
-		t.Run(tests[i].name, func(t *testing.T) {
-			_, err := newNumber(tests[i].in)
-			if tests[i].err {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			_, err := newNumber(test.in)
+			if test.err {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
@@ -52,16 +52,16 @@ func TestNumber_exec(t *testing.T) {
 		{name: "number 1, args [2 3]", args: []float64{2, 3}, in: "1", expected: 1},
 	}
 
-	for i := range tests {
-		t.Run(tests[i].name, func(t *testing.T) {
-			n, err := newNumber(tests[i].in)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			n, err := newNumber(test.in)
 			require.NoError(t, err)
-			actual, err := n.exec(tests[i].args)
-			if tests[i].err {
+			actual, err := n.exec(test.args)
+			if test.err {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
-				require.Equal(t, tests[i].expected, actual)
+				require.Equal(t, test.expected, actual)
 			}
 		})
 	}
