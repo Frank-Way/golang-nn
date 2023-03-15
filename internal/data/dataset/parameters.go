@@ -2,18 +2,19 @@ package dataset
 
 import (
 	"nn/internal/utils"
+	"nn/pkg/percent"
 )
 
 type DataSplitParameters struct {
-	TrainPercent Percent
-	TestsPercent Percent
-	ValidPercent Percent
+	TrainPercent percent.Percent
+	TestsPercent percent.Percent
+	ValidPercent percent.Percent
 }
 
 var DefaultDataSplitParameters = &DataSplitParameters{
-	TrainPercent: Percent60,
-	TestsPercent: Percent30,
-	ValidPercent: Percent10,
+	TrainPercent: percent.Percent60,
+	TestsPercent: percent.Percent30,
+	ValidPercent: percent.Percent10,
 }
 
 func (p *DataSplitParameters) Copy() *DataSplitParameters {

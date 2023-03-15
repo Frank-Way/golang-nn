@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"nn/internal/utils"
+	"nn/pkg/percent"
 	"nn/pkg/wraperr"
 )
 
@@ -58,7 +59,7 @@ func NewDatasetSplit(data *Data, parameters *DataSplitParameters) (*Dataset, err
 		}
 
 		validSize := parameters.ValidPercent.GetI(n)
-		if math.Abs(float64(validSize-valid.X.Rows())) > Percent10.GetF(float64(n)) {
+		if math.Abs(float64(validSize-valid.X.Rows())) > percent.Percent10.GetF(float64(n)) {
 			return nil,
 				fmt.Errorf("desired and actual valid part sizes mismathes too much: %d != %d", validSize, valid.X.Rows())
 		}

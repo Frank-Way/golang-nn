@@ -7,6 +7,7 @@ import (
 	"nn/internal/data/dataset"
 	"nn/internal/test/utils"
 	"nn/internal/test/utils/fabrics"
+	"nn/pkg/percent"
 	"testing"
 )
 
@@ -106,9 +107,9 @@ func TestParameters_Strings(t *testing.T) {
 			{Left: 0, Right: 10, Count: 101},
 		},
 		Split: &dataset.DataSplitParameters{
-			TrainPercent: dataset.Percent60,
-			TestsPercent: dataset.Percent30,
-			ValidPercent: dataset.Percent10,
+			TrainPercent: percent.Percent60,
+			TestsPercent: percent.Percent30,
+			ValidPercent: percent.Percent10,
 		},
 	})
 

@@ -5,6 +5,7 @@ import (
 	"nn/internal/data/dataset"
 	"nn/internal/test/utils"
 	"nn/internal/test/utils/fabrics"
+	"nn/pkg/percent"
 	"testing"
 )
 
@@ -117,12 +118,12 @@ func TestNewDatasetSplit(t *testing.T) {
 		{
 			Base:   utils.Base{Name: "not enough values", Err: dataset.ErrCreate},
 			single: fabrics.DataParameters{X: fabrics.MatrixParameters{Rows: 100, Cols: 1}, Y: fabrics.MatrixParameters{Rows: 100, Cols: 1}},
-			params: &dataset.DataSplitParameters{TrainPercent: dataset.Percent50, TestsPercent: dataset.Percent50, ValidPercent: dataset.Percent50},
+			params: &dataset.DataSplitParameters{TrainPercent: percent.Percent50, TestsPercent: percent.Percent50, ValidPercent: percent.Percent50},
 		},
 		{
 			Base:   utils.Base{Name: "too many values", Err: dataset.ErrCreate},
 			single: fabrics.DataParameters{X: fabrics.MatrixParameters{Rows: 100, Cols: 1}, Y: fabrics.MatrixParameters{Rows: 100, Cols: 1}},
-			params: &dataset.DataSplitParameters{TrainPercent: dataset.Percent10, TestsPercent: dataset.Percent10, ValidPercent: dataset.Percent10},
+			params: &dataset.DataSplitParameters{TrainPercent: percent.Percent10, TestsPercent: percent.Percent10, ValidPercent: percent.Percent10},
 		},
 	}
 

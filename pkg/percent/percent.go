@@ -1,8 +1,14 @@
-package dataset
+package percent
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
 
 type Percent uint8
+
+var rng = rand.New(rand.NewSource(time.Now().Unix()))
 
 const (
 	Percent0 Percent = 10 * iota
@@ -52,6 +58,10 @@ func (p Percent) GetI(value int) int {
 
 func (p Percent) GetF(value float64) float64 {
 	return value * float64(p.value()) / 100.0
+}
+
+func (p Percent) Hit() bool {
+	return rng.Float64() <= p.GetF(1)
 }
 
 func (p Percent) String() string {
