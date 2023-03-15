@@ -87,8 +87,12 @@ func (d *Data) Shuffle() (*Data, []int) {
 }
 
 func (d *Data) Equal(data *Data) bool {
-	if data == nil {
-		return false
+	if d == nil || data == nil {
+		if (d != nil && data == nil) || (d == nil && data != nil) {
+			return false // non-nil != nil and nil != non-nil
+		} else {
+			return true // nil == nil
+		}
 	} else if d.X.Rows() != data.X.Rows() {
 		return false
 	} else if !d.X.Equal(data.X) {
@@ -99,8 +103,12 @@ func (d *Data) Equal(data *Data) bool {
 }
 
 func (d *Data) EqualApprox(data *Data) bool {
-	if data == nil {
-		return false
+	if d == nil || data == nil {
+		if (d != nil && data == nil) || (d == nil && data != nil) {
+			return false // non-nil != nil and nil != non-nil
+		} else {
+			return true // nil == nil
+		}
 	} else if d.X.Rows() != data.X.Rows() {
 		return false
 	} else if !d.X.EqualApprox(data.X) {

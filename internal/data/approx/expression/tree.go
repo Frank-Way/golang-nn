@@ -105,6 +105,14 @@ func splitRecursively(expression string) (*sTree, error) {
 }
 
 func (t *sTree) equal(tree *sTree) bool {
+	if t == nil || tree == nil {
+		if (t != nil && tree == nil) || (t == nil && tree != nil) {
+			return false // non-nil != nil and nil != non-nil
+		} else {
+			return true // nil == nil
+		}
+	}
+
 	if t.root != tree.root {
 		return false
 	}

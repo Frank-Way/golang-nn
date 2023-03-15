@@ -588,7 +588,13 @@ func (m *Matrix) VStack(matrices []*Matrix) (*Matrix, error) {
 }
 
 func (m *Matrix) Equal(matrix *Matrix) bool {
-	if matrix == nil || m.rows != matrix.rows {
+	if m == nil || matrix == nil {
+		if (m != nil && matrix == nil) || (m == nil && matrix != nil) {
+			return false // non-nil != nil and nil != non-nil
+		} else {
+			return true // nil == nil
+		}
+	} else if m.rows != matrix.rows {
 		return false
 	}
 
@@ -602,7 +608,13 @@ func (m *Matrix) Equal(matrix *Matrix) bool {
 }
 
 func (m *Matrix) EqualApprox(matrix *Matrix) bool {
-	if matrix == nil || m.rows != matrix.rows {
+	if m == nil || matrix == nil {
+		if (m != nil && matrix == nil) || (m == nil && matrix != nil) {
+			return false // non-nil != nil and nil != non-nil
+		} else {
+			return true // nil == nil
+		}
+	} else if m.rows != matrix.rows {
 		return false
 	}
 

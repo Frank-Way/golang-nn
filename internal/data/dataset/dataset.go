@@ -83,16 +83,26 @@ func (d *Dataset) Copy() *Dataset {
 }
 
 func (d *Dataset) Equal(dataset *Dataset) bool {
-	if dataset == nil {
-		return false
+	if d == nil || dataset == nil {
+		if (d != nil && dataset == nil) || (d == nil && dataset != nil) {
+			return false // non-nil != nil and nil != non-nil
+		} else {
+			return true // nil == nil
+		}
 	}
+
 	return d.Train.Equal(dataset.Train) && d.Tests.Equal(dataset.Tests) && d.Valid.Equal(dataset.Valid)
 }
 
 func (d *Dataset) EqualApprox(dataset *Dataset) bool {
-	if dataset == nil {
-		return false
+	if d == nil || dataset == nil {
+		if (d != nil && dataset == nil) || (d == nil && dataset != nil) {
+			return false // non-nil != nil and nil != non-nil
+		} else {
+			return true // nil == nil
+		}
 	}
+
 	return d.Train.EqualApprox(dataset.Train) && d.Tests.EqualApprox(dataset.Tests) && d.Valid.EqualApprox(dataset.Valid)
 }
 

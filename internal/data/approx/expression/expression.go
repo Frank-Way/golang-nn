@@ -102,6 +102,14 @@ func (e *Expression) Copy() *Expression {
 }
 
 func (e *Expression) Equal(expression *Expression) bool {
+	if e == nil || expression == nil {
+		if (e != nil && expression == nil) || (e == nil && expression != nil) {
+			return false // non-nil != nil and nil != non-nil
+		} else {
+			return true // nil == nil
+		}
+	}
+
 	return e.representation.equal(expression.representation)
 }
 

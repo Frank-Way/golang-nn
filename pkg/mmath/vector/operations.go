@@ -372,8 +372,12 @@ func Join(vectors ...*Vector) (*Vector, error) {
 }
 
 func (v *Vector) Equal(vector *Vector) bool {
-	if vector == nil {
-		return false
+	if v == nil || vector == nil {
+		if (v != nil && vector == nil) || (v == nil && vector != nil) {
+			return false // non-nil != nil and nil != non-nil
+		} else {
+			return true // nil == nil
+		}
 	} else if v.size != vector.size {
 		return false
 	}
@@ -390,8 +394,12 @@ func (v *Vector) Equal(vector *Vector) bool {
 const Epsilon = 0.000001
 
 func (v *Vector) EqualApprox(vector *Vector) bool {
-	if vector == nil {
-		return false
+	if v == nil || vector == nil {
+		if (v != nil && vector == nil) || (v == nil && vector != nil) {
+			return false // non-nil != nil and nil != non-nil
+		} else {
+			return true // nil == nil
+		}
 	} else if v.size != vector.size {
 		return false
 	}
