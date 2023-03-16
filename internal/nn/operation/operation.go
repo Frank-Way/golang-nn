@@ -6,11 +6,6 @@ import (
 	"nn/pkg/wraperr"
 )
 
-type IOperation interface {
-	Forward(x *matrix.Matrix) (*matrix.Matrix, error)
-	Backward(dy *matrix.Matrix) (*matrix.Matrix, error)
-}
-
 var _ IOperation = (*Operation)(nil)
 
 type Operation struct {
