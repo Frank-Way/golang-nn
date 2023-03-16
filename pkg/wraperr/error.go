@@ -35,3 +35,9 @@ func (e *WrapErr) Is(err error) bool {
 func (e *WrapErr) Unwrap() error {
 	return e.err
 }
+
+func WrapError(wrap error, err *error) {
+	if *err != nil {
+		*err = NewWrapErr(wrap, *err)
+	}
+}
