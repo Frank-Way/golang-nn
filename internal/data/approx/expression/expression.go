@@ -16,21 +16,15 @@ type Expression struct {
 	representation *sTree
 }
 
-func NewExpression(input string) (*Expression, error) {
-	res, err := func() (*Expression, error) {
-		tree, err := splitRecursively(input)
-		if err != nil {
-			return nil, err
-		}
+func NewExpression(input string) (expr *Expression, err error) {
+	defer wraperr.WrapError(ErrParse, &err)
 
-		return newExpression(tree)
-	}()
-
+	tree, err := splitRecursively(input)
 	if err != nil {
-		return nil, wraperr.NewWrapErr(ErrParse, err)
+		return nil, err
 	}
 
-	return res, nil
+	return newExpression(tree)
 }
 
 func newExpression(tree *sTree) (*Expression, error) {
@@ -72,28 +66,22 @@ func newExpression(tree *sTree) (*Expression, error) {
 	}
 }
 
-func (e *Expression) Exec(x []float64) (float64, error) {
-	res, err := func() (float64, error) {
-		if e.number != nil {
-			return e.number.exec(x)
-		} else if e.symbol != nil {
-			return e.symbol.exec(x)
-		} else if e.operation != nil && e.tuple != nil {
-			args, err := e.tuple.exec(x)
-			if err != nil {
-				return 0, err
-			}
-			return e.operation.exec(args)
-		} else {
-			return 0, fmt.Errorf("invalid expression: %+v", e)
+func (e *Expression) Exec(x []float64) (res float64, err error) {
+	defer wraperr.WrapError(ErrExec, &err)
+
+	if e.number != nil {
+		return e.number.exec(x)
+	} else if e.symbol != nil {
+		return e.symbol.exec(x)
+	} else if e.operation != nil && e.tuple != nil {
+		args, err := e.tuple.exec(x)
+		if err != nil {
+			return 0, err
 		}
-	}()
-
-	if err != nil {
-		return 0, wraperr.NewWrapErr(ErrExec, err)
+		return e.operation.exec(args)
+	} else {
+		return 0, fmt.Errorf("invalid expression: %+v", e)
 	}
-
-	return res, nil
 }
 
 func (e *Expression) Copy() *Expression {

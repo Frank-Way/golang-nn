@@ -38,40 +38,34 @@ func NewDataset(train *Data, tests *Data, valid *Data) (*Dataset, error) {
 	return &Dataset{Train: train, Tests: tests, Valid: valid}, nil
 }
 
-func NewDatasetSplit(data *Data, parameters *DataSplitParameters) (*Dataset, error) {
-	res, err := func() (*Dataset, error) {
-		if data == nil {
-			return nil, fmt.Errorf("no data provided for splitting: %v", data)
-		} else if parameters == nil {
-			return nil, fmt.Errorf("no parameters provided for splitting: %v", parameters)
-		}
-		n := data.X.Rows()
-		trainSize := parameters.TrainPercent.GetI(n)
-		train, others, err := data.Split(trainSize)
-		if err != nil {
-			return nil, fmt.Errorf("error during splitting to get traing data: %w", err)
-		}
+func NewDatasetSplit(data *Data, parameters *DataSplitParameters) (d *Dataset, err error) {
+	defer wraperr.WrapError(ErrCreate, &err)
 
-		testSize := parameters.TestsPercent.GetI(n)
-		tests, valid, err := others.Split(testSize)
-		if err != nil {
-			return nil, fmt.Errorf("error during splitting to get tests and valid data: %w", err)
-		}
-
-		validSize := parameters.ValidPercent.GetI(n)
-		if math.Abs(float64(validSize-valid.X.Rows())) > percent.Percent10.GetF(float64(n)) {
-			return nil,
-				fmt.Errorf("desired and actual valid part sizes mismathes too much: %d != %d", validSize, valid.X.Rows())
-		}
-
-		return NewDataset(train, tests, valid)
-	}()
-
+	if data == nil {
+		return nil, fmt.Errorf("no data provided for splitting: %v", data)
+	} else if parameters == nil {
+		return nil, fmt.Errorf("no parameters provided for splitting: %v", parameters)
+	}
+	n := data.X.Rows()
+	trainSize := parameters.TrainPercent.GetI(n)
+	train, others, err := data.Split(trainSize)
 	if err != nil {
-		return nil, wraperr.NewWrapErr(ErrCreate, err)
+		return nil, fmt.Errorf("error during splitting to get traing data: %w", err)
 	}
 
-	return res, nil
+	testSize := parameters.TestsPercent.GetI(n)
+	tests, valid, err := others.Split(testSize)
+	if err != nil {
+		return nil, fmt.Errorf("error during splitting to get tests and valid data: %w", err)
+	}
+
+	validSize := parameters.ValidPercent.GetI(n)
+	if math.Abs(float64(validSize-valid.X.Rows())) > percent.Percent10.GetF(float64(n)) {
+		return nil,
+			fmt.Errorf("desired and actual valid part sizes mismathes too much: %d != %d", validSize, valid.X.Rows())
+	}
+
+	return NewDataset(train, tests, valid)
 }
 
 func (d *Dataset) Copy() *Dataset {

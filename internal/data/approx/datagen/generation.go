@@ -20,23 +20,17 @@ func NewParameters(
 	expression string,
 	ranges []*InputRange,
 	dataSplitParameters *dataset.DataSplitParameters,
-) (*Parameters, error) {
-	res, err := func() (*Parameters, error) {
-		if expression == "" {
-			return nil, fmt.Errorf("no expression provided in datagen parameters: %s", expression)
-		} else if ranges == nil || len(ranges) < 1 {
-			return nil, fmt.Errorf("no input ranges provided in datagen parameters: %v", ranges)
-		} else if dataSplitParameters == nil {
-			dataSplitParameters = dataset.DefaultDataSplitParameters
-		}
-		return &Parameters{Expression: expression, Ranges: ranges, DataSplitParameters: dataSplitParameters}, nil
-	}()
+) (params *Parameters, err error) {
+	defer wraperr.WrapError(ErrCreate, &err)
 
-	if err != nil {
-		return nil, wraperr.NewWrapErr(ErrCreate, err)
+	if expression == "" {
+		return nil, fmt.Errorf("no expression provided in datagen parameters: %s", expression)
+	} else if ranges == nil || len(ranges) < 1 {
+		return nil, fmt.Errorf("no input ranges provided in datagen parameters: %v", ranges)
+	} else if dataSplitParameters == nil {
+		dataSplitParameters = dataset.DefaultDataSplitParameters
 	}
-
-	return res, err
+	return &Parameters{Expression: expression, Ranges: ranges, DataSplitParameters: dataSplitParameters}, nil
 }
 
 func (p *Parameters) Generate() (*dataset.Dataset, error) {

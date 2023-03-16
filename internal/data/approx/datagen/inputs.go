@@ -13,21 +13,15 @@ type InputRange struct {
 	Count int
 }
 
-func NewInputRange(left float64, right float64, count int) (*InputRange, error) {
-	res, err := func() (*InputRange, error) {
-		if left >= right {
-			return nil, fmt.Errorf("left >= right: %f, %f", left, right)
-		} else if count < 2 {
-			return nil, fmt.Errorf("inputs must contain at least 2 points, required %d", count)
-		}
-		return &InputRange{Left: left, Right: right, Count: count}, nil
-	}()
+func NewInputRange(left float64, right float64, count int) (iRng *InputRange, err error) {
+	defer wraperr.WrapError(ErrCreate, &err)
 
-	if err != nil {
-		return nil, wraperr.NewWrapErr(ErrCreate, err)
+	if left >= right {
+		return nil, fmt.Errorf("left >= right: %f, %f", left, right)
+	} else if count < 2 {
+		return nil, fmt.Errorf("inputs must contain at least 2 points, required %d", count)
 	}
-
-	return res, nil
+	return &InputRange{Left: left, Right: right, Count: count}, nil
 }
 
 func (r *InputRange) inputs() (*vector.Vector, error) {

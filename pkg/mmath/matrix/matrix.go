@@ -13,84 +13,74 @@ type Matrix struct {
 	cols    int
 }
 
-func NewMatrix(vectors []*vector.Vector) (*Matrix, error) {
-	res, err := func() (*Matrix, error) {
-		if vectors == nil || len(vectors) < 1 {
-			return nil, fmt.Errorf("no vectors provided: %v", vectors)
-		}
+func NewMatrix(vectors []*vector.Vector) (m *Matrix, err error) {
+	defer wraperr.WrapError(ErrCreate, &err)
 
-		rows := len(vectors)
-
-		for i, row := range vectors {
-			if row == nil {
-				return nil, fmt.Errorf("%d;th row is nil: %v", i, row)
-			}
-		}
-
-		cols := vectors[0].Size()
-
-		for i, row := range vectors {
-			if row.Size() != cols {
-				return nil, fmt.Errorf("%d'th row length mismatch first row length: %d != %d", i, row.Size(), cols)
-			}
-		}
-
-		return &Matrix{
-			vectors: vectors,
-			rows:    rows,
-			cols:    cols,
-		}, nil
-	}()
-
-	if err != nil {
-		return nil, wraperr.NewWrapErr(ErrCreate, err)
+	if vectors == nil || len(vectors) < 1 {
+		return nil, fmt.Errorf("no vectors provided: %v", vectors)
 	}
 
-	return res, nil
+	rows := len(vectors)
+
+	for i, row := range vectors {
+		if row == nil {
+			return nil, fmt.Errorf("%d;th row is nil: %v", i, row)
+		}
+	}
+
+	cols := vectors[0].Size()
+
+	for i, row := range vectors {
+		if row.Size() != cols {
+			return nil, fmt.Errorf("%d'th row length mismatch first row length: %d != %d", i, row.Size(), cols)
+		}
+	}
+
+	return &Matrix{
+		vectors: vectors,
+		rows:    rows,
+		cols:    cols,
+	}, nil
 }
 
-func NewMatrixFlat(rows, cols int, flat *vector.Vector) (*Matrix, error) {
-	vectors, err := func() ([]*vector.Vector, error) {
-		if flat == nil {
-			return nil, fmt.Errorf("no vector provided: %v", flat)
-		} else if rows < 1 {
-			return nil, fmt.Errorf("negative or zero rows count: %d", rows)
-		} else if cols < 1 {
-			return nil, fmt.Errorf("negative or zero cols count: %d", cols)
-		} else if flat.Size() != rows*cols {
-			return nil, fmt.Errorf("wrong vectors count provided for rows*cols matrix: %d != %d*%d=%d",
-				flat.Size(), rows, cols, rows*cols)
-		}
+func NewMatrixFlat(rows, cols int, flat *vector.Vector) (m *Matrix, err error) {
+	defer wraperr.WrapError(ErrCreate, &err)
 
-		vectors, err := flat.Split(cols)
-		if err != nil {
-			return nil, err
-		}
+	if flat == nil {
+		return nil, fmt.Errorf("no vector provided: %v", flat)
+	} else if rows < 1 {
+		return nil, fmt.Errorf("negative or zero rows count: %d", rows)
+	} else if cols < 1 {
+		return nil, fmt.Errorf("negative or zero cols count: %d", cols)
+	} else if flat.Size() != rows*cols {
+		return nil, fmt.Errorf("wrong vectors count provided for rows*cols matrix: %d != %d*%d=%d",
+			flat.Size(), rows, cols, rows*cols)
+	}
 
-		if len(vectors) != rows {
-			return nil, fmt.Errorf("split parts count of vector sized %d for matrix sized %dx%d mismatches: %d != %d",
-				flat.Size(), rows, cols, len(vectors), rows)
-		}
-
-		return vectors, nil
-	}()
-
+	vectors, err := flat.Split(cols)
 	if err != nil {
-		return nil, wraperr.NewWrapErr(ErrCreate, err)
+		return nil, err
+	}
+
+	if len(vectors) != rows {
+		return nil, fmt.Errorf("split parts count of vector sized %d for matrix sized %dx%d mismatches: %d != %d",
+			flat.Size(), rows, cols, len(vectors), rows)
 	}
 
 	return NewMatrix(vectors)
 }
 
-func NewMatrixRaw(values [][]float64) (*Matrix, error) {
+func NewMatrixRaw(values [][]float64) (m *Matrix, err error) {
+	defer wraperr.WrapError(ErrCreate, &err)
+
 	if values == nil {
-		return nil, wraperr.NewWrapErr(ErrCreate, fmt.Errorf("no values provided: %v", values))
+		return nil, fmt.Errorf("no values provided: %v", values)
 	}
 	var vectors []*vector.Vector
 	for _, row := range values {
 		vec, err := vector.NewVector(row)
 		if err != nil {
-			return nil, wraperr.NewWrapErr(ErrCreate, err)
+			return nil, err
 		}
 		vectors = append(vectors, vec)
 	}
@@ -226,29 +216,23 @@ func (m *Matrix) GetRow(row int) (*vector.Vector, error) {
 	return m.vectors[row].Copy(), nil
 }
 
-func (m *Matrix) GetCol(col int) (*vector.Vector, error) {
-	res, err := func() (*vector.Vector, error) {
-		if col < 0 || col >= m.cols {
-			return nil, fmt.Errorf("can not get %d'th col of %dx%d matrix", col, m.rows, m.cols)
-		}
+func (m *Matrix) GetCol(col int) (vec *vector.Vector, err error) {
+	defer wraperr.WrapError(ErrNotFound, &err)
 
-		values := make([]float64, m.rows)
-		for i := 0; i < m.rows; i++ {
-			value, err := m.vectors[i].Get(col)
-			if err != nil {
-				return nil, err
-			}
-			values[i] = value
-		}
-
-		return vector.NewVector(values)
-	}()
-
-	if err != nil {
-		return nil, wraperr.NewWrapErr(ErrNotFound, err)
+	if col < 0 || col >= m.cols {
+		return nil, fmt.Errorf("can not get %d'th col of %dx%d matrix", col, m.rows, m.cols)
 	}
 
-	return res, nil
+	values := make([]float64, m.rows)
+	for i := 0; i < m.rows; i++ {
+		value, err := m.vectors[i].Get(col)
+		if err != nil {
+			return nil, err
+		}
+		values[i] = value
+	}
+
+	return vector.NewVector(values)
 }
 
 func (m *Matrix) CheckEqualShape(matrix *Matrix) error {

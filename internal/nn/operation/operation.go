@@ -21,45 +21,33 @@ type Operation struct {
 	gradient func(dy *matrix.Matrix) (*matrix.Matrix, error)
 }
 
-func (o *Operation) Forward(x *matrix.Matrix) (*matrix.Matrix, error) {
-	res, err := func() (*matrix.Matrix, error) {
-		o.x = x.Copy()
-		y, err := o.output(x)
-		if err != nil {
-			return nil, err
-		}
-		o.y = y.Copy()
-		return y, nil
-	}()
+func (o *Operation) Forward(x *matrix.Matrix) (y *matrix.Matrix, err error) {
+	defer wraperr.WrapError(ErrExec, &err)
 
+	o.x = x.Copy()
+	y, err = o.output(x)
 	if err != nil {
-		return nil, wraperr.NewWrapErr(ErrExec, err)
+		return nil, err
 	}
-
-	return res, nil
+	o.y = y.Copy()
+	return y, nil
 }
 
-func (o *Operation) Backward(dy *matrix.Matrix) (*matrix.Matrix, error) {
-	res, err := func() (*matrix.Matrix, error) {
-		o.dy = dy.Copy()
-		if err := o.y.CheckEqualShape(dy); err != nil {
-			return nil, err
-		}
-		dx, err := o.gradient(dy)
-		if err != nil {
-			return nil, err
-		} else if err = o.x.CheckEqualShape(dx); err != nil {
-			return nil, err
-		}
-		o.dx = dx.Copy()
-		return dx, nil
-	}()
+func (o *Operation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err error) {
+	defer wraperr.WrapError(ErrExec, &err)
 
-	if err != nil {
-		return nil, wraperr.NewWrapErr(ErrExec, err)
+	o.dy = dy.Copy()
+	if err := o.y.CheckEqualShape(dy); err != nil {
+		return nil, err
 	}
-
-	return res, nil
+	dx, err = o.gradient(dy)
+	if err != nil {
+		return nil, err
+	} else if err = o.x.CheckEqualShape(dx); err != nil {
+		return nil, err
+	}
+	o.dx = dx.Copy()
+	return dx, nil
 }
 
 func (o *Operation) Copy() *Operation {

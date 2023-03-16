@@ -18,56 +18,44 @@ type ConstOperation struct {
 	gradient func(dy *matrix.Matrix, p []*matrix.Matrix, x *matrix.Matrix) (*matrix.Matrix, error)
 }
 
-func (o *ConstOperation) Forward(x *matrix.Matrix) (*matrix.Matrix, error) {
-	res, err := func() (*matrix.Matrix, error) {
-		if x == nil {
-			return nil, fmt.Errorf("no input provided: %v", x)
-		}
-		o.x = x.Copy()
-		y, err := o.output(x, o.p)
-		if err != nil {
-			return nil, err
-		}
-		o.y = y.Copy()
-		return y, nil
-	}()
+func (o *ConstOperation) Forward(x *matrix.Matrix) (y *matrix.Matrix, err error) {
+	defer wraperr.WrapError(ErrExec, &err)
 
-	if err != nil {
-		return nil, wraperr.NewWrapErr(ErrExec, err)
+	if x == nil {
+		return nil, fmt.Errorf("no input provided: %v", x)
 	}
-
-	return res, nil
+	o.x = x.Copy()
+	y, err = o.output(x, o.p)
+	if err != nil {
+		return nil, err
+	}
+	o.y = y.Copy()
+	return y, nil
 }
 
-func (o *ConstOperation) Backward(dy *matrix.Matrix) (*matrix.Matrix, error) {
-	res, err := func() (*matrix.Matrix, error) {
-		if dy == nil {
-			return nil, fmt.Errorf("no out gradient provided: %v", dy)
-		} else if o.x == nil {
-			return nil, fmt.Errorf("backward before forward: %v", o.x)
-		}
+func (o *ConstOperation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err error) {
+	defer wraperr.WrapError(ErrExec, &err)
 
-		o.dy = dy.Copy()
-		if err := o.y.CheckEqualShape(dy); err != nil {
-			return nil, err
-		}
-		dx, err := o.gradient(dy, o.p, o.x)
-		if err != nil {
-			return nil, err
-		} else if o.x != nil {
-			if err = o.x.CheckEqualShape(dx); err != nil {
-				return nil, err
-			}
-		}
-		o.dx = dx.Copy()
-		return dx, nil
-	}()
-
-	if err != nil {
-		return nil, wraperr.NewWrapErr(ErrExec, err)
+	if dy == nil {
+		return nil, fmt.Errorf("no out gradient provided: %v", dy)
+	} else if o.x == nil {
+		return nil, fmt.Errorf("backward before forward: %v", o.x)
 	}
 
-	return res, nil
+	o.dy = dy.Copy()
+	if err := o.y.CheckEqualShape(dy); err != nil {
+		return nil, err
+	}
+	dx, err = o.gradient(dy, o.p, o.x)
+	if err != nil {
+		return nil, err
+	} else if o.x != nil {
+		if err = o.x.CheckEqualShape(dx); err != nil {
+			return nil, err
+		}
+	}
+	o.dx = dx.Copy()
+	return dx, nil
 }
 
 func (o *ConstOperation) Copy() *ConstOperation {

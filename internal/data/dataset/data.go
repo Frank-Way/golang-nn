@@ -121,43 +121,36 @@ func (d *Data) EqualApprox(data *Data) bool {
 // Split return two *Data, first contains values in [0; pivot), second - in [pivot; Data.Rows()).
 // Split is a row-based function.
 // If fail, Split returns ErrSplit error wrapper.
-func (d *Data) Split(pivot int) (*Data, *Data, error) {
-	res1, res2, err := func() (*Data, *Data, error) {
-		if pivot < 1 {
-			return nil, nil, fmt.Errorf("negative or zero split pivot for data")
-		} else if d.X.Rows()-pivot < 1 {
-			return nil, nil, fmt.Errorf("not enough values for split data sized %d with pivot %d", d.X.Rows(), pivot)
-		}
+func (d *Data) Split(pivot int) (first *Data, second *Data, err error) {
+	defer wraperr.WrapError(ErrSplit, &err)
 
-		var firstX, firstY, secondX, secondY *matrix.Matrix
-		var err error
-		if firstX, err = d.X.SubMatrix(0, pivot, 1, 0, d.X.Cols(), 1); err != nil {
-			return nil, nil, err
-		}
-		if secondX, err = d.X.SubMatrix(pivot, d.X.Rows(), 1, 0, d.X.Cols(), 1); err != nil {
-			return nil, nil, err
-		}
-		if firstY, err = d.Y.SubMatrix(0, pivot, 1, 0, d.Y.Cols(), 1); err != nil {
-			return nil, nil, err
-		}
-		if secondY, err = d.Y.SubMatrix(pivot, d.Y.Rows(), 1, 0, d.Y.Cols(), 1); err != nil {
-			return nil, nil, err
-		}
-
-		var first, second *Data
-		if first, err = NewData(firstX, firstY); err != nil {
-			return nil, nil, err
-		}
-		if second, err = NewData(secondX, secondY); err != nil {
-			return nil, nil, err
-		}
-
-		return first, second, nil
-	}()
-
-	if err != nil {
-		return nil, nil, wraperr.NewWrapErr(ErrSplit, err)
+	if pivot < 1 {
+		return nil, nil, fmt.Errorf("negative or zero split pivot for data")
+	} else if d.X.Rows()-pivot < 1 {
+		return nil, nil, fmt.Errorf("not enough values for split data sized %d with pivot %d", d.X.Rows(), pivot)
 	}
 
-	return res1, res2, nil
+	var firstX, firstY, secondX, secondY *matrix.Matrix
+
+	if firstX, err = d.X.SubMatrix(0, pivot, 1, 0, d.X.Cols(), 1); err != nil {
+		return nil, nil, err
+	}
+	if secondX, err = d.X.SubMatrix(pivot, d.X.Rows(), 1, 0, d.X.Cols(), 1); err != nil {
+		return nil, nil, err
+	}
+	if firstY, err = d.Y.SubMatrix(0, pivot, 1, 0, d.Y.Cols(), 1); err != nil {
+		return nil, nil, err
+	}
+	if secondY, err = d.Y.SubMatrix(pivot, d.Y.Rows(), 1, 0, d.Y.Cols(), 1); err != nil {
+		return nil, nil, err
+	}
+
+	if first, err = NewData(firstX, firstY); err != nil {
+		return nil, nil, err
+	}
+	if second, err = NewData(secondX, secondY); err != nil {
+		return nil, nil, err
+	}
+
+	return first, second, nil
 }
