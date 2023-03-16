@@ -45,7 +45,7 @@ func NewDropout(keepProbability percent.Percent) (*ConstOperation, error) {
 }
 
 func NewSigmoidParam(coeffs *vector.Vector) (*ConstOperation, error) {
-	res, err := func(coeffs *vector.Vector) (*ConstOperation, error) {
+	res, err := func() (*ConstOperation, error) {
 		if coeffs == nil {
 			return nil, fmt.Errorf("no coeffs provided: %v", coeffs)
 		}
@@ -75,7 +75,7 @@ func NewSigmoidParam(coeffs *vector.Vector) (*ConstOperation, error) {
 				}).MulRowM(p[0])
 			},
 		}, nil
-	}(coeffs)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrCreate, err)

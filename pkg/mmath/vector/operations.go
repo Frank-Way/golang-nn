@@ -26,7 +26,7 @@ func Div(a, b float64) float64 {
 }
 
 func (v *Vector) MulScalar(vector *Vector) (float64, error) {
-	res, err := func(vector *Vector) (float64, error) {
+	res, err := func() (float64, error) {
 		if vector == nil {
 			return 0, fmt.Errorf("no second vector provided: %v", vector)
 		} else if v.size != vector.size {
@@ -39,7 +39,7 @@ func (v *Vector) MulScalar(vector *Vector) (float64, error) {
 		}
 
 		return mul.Sum(), nil
-	}(vector)
+	}()
 
 	if err != nil {
 		return 0, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -63,7 +63,7 @@ func (v *Vector) ApplyFunc(operation UnaryOperation) *Vector {
 }
 
 func (v *Vector) ApplyFuncVec(vector *Vector, operation BinaryOperation) (*Vector, error) {
-	res, err := func(vector *Vector, operation BinaryOperation) (*Vector, error) {
+	res, err := func() (*Vector, error) {
 		if vector == nil {
 			return nil, fmt.Errorf("no second vector provided: %v", vector)
 		} else if vector.size != v.size {
@@ -82,7 +82,7 @@ func (v *Vector) ApplyFuncVec(vector *Vector, operation BinaryOperation) (*Vecto
 		}
 
 		return result, nil
-	}(vector, operation)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -191,7 +191,7 @@ func (v *Vector) Avg() float64 {
 }
 
 func (v *Vector) Extend(scale int) (*Vector, error) {
-	res, err := func(scale int) (*Vector, error) {
+	res, err := func() (*Vector, error) {
 		if scale < 1 {
 			return nil, fmt.Errorf("wrong scale for vector extending: %d", scale)
 		}
@@ -204,7 +204,7 @@ func (v *Vector) Extend(scale int) (*Vector, error) {
 		}
 
 		return NewVector(values)
-	}(scale)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -214,7 +214,7 @@ func (v *Vector) Extend(scale int) (*Vector, error) {
 }
 
 func (v *Vector) Stack(count int) (*Vector, error) {
-	res, err := func(count int) (*Vector, error) {
+	res, err := func() (*Vector, error) {
 		if count < 1 {
 			return nil, fmt.Errorf("wrong count for vector stacking: %d", count)
 		}
@@ -227,7 +227,7 @@ func (v *Vector) Stack(count int) (*Vector, error) {
 		}
 
 		return NewVector(values)
-	}(count)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -237,7 +237,7 @@ func (v *Vector) Stack(count int) (*Vector, error) {
 }
 
 func (v *Vector) Concatenate(vector *Vector) (*Vector, error) {
-	res, err := func(vector *Vector) (*Vector, error) {
+	res, err := func() (*Vector, error) {
 		if vector == nil {
 			return nil, fmt.Errorf("no second vector provided: %v", vector)
 		}
@@ -253,7 +253,7 @@ func (v *Vector) Concatenate(vector *Vector) (*Vector, error) {
 
 		return NewVector(values)
 
-	}(vector)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -278,7 +278,7 @@ func (v *Vector) Reverse() *Vector {
 }
 
 func (v *Vector) Slice(start, stop, step int) (*Vector, error) {
-	res, err := func(start, stop, step int) (*Vector, error) {
+	res, err := func() (*Vector, error) {
 		l := stop - start
 		resLen := int(math.Ceil(float64(l) / float64(step)))
 		if l < 1 {
@@ -306,7 +306,7 @@ func (v *Vector) Slice(start, stop, step int) (*Vector, error) {
 		}
 
 		return vector, nil
-	}(start, stop, step)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -316,7 +316,7 @@ func (v *Vector) Slice(start, stop, step int) (*Vector, error) {
 }
 
 func (v *Vector) Split(partSize int) ([]*Vector, error) {
-	res, err := func(partSize int) ([]*Vector, error) {
+	res, err := func() ([]*Vector, error) {
 		if partSize < 1 {
 			return nil, fmt.Errorf("negative or zero part size in splitting vecttor: %d", partSize)
 		} else if v.size < partSize {
@@ -337,7 +337,7 @@ func (v *Vector) Split(partSize int) ([]*Vector, error) {
 		}
 
 		return vectors, nil
-	}(partSize)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -347,7 +347,7 @@ func (v *Vector) Split(partSize int) ([]*Vector, error) {
 }
 
 func Join(vectors ...*Vector) (*Vector, error) {
-	res, err := func(vectors ...*Vector) (*Vector, error) {
+	res, err := func() (*Vector, error) {
 		if vectors == nil || len(vectors) < 1 {
 			return nil, fmt.Errorf("no vectors provided to join: %v", vectors)
 		}
@@ -362,7 +362,7 @@ func Join(vectors ...*Vector) (*Vector, error) {
 		}
 
 		return result, nil
-	}(vectors...)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -414,7 +414,7 @@ func (v *Vector) EqualApprox(vector *Vector) bool {
 }
 
 func LinSpace(start, stop float64, count int) (*Vector, error) {
-	res, err := func(start, stop float64, count int) (*Vector, error) {
+	res, err := func() (*Vector, error) {
 		if start >= stop {
 			return nil, fmt.Errorf("start greater or equal stop value for linspace: %v >= %v", start, stop)
 		}
@@ -429,7 +429,7 @@ func LinSpace(start, stop float64, count int) (*Vector, error) {
 		values[count-1] = stop
 
 		return NewVector(values)
-	}(start, stop, count)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)

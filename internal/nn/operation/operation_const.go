@@ -19,7 +19,7 @@ type ConstOperation struct {
 }
 
 func (o *ConstOperation) Forward(x *matrix.Matrix) (*matrix.Matrix, error) {
-	res, err := func(x *matrix.Matrix) (*matrix.Matrix, error) {
+	res, err := func() (*matrix.Matrix, error) {
 		if x == nil {
 			return nil, fmt.Errorf("no input provided: %v", x)
 		}
@@ -30,7 +30,7 @@ func (o *ConstOperation) Forward(x *matrix.Matrix) (*matrix.Matrix, error) {
 		}
 		o.y = y.Copy()
 		return y, nil
-	}(x)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrExec, err)
@@ -40,7 +40,7 @@ func (o *ConstOperation) Forward(x *matrix.Matrix) (*matrix.Matrix, error) {
 }
 
 func (o *ConstOperation) Backward(dy *matrix.Matrix) (*matrix.Matrix, error) {
-	res, err := func(dy *matrix.Matrix) (*matrix.Matrix, error) {
+	res, err := func() (*matrix.Matrix, error) {
 		if dy == nil {
 			return nil, fmt.Errorf("no out gradient provided: %v", dy)
 		} else if o.x == nil {
@@ -61,7 +61,7 @@ func (o *ConstOperation) Backward(dy *matrix.Matrix) (*matrix.Matrix, error) {
 		}
 		o.dx = dx.Copy()
 		return dx, nil
-	}(dy)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrExec, err)

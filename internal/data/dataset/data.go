@@ -122,7 +122,7 @@ func (d *Data) EqualApprox(data *Data) bool {
 // Split is a row-based function.
 // If fail, Split returns ErrSplit error wrapper.
 func (d *Data) Split(pivot int) (*Data, *Data, error) {
-	res1, res2, err := func(pivot int) (*Data, *Data, error) {
+	res1, res2, err := func() (*Data, *Data, error) {
 		if pivot < 1 {
 			return nil, nil, fmt.Errorf("negative or zero split pivot for data")
 		} else if d.X.Rows()-pivot < 1 {
@@ -153,7 +153,7 @@ func (d *Data) Split(pivot int) (*Data, *Data, error) {
 		}
 
 		return first, second, nil
-	}(pivot)
+	}()
 
 	if err != nil {
 		return nil, nil, wraperr.NewWrapErr(ErrSplit, err)

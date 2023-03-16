@@ -17,14 +17,14 @@ type Expression struct {
 }
 
 func NewExpression(input string) (*Expression, error) {
-	res, err := func(input string) (*Expression, error) {
+	res, err := func() (*Expression, error) {
 		tree, err := splitRecursively(input)
 		if err != nil {
 			return nil, err
 		}
 
 		return newExpression(tree)
-	}(input)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrParse, err)
@@ -73,7 +73,7 @@ func newExpression(tree *sTree) (*Expression, error) {
 }
 
 func (e *Expression) Exec(x []float64) (float64, error) {
-	res, err := func(x []float64) (float64, error) {
+	res, err := func() (float64, error) {
 		if e.number != nil {
 			return e.number.exec(x)
 		} else if e.symbol != nil {
@@ -87,7 +87,7 @@ func (e *Expression) Exec(x []float64) (float64, error) {
 		} else {
 			return 0, fmt.Errorf("invalid expression: %+v", e)
 		}
-	}(x)
+	}()
 
 	if err != nil {
 		return 0, wraperr.NewWrapErr(ErrExec, err)

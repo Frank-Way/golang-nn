@@ -21,7 +21,7 @@ type ParamOperation struct {
 }
 
 func (o *ParamOperation) Forward(x *matrix.Matrix) (*matrix.Matrix, error) {
-	res, err := func(x *matrix.Matrix) (*matrix.Matrix, error) {
+	res, err := func() (*matrix.Matrix, error) {
 		if x == nil {
 			return nil, fmt.Errorf("no input provided: %v", x)
 		}
@@ -32,7 +32,7 @@ func (o *ParamOperation) Forward(x *matrix.Matrix) (*matrix.Matrix, error) {
 		}
 		o.y = y.Copy()
 		return y, nil
-	}(x)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrExec, err)
@@ -42,7 +42,7 @@ func (o *ParamOperation) Forward(x *matrix.Matrix) (*matrix.Matrix, error) {
 }
 
 func (o *ParamOperation) Backward(dy *matrix.Matrix) (*matrix.Matrix, error) {
-	res, err := func(dy *matrix.Matrix) (*matrix.Matrix, error) {
+	res, err := func() (*matrix.Matrix, error) {
 		if dy == nil {
 			return nil, fmt.Errorf("no out gradient provided: %v", dy)
 		} else if o.x == nil {
@@ -70,7 +70,7 @@ func (o *ParamOperation) Backward(dy *matrix.Matrix) (*matrix.Matrix, error) {
 		}
 		o.dx = dx.Copy()
 		return dx, nil
-	}(dy)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrExec, err)
@@ -82,7 +82,7 @@ func (o *ParamOperation) Backward(dy *matrix.Matrix) (*matrix.Matrix, error) {
 type Optimizer func(param, grad *matrix.Matrix) (*matrix.Matrix, error)
 
 func (o *ParamOperation) ApplyOptim(optim Optimizer) error {
-	err := func(optim func(param, grad *matrix.Matrix) (*matrix.Matrix, error)) error {
+	err := func() error {
 		if optim == nil {
 			return fmt.Errorf("no optimizer provided")
 		} else if o.dp == nil {
@@ -99,7 +99,7 @@ func (o *ParamOperation) ApplyOptim(optim Optimizer) error {
 
 		o.p = newP
 		return nil
-	}(optim)
+	}()
 
 	if err != nil {
 		return wraperr.NewWrapErr(ErrExec, err)

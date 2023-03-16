@@ -22,7 +22,7 @@ type Operation struct {
 }
 
 func (o *Operation) Forward(x *matrix.Matrix) (*matrix.Matrix, error) {
-	res, err := func(x *matrix.Matrix) (*matrix.Matrix, error) {
+	res, err := func() (*matrix.Matrix, error) {
 		o.x = x.Copy()
 		y, err := o.output(x)
 		if err != nil {
@@ -30,7 +30,7 @@ func (o *Operation) Forward(x *matrix.Matrix) (*matrix.Matrix, error) {
 		}
 		o.y = y.Copy()
 		return y, nil
-	}(x)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrExec, err)
@@ -40,7 +40,7 @@ func (o *Operation) Forward(x *matrix.Matrix) (*matrix.Matrix, error) {
 }
 
 func (o *Operation) Backward(dy *matrix.Matrix) (*matrix.Matrix, error) {
-	res, err := func(dy *matrix.Matrix) (*matrix.Matrix, error) {
+	res, err := func() (*matrix.Matrix, error) {
 		o.dy = dy.Copy()
 		if err := o.y.CheckEqualShape(dy); err != nil {
 			return nil, err
@@ -53,7 +53,7 @@ func (o *Operation) Backward(dy *matrix.Matrix) (*matrix.Matrix, error) {
 		}
 		o.dx = dx.Copy()
 		return dx, nil
-	}(dy)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrExec, err)

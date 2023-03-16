@@ -37,7 +37,7 @@ func (m *Matrix) MatMul(matrix *Matrix) (*Matrix, error) {
 }
 
 func (m *Matrix) matMulImplSingle(matrix *Matrix) (*Matrix, error) {
-	res, err := func(matrix *Matrix) (*Matrix, error) {
+	res, err := func() (*Matrix, error) {
 		N, M := m.rows, matrix.cols
 		if m.cols != matrix.rows {
 			return nil, fmt.Errorf("can't Mul matrices sized %dx%d and %dx%d", m.rows, m.cols, matrix.rows, matrix.cols)
@@ -63,7 +63,7 @@ func (m *Matrix) matMulImplSingle(matrix *Matrix) (*Matrix, error) {
 		}
 
 		return NewMatrixRaw(values)
-	}(matrix)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -73,7 +73,7 @@ func (m *Matrix) matMulImplSingle(matrix *Matrix) (*Matrix, error) {
 }
 
 func (m *Matrix) matMulImplMulti(matrix *Matrix) (*Matrix, error) {
-	res, err := func(matrix *Matrix) (*Matrix, error) {
+	res, err := func() (*Matrix, error) {
 		N, M := m.rows, matrix.cols
 		if m.cols != matrix.rows {
 			return nil, fmt.Errorf("can't Mul matrices sized %dx%d and %dx%d", m.rows, m.cols, matrix.rows, matrix.cols)
@@ -105,7 +105,7 @@ func (m *Matrix) matMulImplMulti(matrix *Matrix) (*Matrix, error) {
 
 		wg.Wait()
 		return NewMatrixRaw(values)
-	}(matrix)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -167,14 +167,14 @@ func (m *Matrix) apply(operation BinaryOperation, provider func(row, col int) (f
 }
 
 func (m *Matrix) ApplyFuncMat(matrix *Matrix, operation BinaryOperation) (*Matrix, error) {
-	res, err := func(matrix *Matrix, operation BinaryOperation) (*Matrix, error) {
+	res, err := func() (*Matrix, error) {
 		if matrix == nil {
 			return nil, fmt.Errorf("no second matrix provided: %v", matrix)
 		} else if matrix.Rows() != m.rows || matrix.Cols() != m.cols {
 			return nil, fmt.Errorf("matrix size mismatces: %dx%d != %dx%d", m.rows, m.cols, matrix.Rows(), matrix.Cols())
 		}
 		return m.apply(operation, func(i, j int) (float64, error) { return matrix.Get(i, j) })
-	}(matrix, operation)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -193,7 +193,7 @@ func (m *Matrix) ApplyFuncNum(number float64, operation BinaryOperation) *Matrix
 }
 
 func (m *Matrix) ApplyFuncMatRow(row *Matrix, operation BinaryOperation) (*Matrix, error) {
-	res, err := func(row *Matrix, operation BinaryOperation) (*Matrix, error) {
+	res, err := func() (*Matrix, error) {
 		if row == nil {
 			return nil, fmt.Errorf("no row provided: %v", row)
 		} else if row.rows != 1 {
@@ -202,7 +202,7 @@ func (m *Matrix) ApplyFuncMatRow(row *Matrix, operation BinaryOperation) (*Matri
 			return nil, fmt.Errorf("matrix size mismatces: %dx%d != %dx%d", m.rows, m.cols, row.rows, row.cols)
 		}
 		return m.apply(operation, func(i, j int) (float64, error) { return row.Get(0, j) })
-	}(row, operation)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -212,7 +212,7 @@ func (m *Matrix) ApplyFuncMatRow(row *Matrix, operation BinaryOperation) (*Matri
 }
 
 func (m *Matrix) ApplyFuncMatCol(col *Matrix, operation BinaryOperation) (*Matrix, error) {
-	res, err := func(col *Matrix, operation BinaryOperation) (*Matrix, error) {
+	res, err := func() (*Matrix, error) {
 		if col == nil {
 			return nil, fmt.Errorf("no col provided: %v", col)
 		} else if col.cols != 1 {
@@ -221,7 +221,7 @@ func (m *Matrix) ApplyFuncMatCol(col *Matrix, operation BinaryOperation) (*Matri
 			return nil, fmt.Errorf("matrix size mismatces: %dx%d != %dx%d", m.rows, m.cols, col.rows, col.cols)
 		}
 		return m.apply(operation, func(i, j int) (float64, error) { return col.Get(i, 0) })
-	}(col, operation)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -231,14 +231,14 @@ func (m *Matrix) ApplyFuncMatCol(col *Matrix, operation BinaryOperation) (*Matri
 }
 
 func (m *Matrix) ApplyFuncVecRow(row *vector.Vector, operation BinaryOperation) (*Matrix, error) {
-	res, err := func(row *vector.Vector, operation BinaryOperation) (*Matrix, error) {
+	res, err := func() (*Matrix, error) {
 		if row == nil {
 			return nil, fmt.Errorf("no row provided: %v", row)
 		} else if row.Size() != m.cols {
 			return nil, fmt.Errorf("matrix size mismatces: %dx%d != %dx%d", m.rows, m.cols, row.Size(), 1)
 		}
 		return m.apply(operation, func(i, j int) (float64, error) { return row.Get(j) })
-	}(row, operation)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -248,14 +248,14 @@ func (m *Matrix) ApplyFuncVecRow(row *vector.Vector, operation BinaryOperation) 
 }
 
 func (m *Matrix) ApplyFuncVecCol(col *vector.Vector, operation BinaryOperation) (*Matrix, error) {
-	res, err := func(col *vector.Vector, operation BinaryOperation) (*Matrix, error) {
+	res, err := func() (*Matrix, error) {
 		if col == nil {
 			return nil, fmt.Errorf("no col provided: %v", col)
 		} else if col.Size() != m.rows {
 			return nil, fmt.Errorf("matrix size mismatces: %dx%d != %dx%d", m.rows, m.cols, col.Size(), 1)
 		}
 		return m.apply(operation, func(i, j int) (float64, error) { return col.Get(i) })
-	}(col, operation)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -368,7 +368,7 @@ const (
 )
 
 func (m *Matrix) ReduceAxed(axis Axis, operation func(a, b float64) float64) (*vector.Vector, error) {
-	res, err := func(axis Axis, operation func(a, b float64) float64) (*vector.Vector, error) {
+	res, err := func() (*vector.Vector, error) {
 		switch axis {
 		case Horizontal:
 			values := make([]float64, m.rows)
@@ -381,7 +381,7 @@ func (m *Matrix) ReduceAxed(axis Axis, operation func(a, b float64) float64) (*v
 		default:
 			return nil, fmt.Errorf("unknown axis: %d", axis)
 		}
-	}(axis, operation)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -391,7 +391,7 @@ func (m *Matrix) ReduceAxed(axis Axis, operation func(a, b float64) float64) (*v
 }
 
 func (m *Matrix) ReduceAxedM(axis Axis, operation func(a, b float64) float64) (*Matrix, error) {
-	res, err := func(axis Axis, operation func(a, b float64) float64) (*Matrix, error) {
+	res, err := func() (*Matrix, error) {
 		switch axis {
 		case Horizontal:
 			values := make([]float64, m.rows)
@@ -409,7 +409,7 @@ func (m *Matrix) ReduceAxedM(axis Axis, operation func(a, b float64) float64) (*
 		default:
 			return nil, fmt.Errorf("unknown axis: %d", axis)
 		}
-	}(axis, operation)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -497,7 +497,7 @@ func (m *Matrix) Tanh() *Matrix {
 }
 
 func (m *Matrix) SubMatrix(rowsStart, rowsStop, rowsStep, colsStart, colsStop, colsStep int) (*Matrix, error) {
-	res, err := func(rowsStart, rowsStop, rowsStep, colsStart, colsStop, colsStep int) (*Matrix, error) {
+	res, err := func() (*Matrix, error) {
 		l := rowsStop - rowsStart
 		resLen := int(math.Ceil(float64(l) / float64(rowsStep)))
 		if l < 1 {
@@ -525,7 +525,7 @@ func (m *Matrix) SubMatrix(rowsStart, rowsStop, rowsStep, colsStart, colsStop, c
 		}
 
 		return NewMatrix(values)
-	}(rowsStart, rowsStop, rowsStep, colsStart, colsStop, colsStep)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -535,7 +535,7 @@ func (m *Matrix) SubMatrix(rowsStart, rowsStop, rowsStep, colsStart, colsStop, c
 }
 
 func (m *Matrix) HStack(matrices []*Matrix) (*Matrix, error) {
-	res, err := func(matrices []*Matrix) (*Matrix, error) {
+	res, err := func() (*Matrix, error) {
 		if matrices == nil || len(matrices) < 1 {
 			return nil, fmt.Errorf("no matrices provided for horizontal stacking")
 		}
@@ -557,7 +557,7 @@ func (m *Matrix) HStack(matrices []*Matrix) (*Matrix, error) {
 		}
 
 		return NewMatrix(vectors)
-	}(matrices)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -567,7 +567,7 @@ func (m *Matrix) HStack(matrices []*Matrix) (*Matrix, error) {
 }
 
 func (m *Matrix) VStack(matrices []*Matrix) (*Matrix, error) {
-	res, err := func(matrices []*Matrix) (*Matrix, error) {
+	res, err := func() (*Matrix, error) {
 		if matrices == nil || len(matrices) < 1 {
 			return nil, fmt.Errorf("no matrices provided for vertical stacking")
 		}
@@ -578,7 +578,7 @@ func (m *Matrix) VStack(matrices []*Matrix) (*Matrix, error) {
 		}
 
 		return NewMatrix(vectors)
-	}(matrices)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -628,7 +628,7 @@ func (m *Matrix) EqualApprox(matrix *Matrix) bool {
 }
 
 func (m *Matrix) Order(indices []int) (*Matrix, error) {
-	res, err := func(indices []int) (*Matrix, error) {
+	res, err := func() (*Matrix, error) {
 		if indices == nil {
 			return nil, fmt.Errorf("no indices provided for ordering matrix: %v", indices)
 		} else if len(indices) != m.rows {
@@ -655,7 +655,7 @@ func (m *Matrix) Order(indices []int) (*Matrix, error) {
 		}
 
 		return NewMatrix(vectors)
-	}(indices)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)
@@ -665,7 +665,7 @@ func (m *Matrix) Order(indices []int) (*Matrix, error) {
 }
 
 func CartesianProduct(vectors []*vector.Vector) (*Matrix, error) {
-	res, err := func(vectors []*vector.Vector) (*Matrix, error) {
+	res, err := func() (*Matrix, error) {
 		if vectors == nil || len(vectors) < 1 {
 			return nil, fmt.Errorf("no vectors provided for cartesian product: %v", vectors)
 		}
@@ -712,7 +712,7 @@ func CartesianProduct(vectors []*vector.Vector) (*Matrix, error) {
 		}
 
 		return matrix.T(), nil
-	}(vectors)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrOperationExec, err)

@@ -14,7 +14,7 @@ type Matrix struct {
 }
 
 func NewMatrix(vectors []*vector.Vector) (*Matrix, error) {
-	res, err := func(vectors []*vector.Vector) (*Matrix, error) {
+	res, err := func() (*Matrix, error) {
 		if vectors == nil || len(vectors) < 1 {
 			return nil, fmt.Errorf("no vectors provided: %v", vectors)
 		}
@@ -40,7 +40,7 @@ func NewMatrix(vectors []*vector.Vector) (*Matrix, error) {
 			rows:    rows,
 			cols:    cols,
 		}, nil
-	}(vectors)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrCreate, err)
@@ -50,7 +50,7 @@ func NewMatrix(vectors []*vector.Vector) (*Matrix, error) {
 }
 
 func NewMatrixFlat(rows, cols int, flat *vector.Vector) (*Matrix, error) {
-	vectors, err := func(rows, cols int, flat *vector.Vector) ([]*vector.Vector, error) {
+	vectors, err := func() ([]*vector.Vector, error) {
 		if flat == nil {
 			return nil, fmt.Errorf("no vector provided: %v", flat)
 		} else if rows < 1 {
@@ -73,7 +73,7 @@ func NewMatrixFlat(rows, cols int, flat *vector.Vector) (*Matrix, error) {
 		}
 
 		return vectors, nil
-	}(rows, cols, flat)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrCreate, err)
@@ -227,7 +227,7 @@ func (m *Matrix) GetRow(row int) (*vector.Vector, error) {
 }
 
 func (m *Matrix) GetCol(col int) (*vector.Vector, error) {
-	res, err := func(col int) (*vector.Vector, error) {
+	res, err := func() (*vector.Vector, error) {
 		if col < 0 || col >= m.cols {
 			return nil, fmt.Errorf("can not get %d'th col of %dx%d matrix", col, m.rows, m.cols)
 		}
@@ -242,7 +242,7 @@ func (m *Matrix) GetCol(col int) (*vector.Vector, error) {
 		}
 
 		return vector.NewVector(values)
-	}(col)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrNotFound, err)

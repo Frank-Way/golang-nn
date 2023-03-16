@@ -39,7 +39,7 @@ func NewDataset(train *Data, tests *Data, valid *Data) (*Dataset, error) {
 }
 
 func NewDatasetSplit(data *Data, parameters *DataSplitParameters) (*Dataset, error) {
-	res, err := func(data *Data, parameters *DataSplitParameters) (*Dataset, error) {
+	res, err := func() (*Dataset, error) {
 		if data == nil {
 			return nil, fmt.Errorf("no data provided for splitting: %v", data)
 		} else if parameters == nil {
@@ -65,7 +65,7 @@ func NewDatasetSplit(data *Data, parameters *DataSplitParameters) (*Dataset, err
 		}
 
 		return NewDataset(train, tests, valid)
-	}(data, parameters)
+	}()
 
 	if err != nil {
 		return nil, wraperr.NewWrapErr(ErrCreate, err)
