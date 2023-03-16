@@ -157,8 +157,10 @@ func TestLogger_Stderr(t *testing.T) {
 func TestLogger_TwoDiffFilesDiffLevels(t *testing.T) {
 	file1, err := ioutil.TempFile("", "tmp-logfile1-&.txt")
 	require.NoError(t, err)
+	defer os.Remove(file1.Name())
 	file2, err := ioutil.TempFile("", "tmp-logfile2-&.txt")
 	require.NoError(t, err)
+	defer os.Remove(file2.Name())
 	Reset()
 	Setup(LeveledWriter{Level: Warn, Writer: file1},
 		LeveledWriter{Level: Debug, Writer: file2})
@@ -168,6 +170,7 @@ func TestLogger_TwoDiffFilesDiffLevels(t *testing.T) {
 func TestLogger_TwoWritersOnSameFileDiffLevels(t *testing.T) {
 	file, err := ioutil.TempFile("", "tmp-logfile-&.txt")
 	require.NoError(t, err)
+	defer os.Remove(file.Name())
 	Reset()
 	Setup(LeveledWriter{Level: Warn, Writer: file},
 		LeveledWriter{Level: Debug, Writer: file})
@@ -177,8 +180,83 @@ func TestLogger_TwoWritersOnSameFileDiffLevels(t *testing.T) {
 func TestLogger_StderrAndFileDiffLevels(t *testing.T) {
 	file, err := ioutil.TempFile("", "tmp-logfile-&.txt")
 	require.NoError(t, err)
+	defer os.Remove(file.Name())
 	Reset()
 	Setup(LeveledWriter{Level: Info, Writer: os.Stderr},
 		LeveledWriter{Level: Trace, Writer: file})
 	run(t, tests, []Level{Trace}, []*os.File{file})
+}
+
+func TestLogger_CatchErr(t *testing.T) {
+	file, err := ioutil.TempFile("", "tmp-logfile-&.txt")
+	require.NoError(t, err)
+	defer os.Remove(file.Name())
+	Reset()
+	Setup(LeveledWriter{Level: Info, Writer: file})
+	logger := NewLogger("logger-1")
+	f := func(i int) (err error) {
+		defer logger.CatchErr(&err)
+		logger.Infof("got %d", i)
+		if i < 0 {
+			return fmt.Errorf("negative input: %d", i)
+		}
+		logger.Infof("processing %d", i)
+		return nil
+	}
+
+	require.Error(t, f(-2))
+	require.NoError(t, f(2))
+
+	content := getContent(t, file.Name())
+	expectedSuffixes := []string{
+		"[Info] logger-1: got -2",
+		"[Error] logger-1: negative input: -2",
+		"[Info] logger-1: got 2",
+		"[Info] logger-1: processing 2",
+		"",
+	}
+	require.Equal(t, len(content), len(expectedSuffixes))
+	for i := 0; i < len(content); i++ {
+		require.True(t, strings.HasSuffix(content[i], expectedSuffixes[i]))
+	}
+}
+
+func TestLogger_CatchWrappedErr(t *testing.T) {
+	file, err := ioutil.TempFile("", "tmp-logfile-&.txt")
+	require.NoError(t, err)
+	defer os.Remove(file.Name())
+	Reset()
+	Setup(LeveledWriter{Level: Info, Writer: file})
+	logger := NewLogger("logger-1")
+	f := func(i int) (err error) {
+		defer logger.CatchErr(&err)
+		defer func(err *error) {
+			if *err != nil {
+				*err = fmt.Errorf("wrap: %w", *err)
+			}
+		}(&err)
+		logger.Infof("got %d", i)
+		if i < 0 {
+			return fmt.Errorf("negative input: %d", i)
+		}
+		logger.Infof("processing %d", i)
+		return nil
+	}
+
+	require.Error(t, f(-2))
+	require.NoError(t, f(2))
+
+	content := getContent(t, file.Name())
+	expectedSuffixes := []string{
+		"[Info] logger-1: got -2",
+		"[Error] logger-1: wrap: negative input: -2",
+		"[Info] logger-1: got 2",
+		"[Info] logger-1: processing 2",
+		"",
+	}
+	require.Equal(t, len(content), len(expectedSuffixes))
+	for i := 0; i < len(content); i++ {
+		t.Log(content[i])
+		require.True(t, strings.HasSuffix(content[i], expectedSuffixes[i]))
+	}
 }
