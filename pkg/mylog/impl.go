@@ -4,17 +4,9 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 )
 
-var _ Logger = (*StandardLogger)(nil)
-
-type leveledLogger struct {
-	level  Level
-	logger *log.Logger
-}
-
-var mapLevel = map[Level]string{
+var lvlMap = map[Level]string{
 	Error: "Error",
 	Warn:  "Warn",
 	Info:  "Info",
@@ -24,127 +16,93 @@ var mapLevel = map[Level]string{
 
 var flags = log.LstdFlags | log.Lmsgprefix | log.Lmicroseconds
 
-func (l *leveledLogger) log(level Level, message string) {
-	if level > l.level {
+type LeveledWriter struct {
+	Level  Level
+	Writer io.Writer
+}
+
+type leveledLogger struct {
+	level  Level
+	logger *log.Logger
+}
+
+type logsWrapper struct {
+	loggers []*leveledLogger
+}
+
+func (l *leveledLogger) log(lvl Level, msg string) {
+	if lvl > l.level {
 		return
 	}
 
-	l.logger.Print(fmt.Sprintf(" [%s] %s", mapLevel[level], message))
+	l.logger.Println(fmt.Sprintf("[%s] %s", lvlMap[lvl], msg))
 }
 
-type StandardLogger struct {
-	name    string
-	loggers map[string]*leveledLogger
-}
-
-func (l *StandardLogger) Log(level Level, message string) {
-	for _, logger := range l.loggers {
-		logger.log(level, message)
+func (w *logsWrapper) log(lvl Level, msg string) {
+	for _, logger := range w.loggers {
+		logger.log(lvl, msg)
 	}
 }
 
-func (l *StandardLogger) Error(message string) {
-	l.Log(Error, message)
+var _ Logger = (*logsView)(nil)
+
+type logsView struct {
+	name string
+	logs *logsWrapper
 }
 
-func (l *StandardLogger) Warn(message string) {
-	l.Log(Warn, message)
+func (v *logsView) Log(lvl Level, msg string) {
+	v.logs.log(lvl, fmt.Sprintf("%s: %s", v.name, msg))
 }
 
-func (l *StandardLogger) Info(message string) {
-	l.Log(Info, message)
+func (v *logsView) Error(msg string) {
+	v.Log(Error, msg)
 }
 
-func (l *StandardLogger) Debug(message string) {
-	l.Log(Debug, message)
+func (v *logsView) Warn(msg string) {
+	v.Log(Warn, msg)
 }
 
-func (l *StandardLogger) Trace(message string) {
-	l.Log(Trace, message)
+func (v *logsView) Info(msg string) {
+	v.Log(Info, msg)
 }
 
-func NewStandardLogger(name string) Logger {
-	return newStandardLogger(name)
+func (v *logsView) Debug(msg string) {
+	v.Log(Debug, msg)
 }
 
-func newStandardLogger(name string) *StandardLogger {
-	return &StandardLogger{
-		name:    name,
-		loggers: make(map[string]*leveledLogger),
+func (v *logsView) Trace(msg string) {
+	v.Log(Trace, msg)
+}
+
+var singleton *logsWrapper
+
+func Setup(writers ...LeveledWriter) {
+	if singleton == nil {
+		loggers := make([]*leveledLogger, len(writers))
+		for i, writer := range writers {
+			loggers[i] = &leveledLogger{
+				level:  writer.Level,
+				logger: log.New(writer.Writer, "", flags),
+			}
+		}
+		singleton = &logsWrapper{
+			loggers: loggers,
+		}
 	}
 }
 
-func stderrKey() string {
-	return "!STDERR"
+func Reset() {
+	singleton = nil
 }
 
-func (l *StandardLogger) delete(key string) bool {
-	if _, ok := l.loggers[key]; !ok {
-		return false
+func NewLogger(name string) Logger {
+	return newLogView(name)
+}
+
+func newLogView(name string) *logsView {
+	return &logsView{
+		name: name,
+		logs: singleton,
 	}
-
-	delete(l.loggers, key)
-	return true
-}
-
-func (l *StandardLogger) EnableStdErr(level Level) {
-	key := stderrKey()
-	if _, ok := l.loggers[key]; ok {
-		return
-	}
-
-	l.loggers[key] = &leveledLogger{
-		level:  level,
-		logger: log.New(os.Stderr, l.name, flags),
-	}
-}
-
-func (l *StandardLogger) DisableStdErr() bool {
-	return l.delete(stderrKey())
-}
-
-func fileKey(name string) string {
-	return fmt.Sprintf("!FILE#%s", name)
-}
-
-func (l *StandardLogger) EnableFile(level Level, name string) error {
-	key := fileKey(name)
-	if _, ok := l.loggers[key]; ok {
-		return nil
-	}
-	file, err := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0644)
-	if err != nil {
-		return err
-	}
-
-	l.loggers[key] = &leveledLogger{
-		level:  level,
-		logger: log.New(file, l.name, flags),
-	}
-	return nil
-}
-
-func (l *StandardLogger) DisableFile(name string) bool {
-	return l.delete(fileKey(name))
-}
-
-func writerKey(name string) string {
-	return fmt.Sprintf("!WRITER#%s", name)
-}
-
-func (l *StandardLogger) EnableWriter(level Level, name string, writer io.Writer) error {
-	key := writerKey(name)
-	if _, ok := l.loggers[key]; ok {
-		return nil
-	}
-
-	l.loggers[key] = &leveledLogger{
-		level:  level,
-		logger: log.New(writer, l.name, flags),
-	}
-	return nil
-}
-
-func (l *StandardLogger) DisableWriter(name string) bool {
-	return l.delete(writerKey(name))
 }
