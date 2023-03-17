@@ -51,6 +51,15 @@ type logsView struct {
 	logs *logsWrapper
 }
 
+func (v *logsView) IsEnabled(lvl Level) bool {
+	for _, logger := range v.logs.loggers {
+		if lvl <= logger.level {
+			return true
+		}
+	}
+	return false
+}
+
 func (v *logsView) Log(lvl Level, msg string) {
 	if v.logs != nil {
 		v.logs.log(lvl, fmt.Sprintf("%s: %s", v.name, msg))

@@ -260,3 +260,59 @@ func TestLogger_CatchWrappedErr(t *testing.T) {
 		require.True(t, strings.HasSuffix(content[i], expectedSuffixes[i]))
 	}
 }
+
+type lvltest struct {
+	lvl      Level
+	expected bool
+}
+
+func TestLogger_IsEnabled(t *testing.T) {
+	tests := []struct {
+		name    string
+		writers []LeveledWriter
+		checks  []lvltest
+	}{
+		{
+			name: "info logger",
+			writers: []LeveledWriter{
+				{Level: Info, Writer: os.Stderr},
+			},
+			checks: []lvltest{
+				{expected: true},
+				{lvl: Error, expected: true},
+				{lvl: Warn, expected: true},
+				{lvl: Info, expected: true},
+				{lvl: Debug, expected: false},
+				{lvl: Trace, expected: false},
+			},
+		},
+		{
+			name: "warn, debug logger",
+			writers: []LeveledWriter{
+				{Level: Warn, Writer: os.Stderr},
+				{Level: Debug, Writer: os.Stderr},
+			},
+			checks: []lvltest{
+				{expected: true},
+				{lvl: Error, expected: true},
+				{lvl: Warn, expected: true},
+				{lvl: Info, expected: true},
+				{lvl: Debug, expected: true},
+				{lvl: Trace, expected: false},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			Reset()
+			Setup(test.writers...)
+
+			logger := NewLogger("test-logger")
+
+			for _, check := range test.checks {
+				require.Equal(t, check.expected, logger.IsEnabled(check.lvl))
+			}
+		})
+	}
+}

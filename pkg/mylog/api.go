@@ -12,6 +12,7 @@ const (
 )
 
 type Logger interface {
+	IsEnabled(level Level) bool
 	Log(level Level, message string)
 	Logf(level Level, format string, args ...interface{})
 	CatchErr(err *error)
