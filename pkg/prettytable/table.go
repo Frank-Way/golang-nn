@@ -1,3 +1,5 @@
+// Package prettytable provides functionality for building formatted tables of strings with padded and separated
+// columns, headers.
 package prettytable
 
 import (
@@ -6,15 +8,63 @@ import (
 	"sync"
 )
 
+// Column represents column of table with values and header
 type Column struct {
 	Header string
 	Values []string
 }
 
+// Group represents set of Column, that can be separated of other sets of Column
 type Group struct {
 	Columns []Column
 }
 
+// Build returns table. If fillGaps is false, then all columns of all groups must have same size.
+//
+// Example:
+//     fillGaps := false
+//     t, _ := Build([]Group{
+//         {Columns: []Column{
+//             {Header: `g1_c1`, Values: []string{`g1_c1_v1`, `g1_c1_v2222`, `g1_c1_v3`}},
+//             {Header: `g1_c2`, Values: []string{`g1_c2_v1`, `g1_c2_v2`, `g1_c2_v3`}},
+//         }},
+//         {Columns: []Column{
+//             {Header: `g2_c1`, Values: []string{`g2_c1_v1`, `g2_c1_v2`, `g2_c1_v3`}},
+//         }},
+//         {Columns: []Column{
+//             {Header: `g3_c111111`, Values: []string{`g3_c1_v1`, `g3_c1_v2`, `g3_c1_v3`}},
+//             {Header: `g3_c2`, Values: []string{`g3_c2_v1`, `g3_c2_v2`, `g3_c2_v3`}},
+//             {Header: `g3_c3`, Values: []string{`g3_c3_v1`, `g3_c3_v2`, `g3_c3_v3`}},
+//         }},
+//     }, fillGaps)
+//     fmt.Println(t)
+//     //       g1_c1      g1_c2 |    g2_c1 | g3_c111111      g3_c2      g3_c3
+//     // -----------------------+----------+---------------------------------
+//     //    g1_c1_v1   g1_c2_v1 | g2_c1_v1 |   g3_c1_v1   g3_c2_v1   g3_c3_v1
+//     // g1_c1_v2222   g1_c2_v2 | g2_c1_v2 |   g3_c1_v2   g3_c2_v2   g3_c3_v2
+//     //    g1_c1_v3   g1_c2_v3 | g2_c1_v3 |   g3_c1_v3   g3_c2_v3   g3_c3_v3
+//
+//     fillGaps = true
+//     t, _ = Build([]Group{
+//         {Columns: []Column{
+//             {Header: `g1_c1`, Values: []string{`g1_c1_v1`, `g1_c1_v2222`}},
+//             {Header: `g1_c2`, Values: []string{`g1_c2_v3`}},
+//         }},
+//         {Columns: []Column{
+//             {Header: `g2_c1`, Values: []string{}},
+//         }},
+//         {Columns: []Column{
+//             {Header: `g3_c111111`, Values: []string{`g3_c1_v1`, `g3_c1_v2`, `g3_c1_v3`}},
+//             {Header: `g3_c2`, Values: []string{`g3_c2_v3`}},
+//             {Header: `g3_c3`, Values: []string{`g3_c3_v1`, `g3_c3_v2`, `g3_c3_v3`}},
+//         }},
+//     }, fillGaps)
+//     fmt.Println(t)
+//     //       g1_c1      g1_c2 | g2_c1 | g3_c111111      g3_c2      g3_c3
+//     // -----------------------+-------+---------------------------------
+//     //    g1_c1_v1   g1_c2_v3 |       |   g3_c1_v1   g3_c2_v3   g3_c3_v1
+//     // g1_c1_v2222            |       |   g3_c1_v2              g3_c3_v2
+//     //                        |       |   g3_c1_v3              g3_c3_v3
 func Build(groups []Group, fillGaps bool) (string, error) {
 	if len(groups) < 1 {
 		return "", fmt.Errorf("no table column groups provided: %v", groups)
@@ -109,6 +159,7 @@ func putSB(sb strings.Builder) {
 	pool.Put(sb)
 }
 
+// pad implements right-padding logic
 func pad(value string, width int) (string, error) {
 	length := len(value)
 	if length > width {

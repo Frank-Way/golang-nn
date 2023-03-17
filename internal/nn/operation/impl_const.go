@@ -9,6 +9,8 @@ import (
 	"nn/pkg/wraperr"
 )
 
+// generateMask return Matrix containing only values 0 and 1 distributed by given probability (count of 1 is defined
+// by <probability>)
 func generateMask(rows, cols int, probability percent.Percent) *matrix.Matrix {
 	values := make([][]float64, rows)
 	for i := 0; i < rows; i++ {
@@ -28,6 +30,13 @@ func generateMask(rows, cols int, probability percent.Percent) *matrix.Matrix {
 	return mask
 }
 
+// NewDropout return dropout operation:
+//     - each call will be generated mask of 0 and 1;
+//     - shape of mask match shape of input;
+//     - y = x * mask;
+//     - dx = dy * mask.
+//
+// Throws ErrCreate error.
 func NewDropout(keepProbability percent.Percent) (*ConstOperation, error) {
 	params := []*matrix.Matrix{nil}
 	return &ConstOperation{
@@ -44,6 +53,12 @@ func NewDropout(keepProbability percent.Percent) (*ConstOperation, error) {
 	}, nil
 }
 
+// NewSigmoidParam return operation:
+//     y = f(x) = 1 / (1 + exp(-Ki * x));
+//     dx = f(dy) = Ki * dy * (1 - dy),
+//     where Ki is i'th coeff of <coeffs>. Coeffs count must match layer size.
+//
+// Throws ErrCreate error.
 func NewSigmoidParam(coeffs *vector.Vector) (oper *ConstOperation, err error) {
 	defer wraperr.WrapError(ErrCreate, &err)
 

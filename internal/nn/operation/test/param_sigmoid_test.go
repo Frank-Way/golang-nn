@@ -61,20 +61,3 @@ func TestSigmoidParam_Forward(t *testing.T) {
 		})
 	}
 }
-
-//func TestSigmoidParam_Backward(t *testing.T) {
-//	prob := percent.Percent30
-//	dropout := fabrics.NewDropout(t, fabrics.DropoutParameters{Percent: prob})
-//	in, err := matrix.NewMatrixOf(10, 10, 1)
-//	require.NoError(t, err)
-//	outGrad := in.Copy()
-//	tries := 5
-//	for try := 0; try < tries; try++ {
-//		out, err := dropout.Forward(in)
-//		require.NoError(t, err)
-//		inGrad, err := dropout.Backward(outGrad)
-//		require.NoError(t, err)
-//		// ensure dropping out the same neurons (mask keeps the same until new Forward call)
-//		require.True(t, out.Equal(inGrad))
-//	}
-//}

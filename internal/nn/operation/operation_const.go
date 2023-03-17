@@ -9,6 +9,7 @@ import (
 
 var _ IOperation = (*ConstOperation)(nil)
 
+// ConstOperation represents Operation with additional constant (not modified during training) parameters
 type ConstOperation struct {
 	*Operation
 

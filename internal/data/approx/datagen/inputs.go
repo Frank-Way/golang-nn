@@ -7,6 +7,10 @@ import (
 	"nn/pkg/wraperr"
 )
 
+// InputRange represent down (include) and up (include) borders of range to generate input data for. Inputs generation
+// relies on vector.LinSpace implementation.
+//
+// For example, from range {Left: 0, Right: 1, Count: 6} will be generated inputs: [0, 0.2, 0.4, 0.6, 0.8, 1]
 type InputRange struct {
 	Left  float64
 	Right float64

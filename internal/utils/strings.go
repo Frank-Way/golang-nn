@@ -1,3 +1,4 @@
+// Package utils provides some useful methods used by other packages
 package utils
 
 import (
@@ -19,6 +20,21 @@ var (
 	PrettyFormat Format = "%s\n%s\n"
 )
 
+// FormatObject return map formatted by given format.
+//
+// Example:
+//     m := map[string]string{
+//         `attr1`: `val1`,
+//         `attr2`: `val2`,
+//     }
+//     fmt.Println(m, BaseFormat)
+//     // {attr1: val1, attr2: val2}
+//
+//     fmt.Println(m, PrettyFormat)
+//     // attr1
+//     //   val1
+//     // attr2
+//     //   val2
 func FormatObject(object map[string]string, format Format) string {
 	var sb strings.Builder
 	for key, value := range object {
@@ -40,9 +56,16 @@ func FormatObject(object map[string]string, format Format) string {
 	panic(fmt.Sprintf("illegal format: %v", format))
 }
 
+// AddIndent split source by `\n`, add <count> number of spaces at begin of each line, return lines joined by `\n`
+//
+// Example:
+//     fmt.Println(AddIndent(`1\n 2\n3`, 3))
+//     //    1
+//     //     2
+//     //    3
 func AddIndent(source string, count int) string {
 	split := strings.Split(source, "\n")
-	indent := Repeat(" ", count)
+	indent := strings.Repeat(" ", count)
 	for i, str := range split {
 		split[i] = indent + str
 	}
@@ -50,15 +73,7 @@ func AddIndent(source string, count int) string {
 	return strings.Join(split, "\n")
 }
 
-func Repeat(symbol string, count int) string {
-	var sb strings.Builder
-	for i := 0; i < count; i++ {
-		sb.WriteString(symbol)
-	}
-
-	return sb.String()
-}
-
+// PrettyStrings call PrettyString() on slice of values and combine results in yaml-like list format
 func PrettyStrings(values []SPStringer) string {
 	var sb strings.Builder
 	for i, value := range values {
@@ -71,6 +86,7 @@ func PrettyStrings(values []SPStringer) string {
 	return sb.String()
 }
 
+// Strings call String() on slice of values and join results by comma
 func Strings(values []SPStringer) string {
 	strArr := make([]string, len(values))
 	for i, value := range values {
@@ -79,6 +95,7 @@ func Strings(values []SPStringer) string {
 	return fmt.Sprintf("[%s]", strings.Join(strArr, ", "))
 }
 
+// ShortStrings call ShortString() on slice of values and join results by comma
 func ShortStrings(values []SPStringer) string {
 	strArr := make([]string, len(values))
 	for i, value := range values {

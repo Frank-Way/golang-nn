@@ -59,12 +59,12 @@ func TestMatrix_MatMul(t *testing.T) {
 			b:        matrixInput{in: []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, rows: 3, cols: 4},
 		},
 		{
-			testBase: testBase{name: "3x4 matmul 2x3, error", err: ErrOperationExec},
+			testBase: testBase{name: "3x4 matmul 2x3, error", err: ErrExec},
 			b:        matrixInput{in: []float64{1, 2, 3, 4, 5, 6}, rows: 2, cols: 3},
 			a:        matrixInput{in: []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, rows: 3, cols: 4},
 		},
 		{
-			testBase: testBase{name: "2x3 matmul nil", err: ErrOperationExec},
+			testBase: testBase{name: "2x3 matmul nil", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2, 3, 4, 5, 6}, rows: 2, cols: 3},
 			b:        matrixInput{in: []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, rows: 3, cols: 4},
 			nilCheck: true,
@@ -210,7 +210,7 @@ func TestMatrix_Add(t *testing.T) {
 			b:        matrixInput{in: []float64{4, 5, 6, 7}, rows: 2, cols: 2},
 		},
 		{
-			testBase: testBase{name: "1x1 + 2x2, error", err: ErrOperationExec},
+			testBase: testBase{name: "1x1 + 2x2, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1}, rows: 1, cols: 1},
 			b:        matrixInput{in: []float64{4, 5, 6, 7}, rows: 2, cols: 2},
 		},
@@ -240,7 +240,7 @@ func TestMatrix_Sub(t *testing.T) {
 			b:        matrixInput{in: []float64{4, 5, 6, 7}, rows: 2, cols: 2},
 		},
 		{
-			testBase: testBase{name: "1x1 - 2x2, error", err: ErrOperationExec},
+			testBase: testBase{name: "1x1 - 2x2, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1}, rows: 1, cols: 1},
 			b:        matrixInput{in: []float64{4, 5, 6, 7}, rows: 2, cols: 2},
 		},
@@ -270,7 +270,7 @@ func TestMatrix_Mul(t *testing.T) {
 			b:        matrixInput{in: []float64{4, 5, 6, 7}, rows: 2, cols: 2},
 		},
 		{
-			testBase: testBase{name: "1x1 * 2x2, error", err: ErrOperationExec},
+			testBase: testBase{name: "1x1 * 2x2, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1}, rows: 1, cols: 1},
 			b:        matrixInput{in: []float64{4, 5, 6, 7}, rows: 2, cols: 2},
 		},
@@ -300,7 +300,7 @@ func TestMatrix_Div(t *testing.T) {
 			b:        matrixInput{in: []float64{4, 5, 6, 7}, rows: 2, cols: 2},
 		},
 		{
-			testBase: testBase{name: "1x1 / 2x2, error", err: ErrOperationExec},
+			testBase: testBase{name: "1x1 / 2x2, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1}, rows: 1, cols: 1},
 			b:        matrixInput{in: []float64{4, 5, 6, 7}, rows: 2, cols: 2},
 		},
@@ -337,7 +337,7 @@ func TestMatrix_AddRow(t *testing.T) {
 			b:        []float64{5, 6},
 		},
 		{
-			testBase: testBase{name: "2x1 + 2 row, error", err: ErrOperationExec},
+			testBase: testBase{name: "2x1 + 2 row, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
 			b:        []float64{3, 4},
 		},
@@ -367,7 +367,7 @@ func TestMatrix_SubRow(t *testing.T) {
 			b:        []float64{5, 6},
 		},
 		{
-			testBase: testBase{name: "2x1 - 2 row, error", err: ErrOperationExec},
+			testBase: testBase{name: "2x1 - 2 row, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
 			b:        []float64{3, 4},
 		},
@@ -397,7 +397,7 @@ func TestMatrix_MulRow(t *testing.T) {
 			b:        []float64{5, 6},
 		},
 		{
-			testBase: testBase{name: "2x1 * 2 row, error", err: ErrOperationExec},
+			testBase: testBase{name: "2x1 * 2 row, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
 			b:        []float64{3, 4},
 		},
@@ -427,7 +427,7 @@ func TestMatrix_DivRow(t *testing.T) {
 			b:        []float64{5, 6},
 		},
 		{
-			testBase: testBase{name: "2x1 / 2 row, error", err: ErrOperationExec},
+			testBase: testBase{name: "2x1 / 2 row, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
 			b:        []float64{3, 4},
 		},
@@ -457,7 +457,7 @@ func TestMatrix_AddCol(t *testing.T) {
 			b:        []float64{5, 6},
 		},
 		{
-			testBase: testBase{name: "1x2 + 2 col, error", err: ErrOperationExec},
+			testBase: testBase{name: "1x2 + 2 col, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 1, cols: 2},
 			b:        []float64{3, 4},
 		},
@@ -487,7 +487,7 @@ func TestMatrix_SubCol(t *testing.T) {
 			b:        []float64{5, 6},
 		},
 		{
-			testBase: testBase{name: "1x2 - 2 col, error", err: ErrOperationExec},
+			testBase: testBase{name: "1x2 - 2 col, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 1, cols: 2},
 			b:        []float64{3, 4},
 		},
@@ -517,7 +517,7 @@ func TestMatrix_MulCol(t *testing.T) {
 			b:        []float64{5, 6},
 		},
 		{
-			testBase: testBase{name: "1x2 * 2 col, error", err: ErrOperationExec},
+			testBase: testBase{name: "1x2 * 2 col, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 1, cols: 2},
 			b:        []float64{3, 4},
 		},
@@ -547,7 +547,7 @@ func TestMatrix_DivCol(t *testing.T) {
 			b:        []float64{5, 6},
 		},
 		{
-			testBase: testBase{name: "1x2 / 2 col, error", err: ErrOperationExec},
+			testBase: testBase{name: "1x2 / 2 col, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 1, cols: 2},
 			b:        []float64{3, 4},
 		},
@@ -577,12 +577,12 @@ func TestMatrix_AddRowM(t *testing.T) {
 			b:        matrixInput{in: []float64{5, 6}, rows: 1, cols: 2},
 		},
 		{
-			testBase: testBase{name: "2x1 + 1x2 row, error", err: ErrOperationExec},
+			testBase: testBase{name: "2x1 + 1x2 row, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
 			b:        matrixInput{in: []float64{3, 4}, rows: 1, cols: 2},
 		},
 		{
-			testBase: testBase{name: "2x1 + 2x1 row, error", err: ErrOperationExec},
+			testBase: testBase{name: "2x1 + 2x1 row, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
 			b:        matrixInput{in: []float64{3, 4}, rows: 2, cols: 1},
 		},
@@ -612,12 +612,12 @@ func TestMatrix_SubRowM(t *testing.T) {
 			b:        matrixInput{in: []float64{5, 6}, rows: 1, cols: 2},
 		},
 		{
-			testBase: testBase{name: "2x1 - 1x2 row, error", err: ErrOperationExec},
+			testBase: testBase{name: "2x1 - 1x2 row, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
 			b:        matrixInput{in: []float64{3, 4}, rows: 1, cols: 2},
 		},
 		{
-			testBase: testBase{name: "2x1 - 2x1 row, error", err: ErrOperationExec},
+			testBase: testBase{name: "2x1 - 2x1 row, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
 			b:        matrixInput{in: []float64{3, 4}, rows: 2, cols: 1},
 		},
@@ -647,12 +647,12 @@ func TestMatrix_MulRowM(t *testing.T) {
 			b:        matrixInput{in: []float64{5, 6}, rows: 1, cols: 2},
 		},
 		{
-			testBase: testBase{name: "2x1 * 1x2 row, error", err: ErrOperationExec},
+			testBase: testBase{name: "2x1 * 1x2 row, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
 			b:        matrixInput{in: []float64{3, 4}, rows: 1, cols: 2},
 		},
 		{
-			testBase: testBase{name: "2x1 * 2x1 row, error", err: ErrOperationExec},
+			testBase: testBase{name: "2x1 * 2x1 row, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
 			b:        matrixInput{in: []float64{3, 4}, rows: 2, cols: 1},
 		},
@@ -682,12 +682,12 @@ func TestMatrix_DivRowM(t *testing.T) {
 			b:        matrixInput{in: []float64{5, 6}, rows: 1, cols: 2},
 		},
 		{
-			testBase: testBase{name: "2x1 / 1x2 row, error", err: ErrOperationExec},
+			testBase: testBase{name: "2x1 / 1x2 row, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
 			b:        matrixInput{in: []float64{3, 4}, rows: 1, cols: 2},
 		},
 		{
-			testBase: testBase{name: "2x1 / 2x1 row, error", err: ErrOperationExec},
+			testBase: testBase{name: "2x1 / 2x1 row, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
 			b:        matrixInput{in: []float64{3, 4}, rows: 2, cols: 1},
 		},
@@ -717,12 +717,12 @@ func TestMatrix_AddColM(t *testing.T) {
 			b:        matrixInput{in: []float64{5, 6}, rows: 2, cols: 1},
 		},
 		{
-			testBase: testBase{name: "1x2 + 2x1 col, error", err: ErrOperationExec},
+			testBase: testBase{name: "1x2 + 2x1 col, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 1, cols: 2},
 			b:        matrixInput{in: []float64{3, 4}, rows: 2, cols: 1},
 		},
 		{
-			testBase: testBase{name: "2x1 + 1x2 col, error", err: ErrOperationExec},
+			testBase: testBase{name: "2x1 + 1x2 col, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
 			b:        matrixInput{in: []float64{3, 4}, rows: 1, cols: 2},
 		},
@@ -752,12 +752,12 @@ func TestMatrix_SubColM(t *testing.T) {
 			b:        matrixInput{in: []float64{5, 6}, rows: 2, cols: 1},
 		},
 		{
-			testBase: testBase{name: "1x2 - 2 col, error", err: ErrOperationExec},
+			testBase: testBase{name: "1x2 - 2 col, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 1, cols: 2},
 			b:        matrixInput{in: []float64{3, 4}, rows: 2, cols: 1},
 		},
 		{
-			testBase: testBase{name: "2x1 - 1x2 col, error", err: ErrOperationExec},
+			testBase: testBase{name: "2x1 - 1x2 col, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
 			b:        matrixInput{in: []float64{3, 4}, rows: 1, cols: 2},
 		},
@@ -787,12 +787,12 @@ func TestMatrix_MulColM(t *testing.T) {
 			b:        matrixInput{in: []float64{5, 6}, rows: 2, cols: 1},
 		},
 		{
-			testBase: testBase{name: "1x2 * 2 col, error", err: ErrOperationExec},
+			testBase: testBase{name: "1x2 * 2 col, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 1, cols: 2},
 			b:        matrixInput{in: []float64{3, 4}, rows: 2, cols: 1},
 		},
 		{
-			testBase: testBase{name: "2x1 * 1x2 col, error", err: ErrOperationExec},
+			testBase: testBase{name: "2x1 * 1x2 col, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
 			b:        matrixInput{in: []float64{3, 4}, rows: 1, cols: 2},
 		},
@@ -822,12 +822,12 @@ func TestMatrix_DivColM(t *testing.T) {
 			b:        matrixInput{in: []float64{5, 6}, rows: 2, cols: 1},
 		},
 		{
-			testBase: testBase{name: "1x2 / 2 col, error", err: ErrOperationExec},
+			testBase: testBase{name: "1x2 / 2 col, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 1, cols: 2},
 			b:        matrixInput{in: []float64{3, 4}, rows: 2, cols: 1},
 		},
 		{
-			testBase: testBase{name: "2x1 / 1x2 col, error", err: ErrOperationExec},
+			testBase: testBase{name: "2x1 / 1x2 col, error", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2}, rows: 2, cols: 1},
 			b:        matrixInput{in: []float64{3, 4}, rows: 1, cols: 2},
 		},
@@ -961,7 +961,7 @@ func TestMatrix_SumAxed(t *testing.T) {
 			b:        1,
 		},
 		{
-			testBase: testBase{name: "2x3, unknown axis, err", err: ErrOperationExec},
+			testBase: testBase{name: "2x3, unknown axis, err", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2, 3, 4, 5, 6}, rows: 2, cols: 3},
 			b:        5,
 		},
@@ -995,7 +995,7 @@ func TestMatrix_SumAxedM(t *testing.T) {
 			b:        1,
 		},
 		{
-			testBase: testBase{name: "2x3, unknown axis, err", err: ErrOperationExec},
+			testBase: testBase{name: "2x3, unknown axis, err", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2, 3, 4, 5, 6}, rows: 2, cols: 3},
 			b:        5,
 		},
@@ -1036,7 +1036,7 @@ func TestMatrix_MaxAxed(t *testing.T) {
 			b:        1,
 		},
 		{
-			testBase: testBase{name: "2x3, unknown axis, err", err: ErrOperationExec},
+			testBase: testBase{name: "2x3, unknown axis, err", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2, 3, 4, 5, 6}, rows: 2, cols: 3},
 			b:        5,
 		},
@@ -1078,7 +1078,7 @@ func TestMatrix_MinAxed(t *testing.T) {
 			b:        1,
 		},
 		{
-			testBase: testBase{name: "2x3, unknown axis, err", err: ErrOperationExec},
+			testBase: testBase{name: "2x3, unknown axis, err", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2, 3, 4, 5, 6}, rows: 2, cols: 3},
 			b:        5,
 		},
@@ -1120,7 +1120,7 @@ func TestMatrix_AvgAxed(t *testing.T) {
 			b:        1,
 		},
 		{
-			testBase: testBase{name: "2x3, unknown axis, err", err: ErrOperationExec},
+			testBase: testBase{name: "2x3, unknown axis, err", err: ErrExec},
 			a:        matrixInput{in: []float64{1, 2, 3, 4, 5, 6}, rows: 2, cols: 3},
 			b:        5,
 		},
@@ -1258,7 +1258,7 @@ func TestMatrix_SubMatrix(t *testing.T) {
 			expectedCols: 2,
 		},
 		{
-			testBase:  testBase{name: "{{1,2,3},{4,5,6},{7,8,9},{10,11,12}}[-1:-5:0][-2:-3:-1]", err: ErrOperationExec},
+			testBase:  testBase{name: "{{1,2,3},{4,5,6},{7,8,9},{10,11,12}}[-1:-5:0][-2:-3:-1]", err: ErrExec},
 			a:         matrixInput{in: []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, rows: 4, cols: 3},
 			rowsStart: -1,
 			rowsStop:  -5,
@@ -1318,13 +1318,13 @@ func TestMatrix_HStack(t *testing.T) {
 			expectedCols: 6,
 		},
 		{
-			testBase: testBase{name: "hstack 1x1, error", err: ErrOperationExec},
+			testBase: testBase{name: "hstack 1x1, error", err: ErrExec},
 			inputs: []matrixInput{
 				{in: []float64{1}, rows: 1, cols: 1},
 			},
 		},
 		{
-			testBase: testBase{name: "hstack 1x1 and 2x1, error", err: ErrOperationExec},
+			testBase: testBase{name: "hstack 1x1 and 2x1, error", err: ErrExec},
 			inputs: []matrixInput{
 				{in: []float64{1}, rows: 1, cols: 1},
 				{in: []float64{2, 3}, rows: 2, cols: 1},
@@ -1384,13 +1384,13 @@ func TestMatrix_VStack(t *testing.T) {
 			expectedCols: 3,
 		},
 		{
-			testBase: testBase{name: "vstack 1x1, error", err: ErrOperationExec},
+			testBase: testBase{name: "vstack 1x1, error", err: ErrExec},
 			inputs: []matrixInput{
 				{in: []float64{1}, rows: 1, cols: 1},
 			},
 		},
 		{
-			testBase: testBase{name: "vstack 1x1 and 1x2, error", err: ErrOperationExec},
+			testBase: testBase{name: "vstack 1x1 and 1x2, error", err: ErrExec},
 			inputs: []matrixInput{
 				{in: []float64{1}, rows: 1, cols: 1},
 				{in: []float64{2, 3}, rows: 1, cols: 2},
@@ -1559,12 +1559,12 @@ func TestMatrix_Order(t *testing.T) {
 			indices:  []int{2, 0, 1},
 		},
 		{
-			testBase: testBase{name: "{{1},{2},{3},{4}}[2,0,1], error", err: ErrOperationExec},
+			testBase: testBase{name: "{{1},{2},{3},{4}}[2,0,1], error", err: ErrExec},
 			matrix:   matrixInput{in: []float64{1, 2, 3, 4}, rows: 4, cols: 1},
 			indices:  []int{2, 0, 1},
 		},
 		{
-			testBase: testBase{name: "{{1},{2},{3},{4}}[2,0,1,1], error", err: ErrOperationExec},
+			testBase: testBase{name: "{{1},{2},{3},{4}}[2,0,1,1], error", err: ErrExec},
 			matrix:   matrixInput{in: []float64{1, 2, 3, 4}, rows: 4, cols: 1},
 			indices:  []int{2, 0, 1, 1},
 		},
@@ -1612,8 +1612,8 @@ func TestCartesianProduct(t *testing.T) {
 			inputs:   [][]float64{{1, 2}, {3, 4, 5}, {6, 7}},
 			expected: matrixInput{in: []float64{1, 3, 6, 1, 3, 7, 1, 4, 6, 1, 4, 7, 1, 5, 6, 1, 5, 7, 2, 3, 6, 2, 3, 7, 2, 4, 6, 2, 4, 7, 2, 5, 6, 2, 5, 7}, rows: 12, cols: 3},
 		},
-		{name: "empty inputs", inputs: [][]float64{}, err: ErrOperationExec},
-		{name: "no inputs", err: ErrOperationExec},
+		{name: "empty inputs", inputs: [][]float64{}, err: ErrExec},
+		{name: "no inputs", err: ErrExec},
 	}
 
 	for _, test := range tests {

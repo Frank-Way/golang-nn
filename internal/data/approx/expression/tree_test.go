@@ -32,6 +32,17 @@ func TestSTree_string(t *testing.T) {
 	}
 
 	t.Log("\n" + tree.string())
+
+	s := &sTree{
+		root: "n0", children: []*sTree{
+			{root: "n1", children: []*sTree{}},
+			{root: "n2", children: []*sTree{
+				{root: "n3", children: []*sTree{}},
+			}},
+		},
+	}
+
+	t.Log("\n" + s.string())
 }
 
 func TestSplitBalanced(t *testing.T) {

@@ -9,6 +9,7 @@ import (
 
 var _ IOperation = (*ParamOperation)(nil)
 
+// ParamOperation represent Operation with parameters, that will be modified during training
 type ParamOperation struct {
 	*Operation
 
@@ -35,6 +36,8 @@ func (o *ParamOperation) Forward(x *matrix.Matrix) (y *matrix.Matrix, err error)
 	return y, nil
 }
 
+// Backward return input gradient just as IOperation.Backward() but also computes parameter gradient, used when
+// calling ApplyOptim.
 func (o *ParamOperation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err error) {
 	defer wraperr.WrapError(ErrExec, &err)
 
@@ -67,8 +70,10 @@ func (o *ParamOperation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err err
 	return dx, nil
 }
 
+// Optimizer represents rule to modify parameters by pre-computed gradients
 type Optimizer func(param, grad *matrix.Matrix) (*matrix.Matrix, error)
 
+// ApplyOptim applies provided Optimizer to ParamOperation's parameter
 func (o *ParamOperation) ApplyOptim(optim Optimizer) (err error) {
 	defer wraperr.WrapError(ErrExec, &err)
 
@@ -90,6 +95,7 @@ func (o *ParamOperation) ApplyOptim(optim Optimizer) (err error) {
 	return nil
 }
 
+// Parameter return copy of ParamOperation's parameter
 func (o *ParamOperation) Parameter() *matrix.Matrix {
 	return o.p.Copy()
 }

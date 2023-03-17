@@ -50,7 +50,7 @@ func testBinaryOperation(t *testing.T, tests []binOpStruct, op string) {
 func TestVector_Add(t *testing.T) {
 	tests := []binOpStruct{
 		{name: "correct addition", inA: []float64{1, 2, 3}, inB: []float64{2, 3, 4}, expected: []float64{3, 5, 7}},
-		{name: "wrong sizes", inA: []float64{1, 2, 3}, inB: []float64{2, 3, 4, 5}, err: ErrOperationExec},
+		{name: "wrong sizes", inA: []float64{1, 2, 3}, inB: []float64{2, 3, 4, 5}, err: ErrExec},
 	}
 	testBinaryOperation(t, tests, "a")
 }
@@ -58,7 +58,7 @@ func TestVector_Add(t *testing.T) {
 func TestVector_Mul(t *testing.T) {
 	tests := []binOpStruct{
 		{name: "correct multiplication", inA: []float64{1, 2, 3}, inB: []float64{2, 3, 4}, expected: []float64{2, 6, 12}},
-		{name: "wrong sizes", inA: []float64{1, 2, 3}, inB: []float64{2, 3, 4, 5}, err: ErrOperationExec},
+		{name: "wrong sizes", inA: []float64{1, 2, 3}, inB: []float64{2, 3, 4, 5}, err: ErrExec},
 	}
 	testBinaryOperation(t, tests, "m")
 }
@@ -66,7 +66,7 @@ func TestVector_Mul(t *testing.T) {
 func TestVector_Sub(t *testing.T) {
 	tests := []binOpStruct{
 		{name: "correct subtraction", inA: []float64{1, 2, 3}, inB: []float64{2, 3, 4}, expected: []float64{-1, -1, -1}},
-		{name: "wrong sizes", inA: []float64{1, 2, 3}, inB: []float64{2, 3, 4, 5}, err: ErrOperationExec},
+		{name: "wrong sizes", inA: []float64{1, 2, 3}, inB: []float64{2, 3, 4, 5}, err: ErrExec},
 	}
 	testBinaryOperation(t, tests, "s")
 }
@@ -74,7 +74,7 @@ func TestVector_Sub(t *testing.T) {
 func TestVector_Div(t *testing.T) {
 	tests := []binOpStruct{
 		{name: "correct division", inA: []float64{1, 2, 3}, inB: []float64{2, 3, 4}, expected: []float64{1.0 / 2.0, 2.0 / 3.0, 3.0 / 4.0}},
-		{name: "wrong sizes", inA: []float64{1, 2, 3}, inB: []float64{2, 3, 4, 5}, err: ErrOperationExec},
+		{name: "wrong sizes", inA: []float64{1, 2, 3}, inB: []float64{2, 3, 4, 5}, err: ErrExec},
 	}
 	testBinaryOperation(t, tests, "d")
 }
@@ -89,8 +89,8 @@ func TestVector_Extend(t *testing.T) {
 	}{
 		{name: "vector of size 3, scale by 3, no error", in: []float64{1, 2, 3}, scale: 3, expected: []float64{1, 1, 1, 2, 2, 2, 3, 3, 3}},
 		{name: "vector of size 3, scale by 1, no error", in: []float64{1, 2, 3}, scale: 1, expected: []float64{1, 2, 3}},
-		{name: "vector of size 3, scale by 0, error", in: []float64{1, 2, 3}, scale: 0, err: ErrOperationExec},
-		{name: "vector of size 3, scale by -3, error", in: []float64{1, 2, 3}, scale: -3, err: ErrOperationExec},
+		{name: "vector of size 3, scale by 0, error", in: []float64{1, 2, 3}, scale: 0, err: ErrExec},
+		{name: "vector of size 3, scale by -3, error", in: []float64{1, 2, 3}, scale: -3, err: ErrExec},
 	}
 
 	for _, test := range tests {
@@ -123,8 +123,8 @@ func TestVector_Stack(t *testing.T) {
 	}{
 		{name: "vector of size 3, stack by 3, no error", in: []float64{1, 2, 3}, count: 3, expected: []float64{1, 2, 3, 1, 2, 3, 1, 2, 3}},
 		{name: "vector of size 3, stack by 1, no error", in: []float64{1, 2, 3}, count: 1, expected: []float64{1, 2, 3}},
-		{name: "vector of size 3, stack by 0, error", in: []float64{1, 2, 3}, count: 0, err: ErrOperationExec},
-		{name: "vector of size 3, stack by -3, error", in: []float64{1, 2, 3}, count: -3, err: ErrOperationExec},
+		{name: "vector of size 3, stack by 0, error", in: []float64{1, 2, 3}, count: 0, err: ErrExec},
+		{name: "vector of size 3, stack by -3, error", in: []float64{1, 2, 3}, count: -3, err: ErrExec},
 	}
 
 	for _, test := range tests {
@@ -159,7 +159,7 @@ func TestVector_Concatenate(t *testing.T) {
 		{name: "vector of size 2 concat vector of size 3", inA: []float64{1, 2}, inB: []float64{3, 4, 5}, expected: []float64{1, 2, 3, 4, 5}},
 		{name: "vector of size 1 concat vector of size 1", inA: []float64{1}, inB: []float64{3}, expected: []float64{1, 3}},
 		{name: "vector of size 2 concat vector of size 1", inA: []float64{1, 2}, inB: []float64{3}, expected: []float64{1, 2, 3}},
-		{name: "vector of size 2 concat nil vector", inA: []float64{1, 2}, inB: []float64{3, 4, 5}, nilCheck: true, err: ErrOperationExec},
+		{name: "vector of size 2 concat nil vector", inA: []float64{1, 2}, inB: []float64{3, 4, 5}, nilCheck: true, err: ErrExec},
 	}
 
 	for _, test := range tests {
@@ -206,8 +206,8 @@ func TestVector_MulScalar(t *testing.T) {
 		nilCheck bool
 	}{
 		{name: "Mul scalar vectors of size 3, no error", inA: []float64{1, 2, 3}, inB: []float64{4, 5, 6}, expected: 1*4 + 2*5 + 3*6},
-		{name: "Mul scalar vectors of size 1 and 2, error", inA: []float64{1}, inB: []float64{4, 5}, err: ErrOperationExec},
-		{name: "Mul scalar of vector and nil, error", inA: []float64{1, 2, 3}, inB: []float64{4, 5, 6}, nilCheck: true, err: ErrOperationExec},
+		{name: "Mul scalar vectors of size 1 and 2, error", inA: []float64{1}, inB: []float64{4, 5}, err: ErrExec},
+		{name: "Mul scalar of vector and nil, error", inA: []float64{1, 2, 3}, inB: []float64{4, 5, 6}, nilCheck: true, err: ErrExec},
 	}
 
 	for _, test := range tests {
@@ -410,19 +410,19 @@ func TestVector_Slice(t *testing.T) {
 		{name: "{1, 2, 3, 4}[1:4:1], no error", in: []float64{1, 2, 3, 4}, start: 1, stop: 4, step: 1, expected: []float64{2, 3, 4}},
 		{name: "{1, 2, 3, 4}[2:4:1], no error", in: []float64{1, 2, 3, 4}, start: 2, stop: 4, step: 1, expected: []float64{3, 4}},
 		{name: "{1, 2, 3, 4}[3:4:1], no error", in: []float64{1, 2, 3, 4}, start: 3, stop: 4, step: 1, expected: []float64{4}},
-		{name: "{1, 2, 3, 4}[4:4:1], error", in: []float64{1, 2, 3, 4}, start: 4, stop: 4, step: 1, err: ErrOperationExec},
+		{name: "{1, 2, 3, 4}[4:4:1], error", in: []float64{1, 2, 3, 4}, start: 4, stop: 4, step: 1, err: ErrExec},
 		{name: "{1, 2, 3, 4}[0:3:1], no error", in: []float64{1, 2, 3, 4}, start: 0, stop: 3, step: 1, expected: []float64{1, 2, 3}},
 		{name: "{1, 2, 3, 4}[0:2:1], no error", in: []float64{1, 2, 3, 4}, start: 0, stop: 2, step: 1, expected: []float64{1, 2}},
 		{name: "{1, 2, 3, 4}[0:1:1], no error", in: []float64{1, 2, 3, 4}, start: 0, stop: 1, step: 1, expected: []float64{1}},
-		{name: "{1, 2, 3, 4}[0:0:1], error", in: []float64{1, 2, 3, 4}, start: 0, stop: 0, step: 1, err: ErrOperationExec},
+		{name: "{1, 2, 3, 4}[0:0:1], error", in: []float64{1, 2, 3, 4}, start: 0, stop: 0, step: 1, err: ErrExec},
 		{name: "{1, 2, 3, 4}[0:4:2], no error", in: []float64{1, 2, 3, 4}, start: 0, stop: 4, step: 2, expected: []float64{1, 3}},
 		{name: "{1, 2, 3, 4}[1:4:2], no error", in: []float64{1, 2, 3, 4}, start: 1, stop: 4, step: 2, expected: []float64{2, 4}},
 		{name: "{1, 2, 3, 4}[1:3:2], no error", in: []float64{1, 2, 3, 4}, start: 1, stop: 3, step: 2, expected: []float64{2}},
-		{name: "{1, 2, 3, 4}[-1:4:1], error", in: []float64{1, 2, 3, 4}, start: -1, stop: 4, step: 1, err: ErrOperationExec},
-		{name: "{1, 2, 3, 4}[0:5:1], error", in: []float64{1, 2, 3, 4}, start: 0, stop: 5, step: 1, err: ErrOperationExec},
-		{name: "{1, 2, 3, 4}[0:4:-1], error", in: []float64{1, 2, 3, 4}, start: 0, stop: 4, step: -1, err: ErrOperationExec},
-		{name: "{1, 2, 3, 4}[3:0:1], error", in: []float64{1, 2, 3, 4}, start: 3, stop: 0, step: 1, err: ErrOperationExec},
-		{name: "{1, 2, 3, 4}[4:6:1], error", in: []float64{1, 2, 3, 4}, start: 4, stop: 6, step: 1, err: ErrOperationExec},
+		{name: "{1, 2, 3, 4}[-1:4:1], error", in: []float64{1, 2, 3, 4}, start: -1, stop: 4, step: 1, err: ErrExec},
+		{name: "{1, 2, 3, 4}[0:5:1], error", in: []float64{1, 2, 3, 4}, start: 0, stop: 5, step: 1, err: ErrExec},
+		{name: "{1, 2, 3, 4}[0:4:-1], error", in: []float64{1, 2, 3, 4}, start: 0, stop: 4, step: -1, err: ErrExec},
+		{name: "{1, 2, 3, 4}[3:0:1], error", in: []float64{1, 2, 3, 4}, start: 3, stop: 0, step: 1, err: ErrExec},
+		{name: "{1, 2, 3, 4}[4:6:1], error", in: []float64{1, 2, 3, 4}, start: 4, stop: 6, step: 1, err: ErrExec},
 	}
 
 	for _, test := range tests {
@@ -457,10 +457,10 @@ func TestVector_Split(t *testing.T) {
 		{name: "{1, 2, 3, 4, 5, 6} split to 2, no error", in: []float64{1, 2, 3, 4, 5, 6}, partSize: 2, expected: [][]float64{{1, 2}, {3, 4}, {5, 6}}},
 		{name: "{1, 2, 3, 4, 5, 6} split to 3, no error", in: []float64{1, 2, 3, 4, 5, 6}, partSize: 3, expected: [][]float64{{1, 2, 3}, {4, 5, 6}}},
 		{name: "{1, 2, 3, 4, 5, 6} split to 6, no error", in: []float64{1, 2, 3, 4, 5, 6}, partSize: 6, expected: [][]float64{{1, 2, 3, 4, 5, 6}}},
-		{name: "{1, 2, 3, 4, 5, 6} split to 7, error", in: []float64{1, 2, 3, 4, 5, 6}, partSize: 7, err: ErrOperationExec},
-		{name: "{1, 2, 3, 4, 5, 6} split to 4, error", in: []float64{1, 2, 3, 4, 5, 6}, partSize: 4, err: ErrOperationExec},
-		{name: "{1, 2, 3, 4, 5, 6} split to -1, error", in: []float64{1, 2, 3, 4, 5, 6}, partSize: -1, err: ErrOperationExec},
-		{name: "{1, 2, 3, 4, 5, 6} split to 0, error", in: []float64{1, 2, 3, 4, 5, 6}, partSize: 0, err: ErrOperationExec},
+		{name: "{1, 2, 3, 4, 5, 6} split to 7, error", in: []float64{1, 2, 3, 4, 5, 6}, partSize: 7, err: ErrExec},
+		{name: "{1, 2, 3, 4, 5, 6} split to 4, error", in: []float64{1, 2, 3, 4, 5, 6}, partSize: 4, err: ErrExec},
+		{name: "{1, 2, 3, 4, 5, 6} split to -1, error", in: []float64{1, 2, 3, 4, 5, 6}, partSize: -1, err: ErrExec},
+		{name: "{1, 2, 3, 4, 5, 6} split to 0, error", in: []float64{1, 2, 3, 4, 5, 6}, partSize: 0, err: ErrExec},
 	}
 
 	for _, test := range tests {
@@ -495,8 +495,8 @@ func TestJoin(t *testing.T) {
 		err      error
 	}{
 		{name: "{1, 2} + {3} + {4, 5, 6}, no error", in: [][]float64{{1, 2}, {3}, {4, 5, 6}}, expected: []float64{1, 2, 3, 4, 5, 6}, err: nil},
-		{name: "{1, 2} + {3} + {4, 5, 6} + nil, no error", in: [][]float64{{1, 2}, {3}, {4, 5, 6}}, nilCheck: true, err: ErrOperationExec},
-		{name: "no inputs, error", err: ErrOperationExec},
+		{name: "{1, 2} + {3} + {4, 5, 6} + nil, no error", in: [][]float64{{1, 2}, {3}, {4, 5, 6}}, nilCheck: true, err: ErrExec},
+		{name: "no inputs, error", err: ErrExec},
 	}
 
 	for _, test := range tests {
@@ -597,7 +597,7 @@ func TestLinSpace(t *testing.T) {
 	}{
 		{name: "4 values in [1;2]", start: 1, stop: 2, count: 4, expected: []float64{1, 1 + 1.0/3.0, 1 + 2.0/3.0, 2}},
 		{name: "2 values in [1;2]", start: 1, stop: 2, count: 2, expected: []float64{1, 2}},
-		{name: "2 values in [2;1], error", start: 2, stop: 1, count: 2, err: ErrOperationExec},
+		{name: "2 values in [2;1], error", start: 2, stop: 1, count: 2, err: ErrExec},
 	}
 
 	for _, test := range tests {

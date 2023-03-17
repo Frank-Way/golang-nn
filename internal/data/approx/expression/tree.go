@@ -5,21 +5,39 @@ import (
 	"strings"
 )
 
+// sTree is tree with string as root and slice of sTree as children
 type sTree struct {
 	root     string
 	children []*sTree
 }
 
 func (t *sTree) hasChildren() bool {
-	return t.children != nil && len(t.children) > 0
+	return len(t.children) > 0
 }
 
+// string builds tree using recursion.
+//
+// Example:
+//     t := &sTree{
+//         root: "n0", children: []*sTree{
+//             {root: "n1", children: []*sTree{}},
+//             {root: "n2", children: []*sTree{
+//                 {root: "n3", children: []*sTree{}}
+//             }},
+//         },
+//     }
+//     fmt.Println(t.string())
+//     // n0
+//     // ├── n1
+//     // └── n2
+//     //     └── n3
 func (t *sTree) string() string {
 	var sb strings.Builder
 	t.print(&sb, "", "")
 	return sb.String()
 }
 
+// print prints root and all the children to given strings.Builder
 func (t *sTree) print(sb *strings.Builder, prefix, childrenPrefix string) {
 	sb.WriteString(prefix)
 	sb.WriteString(t.root)
@@ -33,6 +51,7 @@ func (t *sTree) print(sb *strings.Builder, prefix, childrenPrefix string) {
 	}
 }
 
+// splitBalanced split input by provided separator according to bracket's balance
 func splitBalanced(input string, sep rune) ([]string, error) {
 	if input == "" {
 		return []string{}, nil
@@ -44,17 +63,17 @@ func splitBalanced(input string, sep rune) ([]string, error) {
 	chars := []rune(input)
 	for i := 0; i < len(chars); i++ {
 		char := chars[i]
-		if char == openBracket { // открывающая скобка - увеличиваем баланс
+		if char == openBracket {
 			balance += 1
-		} else if char == closeBracket { // закрывающая скобка - уменьшаем баланс
+		} else if char == closeBracket {
 			balance -= 1
 		}
-		if balance == 0 { // в состоянии баланса смотрим
-			if char == sep { // на очередном разделителе - вырезаем, запоминаем индекс и идем дальше
+		if balance == 0 {
+			if char == sep { // on sep - cut balanced substring and move start index to next position
 				resultRaw = append(resultRaw, chars[start:i])
 				start = i + 1
 			}
-			if i == len(chars)-1 { // в конце строки - дорезаем до конца
+			if i == len(chars)-1 { // if last symbol is closing bracket
 				resultRaw = append(resultRaw, chars[start:i+1])
 			}
 		}
@@ -80,6 +99,7 @@ func runesToString(runes []rune) string {
 	return sb.String()
 }
 
+// splitRecursively builds sTree for given expression recursively using splitBalanced
 func splitRecursively(expression string) (*sTree, error) {
 	root := expression
 	var children []*sTree

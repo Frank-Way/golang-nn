@@ -240,3 +240,99 @@ func TestData_Strings(t *testing.T) {
 	t.Log("String():\n" + data.String())
 	t.Log("PrettyString():\n" + data.PrettyString())
 }
+
+func TestData_Batches(t *testing.T) {
+	tests := []struct {
+		testutils.Base
+		in       *dataset.Data
+		batch    int
+		expected []*dataset.Data
+	}{
+		{
+			Base: testutils.Base{Name: "6 rows, 2 batch"},
+			in: fabrics.NewData(t, fabrics.DataParameters{
+				X: fabrics.MatrixParameters{Rows: 6, Cols: 1, Values: []float64{1, 2, 3, 4, 5, 6}},
+				Y: fabrics.MatrixParameters{Rows: 6, Cols: 1, Values: []float64{7, 8, 9, 10, 11, 12}},
+			}),
+			batch: 2,
+			expected: []*dataset.Data{
+				fabrics.NewData(t, fabrics.DataParameters{
+					X: fabrics.MatrixParameters{Rows: 2, Cols: 1, Values: []float64{1, 2}},
+					Y: fabrics.MatrixParameters{Rows: 2, Cols: 1, Values: []float64{7, 8}},
+				}),
+				fabrics.NewData(t, fabrics.DataParameters{
+					X: fabrics.MatrixParameters{Rows: 2, Cols: 1, Values: []float64{3, 4}},
+					Y: fabrics.MatrixParameters{Rows: 2, Cols: 1, Values: []float64{9, 10}},
+				}),
+				fabrics.NewData(t, fabrics.DataParameters{
+					X: fabrics.MatrixParameters{Rows: 2, Cols: 1, Values: []float64{5, 6}},
+					Y: fabrics.MatrixParameters{Rows: 2, Cols: 1, Values: []float64{11, 12}},
+				}),
+			},
+		},
+		{
+			Base: testutils.Base{Name: "6 rows, 4 batch"},
+			in: fabrics.NewData(t, fabrics.DataParameters{
+				X: fabrics.MatrixParameters{Rows: 6, Cols: 1, Values: []float64{1, 2, 3, 4, 5, 6}},
+				Y: fabrics.MatrixParameters{Rows: 6, Cols: 1, Values: []float64{7, 8, 9, 10, 11, 12}},
+			}),
+			batch: 4,
+			expected: []*dataset.Data{
+				fabrics.NewData(t, fabrics.DataParameters{
+					X: fabrics.MatrixParameters{Rows: 4, Cols: 1, Values: []float64{1, 2, 3, 4}},
+					Y: fabrics.MatrixParameters{Rows: 4, Cols: 1, Values: []float64{7, 8, 9, 10}},
+				}),
+				fabrics.NewData(t, fabrics.DataParameters{
+					X: fabrics.MatrixParameters{Rows: 2, Cols: 1, Values: []float64{5, 6}},
+					Y: fabrics.MatrixParameters{Rows: 2, Cols: 1, Values: []float64{11, 12}},
+				}),
+			},
+		},
+		{
+			Base: testutils.Base{Name: "6 rows, 8 batch"},
+			in: fabrics.NewData(t, fabrics.DataParameters{
+				X: fabrics.MatrixParameters{Rows: 6, Cols: 1, Values: []float64{1, 2, 3, 4, 5, 6}},
+				Y: fabrics.MatrixParameters{Rows: 6, Cols: 1, Values: []float64{7, 8, 9, 10, 11, 12}},
+			}),
+			batch: 8,
+			expected: []*dataset.Data{
+				fabrics.NewData(t, fabrics.DataParameters{
+					X: fabrics.MatrixParameters{Rows: 6, Cols: 1, Values: []float64{1, 2, 3, 4, 5, 6}},
+					Y: fabrics.MatrixParameters{Rows: 6, Cols: 1, Values: []float64{7, 8, 9, 10, 11, 12}},
+				}),
+			},
+		},
+		{
+			Base: testutils.Base{Name: "6 rows, -2 batch", Err: dataset.ErrSplit},
+			in: fabrics.NewData(t, fabrics.DataParameters{
+				X: fabrics.MatrixParameters{Rows: 6, Cols: 1, Values: []float64{1, 2, 3, 4, 5, 6}},
+				Y: fabrics.MatrixParameters{Rows: 6, Cols: 1, Values: []float64{7, 8, 9, 10, 11, 12}},
+			}),
+			batch: -2,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			gen, count, err := test.in.Batches(test.batch)
+			if test.Err == nil {
+				require.NoError(t, err)
+				require.Equal(t, len(test.expected), count)
+				for i := 0; i < count; i++ {
+					data1, err := gen(i)
+					require.NoError(t, err)
+					require.True(t, data1.Equal(test.expected[i]))
+
+					data2, err := gen(i)
+					require.NoError(t, err)
+					require.True(t, data2.Equal(test.expected[i]))
+
+					require.True(t, data1 == data2)
+				}
+			} else {
+				require.Error(t, err)
+				require.ErrorIs(t, err, test.Err)
+			}
+		})
+	}
+}

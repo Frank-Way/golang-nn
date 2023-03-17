@@ -8,6 +8,8 @@ import (
 
 var _ IOperation = (*Operation)(nil)
 
+// Operation represents main part of all operations. It stores all given and computed data. It defines operation
+// behavior.
 type Operation struct {
 	name string
 
@@ -50,6 +52,7 @@ func (o *Operation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err error) {
 	return dx, nil
 }
 
+// Copy returns deep copy of Operation
 func (o *Operation) Copy() *Operation {
 	res := &Operation{
 		name:     o.name,

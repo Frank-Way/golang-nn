@@ -7,6 +7,9 @@ import (
 	"nn/pkg/wraperr"
 )
 
+// NewBiasOperation returns operation of adding bias
+//
+// Throws ErrCreate error
 func NewBiasOperation(bias *vector.Vector) (*ParamOperation, error) {
 	if bias == nil {
 		return nil, wraperr.NewWrapErr(ErrCreate, fmt.Errorf("no bias provided: %v", bias))
@@ -27,6 +30,9 @@ func NewBiasOperation(bias *vector.Vector) (*ParamOperation, error) {
 	}, nil
 }
 
+// NewWeightOperation returns operation of multiply weights
+//
+// Throws ErrCreate error
 func NewWeightOperation(weight *matrix.Matrix) (*ParamOperation, error) {
 	if weight == nil {
 		return nil, wraperr.NewWrapErr(ErrCreate, fmt.Errorf("no weight provided: %v", weight))

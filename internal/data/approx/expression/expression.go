@@ -1,3 +1,5 @@
+// Package expression provides functionality for Expression to parse and compute math expressions written in
+// prefix-notation (lisp-like)
 package expression
 
 import (
@@ -5,6 +7,7 @@ import (
 	"nn/pkg/wraperr"
 )
 
+// Expression represents operation, symbol (variable) or constant.
 type Expression struct {
 	*operation
 	*tuple
@@ -16,27 +19,38 @@ type Expression struct {
 	representation *sTree
 }
 
+// NewExpression parses given input and provides Expression to compute it.
+//
+// Throws ErrParse.
+//
+// Example of valid inputs:
+//     (+ 1 2)
+//     (sin (* 1 2))
+//     (* x0 x1)
 func NewExpression(input string) (expr *Expression, err error) {
 	defer wraperr.WrapError(ErrParse, &err)
 
-	tree, err := splitRecursively(input)
+	tree, err := splitRecursively(input) // build strings tree from input
 	if err != nil {
 		return nil, err
 	}
 
-	return newExpression(tree)
+	return newExpression(tree) // build expression from tree
 }
 
+// newExpression walks over provided sTree to parse it to Expression
 func newExpression(tree *sTree) (*Expression, error) {
-	asBytes := []byte(tree.root)
+	root := []byte(tree.root)
 	res := &Expression{representation: tree}
 
-	if tree.hasChildren() {
+	if tree.hasChildren() { // only operation has children
+		// first child of operation is operation's token
 		token := tree.children[0].root
 		operation, err := getOperation(token)
 		if err != nil {
 			return nil, fmt.Errorf("first token %q of %q is not an valid operation: %w", token, tree.root, err)
 		}
+		// other children of operation is it's arguments (e.g. tuple of expressions)
 		tuple, err := newTuple(tree.children[1:])
 		if err != nil {
 			return nil, err
@@ -47,14 +61,14 @@ func newExpression(tree *sTree) (*Expression, error) {
 		}
 		res.operation, res.tuple = operation, tuple
 		return res, nil
-	} else if numberPattern.Match(asBytes) {
+	} else if numberPattern.Match(root) {
 		num, err := newNumber(tree.root)
 		if err != nil {
 			return nil, err
 		}
 		res.number = num
 		return res, nil
-	} else if symbolPattern.Match(asBytes) {
+	} else if symbolPattern.Match(root) {
 		sym, err := newSymbol(tree.root)
 		if err != nil {
 			return nil, err
@@ -66,6 +80,16 @@ func newExpression(tree *sTree) (*Expression, error) {
 	}
 }
 
+// Exec computes expression for given arguments. Arguments count must be greater or equal to symbols (variables)
+// count in Expression.
+//
+// Throws ErrExec.
+//
+// Example:
+//     expr, _ := NewExpression(`(* 3 x0)`)
+//     res1, _ := expr.Exec([]float64{2})
+//     res2, _ := expr.Exec([]float64{10})
+//     fmt.Println(res1, res2) // 6 30
 func (e *Expression) Exec(x []float64) (res float64, err error) {
 	defer wraperr.WrapError(ErrExec, &err)
 

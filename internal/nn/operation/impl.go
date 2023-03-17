@@ -5,6 +5,9 @@ import (
 	"nn/pkg/mmath/matrix"
 )
 
+// NewLinearActivation return operation:
+//     y = f(x) = x;
+//     dx = f(dy) = dy.
 func NewLinearActivation() *Operation {
 	return &Operation{
 		name:     "linear activation",
@@ -13,6 +16,9 @@ func NewLinearActivation() *Operation {
 	}
 }
 
+// NewSigmoidActivation return operation:
+//     y = f(x) = 1 / (1 + exp(-x));
+//     dx = f(dy) = dy * (1 - dy).
 func NewSigmoidActivation() *Operation {
 	return &Operation{
 		name: "sigmoid activation",
@@ -29,6 +35,9 @@ func NewSigmoidActivation() *Operation {
 	}
 }
 
+// NewTanhActivation return operation:
+//     y = f(x) = tanh(x);
+//     dx = f(dy) = dy * (1 - dy).
 func NewTanhActivation() *Operation {
 	return &Operation{
 		name: "tanh activation",

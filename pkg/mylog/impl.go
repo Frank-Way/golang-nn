@@ -16,16 +16,21 @@ var lvlMap = map[Level]string{
 
 var flags = log.LstdFlags | log.Lmsgprefix | log.Lmicroseconds
 
+// LeveledWriter represent io.Writer which will be attempted to send logs to with specified Level
 type LeveledWriter struct {
 	Level  Level
 	Writer io.Writer
 }
 
+// leveledLogger represent LeveledWriter with io.Writer wrapped with log.Logger. It handles level-based logic.
+// Here logger has no prefix, e.g. it has no name.
 type leveledLogger struct {
 	level  Level
 	logger *log.Logger
 }
 
+// logsWrapper is wrap on slice of leveledLogger. It delegate calls to under laying leveledLogger's. Such wrap allows
+//  to use several loggers writing to different destinations with different logging levels.
 type logsWrapper struct {
 	loggers []*leveledLogger
 }
@@ -46,11 +51,13 @@ func (w *logsWrapper) log(lvl Level, msg string) {
 
 var _ Logger = (*logsView)(nil)
 
+// logsView represent a named view on logsWrapper. It allows to give a name to logger. It implements Logger API.
 type logsView struct {
 	name string
 	logs *logsWrapper
 }
 
+// IsEnabled iterating over all set up loggers to check it levels
 func (v *logsView) IsEnabled(lvl Level) bool {
 	for _, logger := range v.logs.loggers {
 		if lvl <= logger.level {
@@ -116,8 +123,10 @@ func (v *logsView) Tracef(format string, args ...interface{}) {
 	v.Logf(Trace, format, args...)
 }
 
+// singleton is one logsWrapper used by all logsView
 var singleton *logsWrapper
 
+// Setup allows to set up logs configuration
 func Setup(writers ...LeveledWriter) {
 	if singleton == nil {
 		loggers := make([]*leveledLogger, len(writers))
@@ -133,14 +142,17 @@ func Setup(writers ...LeveledWriter) {
 	}
 }
 
+// Reset allows to reset logs configuration
 func Reset() {
 	singleton = nil
 }
 
+// NewLogger returns Logger implementation
 func NewLogger(name string) Logger {
 	return newLogView(name)
 }
 
+// newLogView returns named view on singleton
 func newLogView(name string) *logsView {
 	return &logsView{
 		name: name,

@@ -1,3 +1,4 @@
+// Package dataset provides functionality for Data and Dataset to store data for training neural network
 package dataset
 
 import (
@@ -8,13 +9,20 @@ import (
 	"nn/pkg/wraperr"
 )
 
+// Data holds inputs and corresponding outputs
 type Data struct {
 	X *matrix.Matrix
 	Y *matrix.Matrix
 }
 
-func NewData(x *matrix.Matrix, y *matrix.Matrix) (*Data, error) {
-	var err error
+// NewData checks given Matrix and creates Data. Inputs and outputs must have same rows count.
+//
+// Throws ErrCreate error.
+func NewData(x *matrix.Matrix, y *matrix.Matrix) (data *Data, err error) {
+	//defer logger.CatchErr(&err)
+	defer wraperr.WrapError(ErrCreate, &err)
+
+	//logger.Infof("create data from x %q and y %q", x.ShortString(), y.ShortString())
 	if x == nil {
 		err = fmt.Errorf("no inputs provided: %v", x)
 	} else if y == nil {
@@ -26,10 +34,14 @@ func NewData(x *matrix.Matrix, y *matrix.Matrix) (*Data, error) {
 		return nil, wraperr.NewWrapErr(ErrCreate, err)
 	}
 
-	return &Data{X: x, Y: y}, nil
+	data = &Data{X: x, Y: y}
+	//logger.Tracef("created data: %s", data.ShortString())
+	return data, nil
 }
 
+// Copy return deep copy of Data
 func (d *Data) Copy() *Data {
+	//logger.Tracef("copy data %q", d.ShortString())
 	data, err := NewData(d.X.Copy(), d.Y.Copy())
 	if err != nil {
 		panic(err)
@@ -40,8 +52,8 @@ func (d *Data) Copy() *Data {
 
 func (d *Data) toMap(stringer func(spStringer utils.SPStringer) string) map[string]string {
 	return map[string]string{
-		"X": stringer(d.X),
-		"Y": stringer(d.Y),
+		"x": stringer(d.X),
+		"y": stringer(d.Y),
 	}
 
 }
@@ -67,8 +79,17 @@ func (d *Data) ShortString() string {
 	return utils.FormatObject(d.toMap(utils.ShortString), utils.ShortFormat)
 }
 
-func (d *Data) Shuffle() (*Data, []int) {
-	perm := rand.Perm(d.X.Rows())
+// Shuffle mixes data. Shuffle is row-based. Inputs and outputs reordering using the same random permutation.
+// Shuffle creates new Data, source Data stay untouched.
+//
+// Example:
+//     {X: | 1 |, Y: | 4 |}.Shuffle() = {X: | 3 |, Y: | 6 |}, [2 0 1]
+//         | 2 |     | 5 |                  | 1 |     | 4 |
+//         | 3 |     | 6 |                  | 2 |     | 5 |
+func (d *Data) Shuffle() (data *Data, perm []int) {
+	//logger.Infof("shuffle data: %s", d.ShortString())
+	perm = rand.Perm(d.X.Rows())
+	//logger.Tracef("permutation: %v", perm)
 
 	var err error
 	var xOrdered, yOrdered *matrix.Matrix
@@ -79,9 +100,10 @@ func (d *Data) Shuffle() (*Data, []int) {
 		panic(err)
 	}
 
-	if data, err := NewData(xOrdered, yOrdered); err != nil {
+	if data, err = NewData(xOrdered, yOrdered); err != nil {
 		panic(err)
 	} else {
+		//logger.Infof("shuffled data: %s", data.ShortString())
 		return data, perm
 	}
 }
@@ -99,7 +121,7 @@ func (d *Data) Equal(data *Data) bool {
 		return false
 	}
 
-	return d.Y.Equal(data.Y)
+	return d.X.Equal(data.X)
 }
 
 func (d *Data) EqualApprox(data *Data) bool {
@@ -118,12 +140,22 @@ func (d *Data) EqualApprox(data *Data) bool {
 	return d.Y.EqualApprox(data.Y)
 }
 
-// Split return two *Data, first contains values in [0; pivot), second - in [pivot; Data.Rows()).
-// Split is a row-based function.
-// If fail, Split returns ErrSplit error wrapper.
+// Split return two Data, first contains values in [0; pivot), second - in [pivot; Data.Rows()).
+// Split is a row-based.
+//
+// Throws ErrSplit error.
+//
+// Example:
+//     {X: |  1 |, Y: |  5 |}.Split(2) = [{X: | 1 |, Y: | 5 |}, {X: |  3 |, Y: |  7 |}]
+//         |  2 |     |  6 |                  | 2 |     | 6 |       |  4 |     |  8 |
+//         |  3 |     |  7 |                                        | 44 |     | 88 |
+//         |  4 |     |  8 |
+//         | 44 |     | 88 |
 func (d *Data) Split(pivot int) (first *Data, second *Data, err error) {
+	//defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrSplit, &err)
 
+	//logger.Infof("split data %q by pivot %d", d.ShortString(), pivot)
 	if pivot < 1 {
 		return nil, nil, fmt.Errorf("negative or zero split pivot for data")
 	} else if d.X.Rows()-pivot < 1 {
@@ -152,5 +184,50 @@ func (d *Data) Split(pivot int) (first *Data, second *Data, err error) {
 		return nil, nil, err
 	}
 
+	//logger.Tracef("first part: %s", first.ShortString())
+	//logger.Tracef("second part: %s", second.ShortString())
+
 	return first, second, nil
+}
+
+// Batches return closure over Data split in batches with given size. Last batch size may be less then <batchSize>.
+// Generator may be overused any times causing no actual data-splitting logic (e.g. no cost). Second return value is
+// max index of generator to use it in `for-loop`.
+//
+// Throws ErrSplit error.
+func (d *Data) Batches(batchSize int) (generator func(i int) (*Data, error), count int, err error) {
+	defer wraperr.WrapError(ErrSplit, &err)
+
+	if batchSize < 1 {
+		return nil, 0, fmt.Errorf("negative or zero batch size: %d", batchSize)
+	}
+
+	count = d.X.Rows() / batchSize
+	if d.X.Rows()%batchSize != 0 {
+		count++
+	}
+
+	batches := make([]*Data, count)
+	var first, second *Data
+	first = d
+	for i := 0; i < count; i++ {
+		if first.X.Rows() <= batchSize {
+			batches[i] = first
+			break
+		}
+		first, second, err = first.Split(batchSize)
+		if err != nil {
+			return nil, 0, err
+		}
+
+		batches[i] = first
+		first, second = second, nil
+	}
+
+	return func(i int) (*Data, error) {
+		if i < 0 || i >= len(batches) {
+			return nil, fmt.Errorf("wrong batch index for %d batches: %d", len(batches), i)
+		}
+		return batches[i], nil // closure over batches from outer scope
+	}, count, nil
 }

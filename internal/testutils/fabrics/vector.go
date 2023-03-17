@@ -1,3 +1,4 @@
+// Package fabrics provides fabrics for creating test structs from other packages
 package fabrics
 
 import (

@@ -5,6 +5,7 @@ import (
 	"nn/pkg/percent"
 )
 
+// DataSplitParameters represent distribution of data by train, tests and validation categories
 type DataSplitParameters struct {
 	TrainPercent percent.Percent
 	TestsPercent percent.Percent

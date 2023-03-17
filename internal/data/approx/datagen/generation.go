@@ -1,3 +1,4 @@
+// Package datagen provides functionality for generation data using Parameters
 package datagen
 
 import (
@@ -10,6 +11,10 @@ import (
 	"nn/pkg/wraperr"
 )
 
+// Parameters represent expression, input ranges and data split parameters. On generation:
+//     * Expression will be parsed using expression.NewExpression();
+//     * Ranges will be used to generate inputs for expression.Exec();
+//     * DataSplitParameters tells which part of generated data will be stored for training, tests and validation.
 type Parameters struct {
 	Expression string
 	Ranges     []*InputRange
@@ -33,26 +38,27 @@ func NewParameters(
 	return &Parameters{Expression: expression, Ranges: ranges, DataSplitParameters: dataSplitParameters}, nil
 }
 
+// Generate provides Dataset from given Parameters
 func (p *Parameters) Generate() (*dataset.Dataset, error) {
-	expr, err := expression.NewExpression(p.Expression)
+	expr, err := expression.NewExpression(p.Expression) // parse expression
 	if err != nil {
 		return nil, err
 	}
 
-	inCols := make([]*vector.Vector, len(p.Ranges))
+	inCols := make([]*vector.Vector, len(p.Ranges)) // generate inputs
 	for i, inRange := range p.Ranges {
 		if inCols[i], err = inRange.inputs(); err != nil {
 			return nil, err
 		}
 	}
 
-	inMat, err := matrix.CartesianProduct(inCols)
+	inMat, err := matrix.CartesianProduct(inCols) // combine inputs
 	if err != nil {
 		return nil, err
 	}
 	inRaw := inMat.Raw()
 
-	outRows := make([]*vector.Vector, inMat.Rows())
+	outRows := make([]*vector.Vector, inMat.Rows()) // compute outputs using parsed expression
 	for i := 0; i < inMat.Rows(); i++ {
 		exec, err := expr.Exec(inRaw[i])
 		if err != nil {
@@ -73,7 +79,7 @@ func (p *Parameters) Generate() (*dataset.Dataset, error) {
 		return nil, err
 	}
 
-	return dataset.NewDatasetSplit(data, p.DataSplitParameters)
+	return dataset.NewDatasetSplit(data, p.DataSplitParameters) // split data
 }
 
 func (p *Parameters) rangesAsSPStringers() []utils.SPStringer {
