@@ -19,10 +19,10 @@ type Dataset struct {
 //
 // Throws ErrCreate error.
 func NewDataset(train *Data, tests *Data, valid *Data) (ds *Dataset, err error) {
-	//defer logger.CatchErr(&err)
+	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrCreate, &err)
 
-	//logger.Infof("create dataset from train %q tests %q valid %q", train.ShortString(), tests.ShortString(), valid.ShortString())
+	logger.Infof("create dataset from train %q tests %q valid %q", train.ShortString(), tests.ShortString(), valid.ShortString())
 	if train == nil {
 		err = fmt.Errorf("no train data: %v", train)
 	} else if tests == nil {
@@ -43,17 +43,17 @@ func NewDataset(train *Data, tests *Data, valid *Data) (ds *Dataset, err error) 
 	}
 
 	ds = &Dataset{Train: train, Tests: tests, Valid: valid}
-	//logger.Tracef("created dataset: %s", ds.ShortString())
+	logger.Tracef("created dataset: %s", ds.ShortString())
 
 	return ds, nil
 }
 
 // NewDatasetSplit splits given Data into train, tests and validation data by given DataSplitParameters
 func NewDatasetSplit(data *Data, parameters *DataSplitParameters) (d *Dataset, err error) {
-	//defer logger.CatchErr(&err)
+	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrCreate, &err)
 
-	//logger.Infof("create dataset from data %q and split %q", data.ShortString(), parameters.ShortString())
+	logger.Infof("create dataset from data %q and split %q", data.ShortString(), parameters.ShortString())
 	if data == nil {
 		return nil, fmt.Errorf("no data provided for splitting: %v", data)
 	} else if parameters == nil {
@@ -61,14 +61,14 @@ func NewDatasetSplit(data *Data, parameters *DataSplitParameters) (d *Dataset, e
 	}
 	n := data.X.Rows()
 	trainSize := parameters.TrainPercent.GetI(n)
-	//logger.Debugf("get train data sized %d from source sized %d", trainSize, n)
+	logger.Debugf("get train data sized %d from source sized %d", trainSize, n)
 	train, others, err := data.Split(trainSize)
 	if err != nil {
 		return nil, fmt.Errorf("error during splitting to get traing data: %w", err)
 	}
 
 	testSize := parameters.TestsPercent.GetI(n)
-	//logger.Debugf("get test data sized %d from others sized %d", testSize, others.X.Rows())
+	logger.Debugf("get test data sized %d from others sized %d", testSize, others.X.Rows())
 	tests, valid, err := others.Split(testSize)
 	if err != nil {
 		return nil, fmt.Errorf("error during splitting to get tests and valid data: %w", err)

@@ -37,6 +37,7 @@ func (o *operation) checkInputsCount(count int) bool {
 	}
 }
 
+// getOperation return operation for given token. Allowed tokens are: `+`, `-`, `*`, `/`, ``, ``, ``, ``, ``, ``, ``
 func getOperation(token string) (*operation, error) {
 	switch token {
 	case "+":
@@ -65,6 +66,7 @@ func getOperation(token string) (*operation, error) {
 		}), nil
 	case "max":
 		return newOperation(0, func(x []float64) float64 {
+			// 0 inputsCount prevents zero-length inputs, so it is safe to pick first element (as long as it is not nil)
 			max := x[0]
 			for _, v := range x[1:] {
 				if max < v {
@@ -72,6 +74,17 @@ func getOperation(token string) (*operation, error) {
 				}
 			}
 			return max
+		}), nil
+	case "min":
+		return newOperation(0, func(x []float64) float64 {
+			// 0 inputsCount prevents zero-length inputs, so it is safe to pick first element (as long as it is not nil)
+			min := x[0]
+			for _, v := range x[1:] {
+				if min > v {
+					min = v
+				}
+			}
+			return min
 		}), nil
 	default:
 		return nil, fmt.Errorf("unknown operation token: %s", token)

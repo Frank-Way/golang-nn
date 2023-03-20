@@ -11,6 +11,7 @@ import (
 //
 // Throws ErrCreate error
 func NewBiasOperation(bias *vector.Vector) (*ParamOperation, error) {
+	logger.Debug("create new bias add operation")
 	if bias == nil {
 		return nil, wraperr.NewWrapErr(ErrCreate, fmt.Errorf("no bias provided: %v", bias))
 	}
@@ -34,6 +35,7 @@ func NewBiasOperation(bias *vector.Vector) (*ParamOperation, error) {
 //
 // Throws ErrCreate error
 func NewWeightOperation(weight *matrix.Matrix) (*ParamOperation, error) {
+	logger.Debug("create new weight multiply operation")
 	if weight == nil {
 		return nil, wraperr.NewWrapErr(ErrCreate, fmt.Errorf("no weight provided: %v", weight))
 	}

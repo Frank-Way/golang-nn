@@ -20,6 +20,7 @@ type ConstOperation struct {
 }
 
 func (o *ConstOperation) Forward(x *matrix.Matrix) (y *matrix.Matrix, err error) {
+	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
 
 	if x == nil {
@@ -35,6 +36,7 @@ func (o *ConstOperation) Forward(x *matrix.Matrix) (y *matrix.Matrix, err error)
 }
 
 func (o *ConstOperation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err error) {
+	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
 
 	if dy == nil {

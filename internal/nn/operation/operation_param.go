@@ -22,6 +22,7 @@ type ParamOperation struct {
 }
 
 func (o *ParamOperation) Forward(x *matrix.Matrix) (y *matrix.Matrix, err error) {
+	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
 
 	if x == nil {
@@ -39,6 +40,7 @@ func (o *ParamOperation) Forward(x *matrix.Matrix) (y *matrix.Matrix, err error)
 // Backward return input gradient just as IOperation.Backward() but also computes parameter gradient, used when
 // calling ApplyOptim.
 func (o *ParamOperation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err error) {
+	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
 
 	if dy == nil {
@@ -75,6 +77,7 @@ type Optimizer func(param, grad *matrix.Matrix) (*matrix.Matrix, error)
 
 // ApplyOptim applies provided Optimizer to ParamOperation's parameter
 func (o *ParamOperation) ApplyOptim(optim Optimizer) (err error) {
+	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
 
 	if optim == nil {

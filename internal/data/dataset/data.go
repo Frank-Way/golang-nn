@@ -19,10 +19,10 @@ type Data struct {
 //
 // Throws ErrCreate error.
 func NewData(x *matrix.Matrix, y *matrix.Matrix) (data *Data, err error) {
-	//defer logger.CatchErr(&err)
+	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrCreate, &err)
 
-	//logger.Infof("create data from x %q and y %q", x.ShortString(), y.ShortString())
+	logger.Infof("create data from x %q and y %q", x.ShortString(), y.ShortString())
 	if x == nil {
 		err = fmt.Errorf("no inputs provided: %v", x)
 	} else if y == nil {
@@ -35,13 +35,13 @@ func NewData(x *matrix.Matrix, y *matrix.Matrix) (data *Data, err error) {
 	}
 
 	data = &Data{X: x, Y: y}
-	//logger.Tracef("created data: %s", data.ShortString())
+	logger.Tracef("created data: %s", data.ShortString())
 	return data, nil
 }
 
 // Copy return deep copy of Data
 func (d *Data) Copy() *Data {
-	//logger.Tracef("copy data %q", d.ShortString())
+	logger.Tracef("copy data %q", d.ShortString())
 	data, err := NewData(d.X.Copy(), d.Y.Copy())
 	if err != nil {
 		panic(err)
@@ -87,9 +87,9 @@ func (d *Data) ShortString() string {
 //         | 2 |     | 5 |                  | 1 |     | 4 |
 //         | 3 |     | 6 |                  | 2 |     | 5 |
 func (d *Data) Shuffle() (data *Data, perm []int) {
-	//logger.Infof("shuffle data: %s", d.ShortString())
+	logger.Infof("shuffle data: %s", d.ShortString())
 	perm = rand.Perm(d.X.Rows())
-	//logger.Tracef("permutation: %v", perm)
+	logger.Tracef("permutation: %v", perm)
 
 	var err error
 	var xOrdered, yOrdered *matrix.Matrix
@@ -103,7 +103,7 @@ func (d *Data) Shuffle() (data *Data, perm []int) {
 	if data, err = NewData(xOrdered, yOrdered); err != nil {
 		panic(err)
 	} else {
-		//logger.Infof("shuffled data: %s", data.ShortString())
+		logger.Infof("shuffled data: %s", data.ShortString())
 		return data, perm
 	}
 }
@@ -152,10 +152,10 @@ func (d *Data) EqualApprox(data *Data) bool {
 //         |  4 |     |  8 |
 //         | 44 |     | 88 |
 func (d *Data) Split(pivot int) (first *Data, second *Data, err error) {
-	//defer logger.CatchErr(&err)
+	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrSplit, &err)
 
-	//logger.Infof("split data %q by pivot %d", d.ShortString(), pivot)
+	logger.Infof("split data %q by pivot %d", d.ShortString(), pivot)
 	if pivot < 1 {
 		return nil, nil, fmt.Errorf("negative or zero split pivot for data")
 	} else if d.X.Rows()-pivot < 1 {
@@ -184,8 +184,8 @@ func (d *Data) Split(pivot int) (first *Data, second *Data, err error) {
 		return nil, nil, err
 	}
 
-	//logger.Tracef("first part: %s", first.ShortString())
-	//logger.Tracef("second part: %s", second.ShortString())
+	logger.Tracef("first part: %s", first.ShortString())
+	logger.Tracef("second part: %s", second.ShortString())
 
 	return first, second, nil
 }

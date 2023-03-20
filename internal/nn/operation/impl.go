@@ -9,6 +9,7 @@ import (
 //     y = f(x) = x;
 //     dx = f(dy) = dy.
 func NewLinearActivation() *Operation {
+	logger.Debug("create new linear activation")
 	return &Operation{
 		name:     "linear activation",
 		output:   func(x *matrix.Matrix) (*matrix.Matrix, error) { return x.Copy(), nil },
@@ -20,6 +21,7 @@ func NewLinearActivation() *Operation {
 //     y = f(x) = 1 / (1 + exp(-x));
 //     dx = f(dy) = dy * (1 - dy).
 func NewSigmoidActivation() *Operation {
+	logger.Debug("create new sigmoid activation")
 	return &Operation{
 		name: "sigmoid activation",
 		output: func(x *matrix.Matrix) (*matrix.Matrix, error) {
@@ -39,6 +41,7 @@ func NewSigmoidActivation() *Operation {
 //     y = f(x) = tanh(x);
 //     dx = f(dy) = dy * (1 - dy).
 func NewTanhActivation() *Operation {
+	logger.Debug("create new tanh activation")
 	return &Operation{
 		name: "tanh activation",
 		output: func(x *matrix.Matrix) (*matrix.Matrix, error) {

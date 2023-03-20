@@ -28,8 +28,10 @@ type Expression struct {
 //     (sin (* 1 2))
 //     (* x0 x1)
 func NewExpression(input string) (expr *Expression, err error) {
+	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrParse, &err)
 
+	logger.Infof("parsing expression for input %q", input)
 	tree, err := splitRecursively(input) // build strings tree from input
 	if err != nil {
 		return nil, err
@@ -44,6 +46,7 @@ func newExpression(tree *sTree) (*Expression, error) {
 	res := &Expression{representation: tree}
 
 	if tree.hasChildren() { // only operation has children
+		logger.Tracef("create expression from root %q", tree.root)
 		// first child of operation is operation's token
 		token := tree.children[0].root
 		operation, err := getOperation(token)
@@ -62,6 +65,7 @@ func newExpression(tree *sTree) (*Expression, error) {
 		res.operation, res.tuple = operation, tuple
 		return res, nil
 	} else if numberPattern.Match(root) {
+		logger.Tracef("create number from root %q", tree.root)
 		num, err := newNumber(tree.root)
 		if err != nil {
 			return nil, err
@@ -69,6 +73,7 @@ func newExpression(tree *sTree) (*Expression, error) {
 		res.number = num
 		return res, nil
 	} else if symbolPattern.Match(root) {
+		logger.Tracef("create symbol from root %q", tree.root)
 		sym, err := newSymbol(tree.root)
 		if err != nil {
 			return nil, err
@@ -91,8 +96,10 @@ func newExpression(tree *sTree) (*Expression, error) {
 //     res2, _ := expr.Exec([]float64{10})
 //     fmt.Println(res1, res2) // 6 30
 func (e *Expression) Exec(x []float64) (res float64, err error) {
+	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
 
+	logger.Infof("execute expression %q for inputs: %v", e.representation.root, x)
 	if e.number != nil {
 		return e.number.exec(x)
 	} else if e.symbol != nil {

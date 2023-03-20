@@ -38,6 +38,7 @@ func generateMask(rows, cols int, probability percent.Percent) *matrix.Matrix {
 //
 // Throws ErrCreate error.
 func NewDropout(keepProbability percent.Percent) (*ConstOperation, error) {
+	logger.Debug("create new dropout operation")
 	params := []*matrix.Matrix{nil}
 	return &ConstOperation{
 		Operation: &Operation{name: "dropout"},
@@ -60,8 +61,10 @@ func NewDropout(keepProbability percent.Percent) (*ConstOperation, error) {
 //
 // Throws ErrCreate error.
 func NewSigmoidParam(coeffs *vector.Vector) (oper *ConstOperation, err error) {
+	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrCreate, &err)
 
+	logger.Debug("create new dropout operation")
 	if coeffs == nil {
 		return nil, fmt.Errorf("no coeffs provided: %v", coeffs)
 	}

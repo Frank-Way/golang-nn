@@ -18,6 +18,7 @@ type InputRange struct {
 }
 
 func NewInputRange(left float64, right float64, count int) (iRng *InputRange, err error) {
+	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrCreate, &err)
 
 	if left >= right {
@@ -29,6 +30,7 @@ func NewInputRange(left float64, right float64, count int) (iRng *InputRange, er
 }
 
 func (r *InputRange) inputs() (*vector.Vector, error) {
+	logger.Tracef("generate inputs for %s", r.ShortString())
 	return vector.LinSpace(r.Left, r.Right, r.Count)
 }
 

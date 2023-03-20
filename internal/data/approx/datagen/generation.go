@@ -26,6 +26,7 @@ func NewParameters(
 	ranges []*InputRange,
 	dataSplitParameters *dataset.DataSplitParameters,
 ) (params *Parameters, err error) {
+	logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrCreate, &err)
 
 	if expression == "" {
@@ -38,8 +39,14 @@ func NewParameters(
 	return &Parameters{Expression: expression, Ranges: ranges, DataSplitParameters: dataSplitParameters}, nil
 }
 
-// Generate provides Dataset from given Parameters
-func (p *Parameters) Generate() (*dataset.Dataset, error) {
+// Generate provides Dataset from given Parameters.
+//
+// Throws ErrCreate error.
+func (p *Parameters) Generate() (ds *dataset.Dataset, err error) {
+	logger.CatchErr(&err)
+	defer wraperr.WrapError(ErrCreate, &err)
+
+	logger.Infof("parse expression %s", p.Expression)
 	expr, err := expression.NewExpression(p.Expression) // parse expression
 	if err != nil {
 		return nil, err
@@ -52,12 +59,14 @@ func (p *Parameters) Generate() (*dataset.Dataset, error) {
 		}
 	}
 
+	logger.Debug("combine inputs")
 	inMat, err := matrix.CartesianProduct(inCols) // combine inputs
 	if err != nil {
 		return nil, err
 	}
 	inRaw := inMat.Raw()
 
+	logger.Debug("compute outputs of expression")
 	outRows := make([]*vector.Vector, inMat.Rows()) // compute outputs using parsed expression
 	for i := 0; i < inMat.Rows(); i++ {
 		exec, err := expr.Exec(inRaw[i])
