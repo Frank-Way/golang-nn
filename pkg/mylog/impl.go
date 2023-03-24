@@ -54,22 +54,24 @@ var _ Logger = (*logsView)(nil)
 // logsView represent a named view on logsWrapper. It allows to give a name to logger. It implements Logger API.
 type logsView struct {
 	name string
-	logs *logsWrapper
+	logs **logsWrapper
 }
 
 // IsEnabled iterating over all set up loggers to check it levels
 func (v *logsView) IsEnabled(lvl Level) bool {
-	for _, logger := range v.logs.loggers {
-		if lvl <= logger.level {
-			return true
+	if *v.logs != nil {
+		for _, logger := range (*v.logs).loggers {
+			if lvl <= logger.level {
+				return true
+			}
 		}
 	}
 	return false
 }
 
 func (v *logsView) Log(lvl Level, msg string) {
-	if v.logs != nil {
-		v.logs.log(lvl, fmt.Sprintf("%s: %s", v.name, msg))
+	if *v.logs != nil {
+		(*v.logs).log(lvl, fmt.Sprintf("%s: %s", v.name, msg))
 	}
 }
 
@@ -156,6 +158,6 @@ func NewLogger(name string) Logger {
 func newLogView(name string) *logsView {
 	return &logsView{
 		name: name,
-		logs: singleton,
+		logs: &singleton,
 	}
 }
