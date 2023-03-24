@@ -34,6 +34,7 @@ func NewActivation(t *testing.T, act Activation, parameters ActivationParameters
 		require.NoError(t, err)
 		return act
 	}
+	t.Errorf("unknown act: %d", act)
 	return nil
 }
 
