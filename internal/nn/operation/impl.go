@@ -8,7 +8,7 @@ import (
 // NewLinearActivation return operation:
 //     y = f(x) = x;
 //     dx = f(dy) = dy.
-func NewLinearActivation() *Operation {
+func NewLinearActivation() IOperation {
 	logger.Debug("create new linear activation")
 	return &Operation{
 		name:     "linear activation",
@@ -20,7 +20,7 @@ func NewLinearActivation() *Operation {
 // NewSigmoidActivation return operation:
 //     y = f(x) = 1 / (1 + exp(-x));
 //     dx = f(dy) = dy * (1 - dy).
-func NewSigmoidActivation() *Operation {
+func NewSigmoidActivation() IOperation {
 	logger.Debug("create new sigmoid activation")
 	return &Operation{
 		name: "sigmoid activation",
@@ -40,7 +40,7 @@ func NewSigmoidActivation() *Operation {
 // NewTanhActivation return operation:
 //     y = f(x) = tanh(x);
 //     dx = f(dy) = dy * (1 - dy).
-func NewTanhActivation() *Operation {
+func NewTanhActivation() IOperation {
 	logger.Debug("create new tanh activation")
 	return &Operation{
 		name: "tanh activation",

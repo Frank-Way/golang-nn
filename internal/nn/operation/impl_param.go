@@ -10,10 +10,13 @@ import (
 // NewBiasOperation returns operation of adding bias
 //
 // Throws ErrCreate error
-func NewBiasOperation(bias *vector.Vector) (*ParamOperation, error) {
+func NewBiasOperation(bias *vector.Vector) (o IOperation, err error) {
+	defer logger.CatchErr(&err)
+	defer wraperr.WrapError(ErrCreate, &err)
+
 	logger.Debug("create new bias add operation")
 	if bias == nil {
-		return nil, wraperr.NewWrapErr(ErrCreate, fmt.Errorf("no bias provided: %v", bias))
+		return nil, fmt.Errorf("no bias provided: %v", bias)
 	}
 	biasAsMatrix, _ := matrix.NewMatrix([]*vector.Vector{bias.Copy()})
 	return &ParamOperation{
@@ -34,10 +37,13 @@ func NewBiasOperation(bias *vector.Vector) (*ParamOperation, error) {
 // NewWeightOperation returns operation of multiply weights
 //
 // Throws ErrCreate error
-func NewWeightOperation(weight *matrix.Matrix) (*ParamOperation, error) {
+func NewWeightOperation(weight *matrix.Matrix) (o IOperation, err error) {
+	defer logger.CatchErr(&err)
+	defer wraperr.WrapError(ErrCreate, &err)
+
 	logger.Debug("create new weight multiply operation")
 	if weight == nil {
-		return nil, wraperr.NewWrapErr(ErrCreate, fmt.Errorf("no weight provided: %v", weight))
+		return nil, fmt.Errorf("no weight provided: %v", weight)
 	}
 	return &ParamOperation{
 		Operation: &Operation{name: "weight multiply"},

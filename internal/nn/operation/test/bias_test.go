@@ -226,7 +226,7 @@ func TestBias_ApplyOptim(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			bias := fabrics.NewBias(t, test.bias)
+			bias := fabrics.NewBias(t, test.bias).(*operation.ParamOperation)
 			in := fabrics.NewMatrix(t, test.in)
 			out, err := bias.Forward(in)
 			require.NoError(t, err)

@@ -23,7 +23,7 @@ func TestDropout_Forward(t *testing.T) {
 	inSum := in.Sum()
 	outSum := prob.GetF(inSum)
 	epsilon := percent.Percent10.GetF(outSum)
-	tries := 5 // results are random, so it needs to take several tries
+	tries := 10 // results are random, so it needs to take several tries
 	outs := make([]*matrix.Matrix, tries)
 	for try := 0; try < tries; try++ {
 		outs[try], err = dropout.Forward(in)

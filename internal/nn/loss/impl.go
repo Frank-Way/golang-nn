@@ -5,7 +5,7 @@ import (
 )
 
 // NewMSELoss create new mean-squared loss module
-func NewMSELoss() *Loss {
+func NewMSELoss() ILoss {
 	logger.Debug("create new MSE loss")
 	return &Loss{
 		name: "MSE loss",

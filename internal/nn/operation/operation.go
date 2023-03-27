@@ -69,8 +69,7 @@ func (o *Operation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err error) {
 	return dx, nil
 }
 
-// Copy returns deep copy of Operation
-func (o *Operation) Copy() *Operation {
+func (o *Operation) Copy() IOperation {
 	if o == nil {
 		return nil
 	}
@@ -94,44 +93,50 @@ func (o *Operation) Copy() *Operation {
 	return res
 }
 
-func (o *Operation) Equal(operation *Operation) bool {
+func (o *Operation) Equal(operation IOperation) bool {
 	if o == nil || operation == nil {
 		if (o != nil && operation == nil) || (o == nil && operation != nil) {
 			return false // non-nil != nil and nil != non-nil
 		} else {
 			return true // nil == nil
 		}
-	} else if o.name != operation.name {
+	}
+	if op, ok := operation.(*Operation); !ok {
 		return false
-	} else if o.x != nil && !o.x.Equal(operation.x) {
+	} else if o.name != op.name {
 		return false
-	} else if o.y != nil && !o.y.Equal(operation.y) {
+	} else if o.x != nil && !o.x.Equal(op.x) {
 		return false
-	} else if o.dx != nil && !o.dx.Equal(operation.dx) {
+	} else if o.y != nil && !o.y.Equal(op.y) {
 		return false
-	} else if o.dy != nil && !o.dy.Equal(operation.dy) {
+	} else if o.dx != nil && !o.dx.Equal(op.dx) {
+		return false
+	} else if o.dy != nil && !o.dy.Equal(op.dy) {
 		return false
 	}
 
 	return true
 }
 
-func (o *Operation) EqualApprox(operation *Operation) bool {
+func (o *Operation) EqualApprox(operation IOperation) bool {
 	if o == nil || operation == nil {
 		if (o != nil && operation == nil) || (o == nil && operation != nil) {
 			return false // non-nil != nil and nil != non-nil
 		} else {
 			return true // nil == nil
 		}
-	} else if o.name != operation.name {
+	}
+	if op, ok := operation.(*Operation); !ok {
 		return false
-	} else if o.x != nil && !o.x.EqualApprox(operation.x) {
+	} else if o.name != op.name {
 		return false
-	} else if o.y != nil && !o.y.EqualApprox(operation.y) {
+	} else if o.x != nil && !o.x.EqualApprox(op.x) {
 		return false
-	} else if o.dx != nil && !o.dx.EqualApprox(operation.dx) {
+	} else if o.y != nil && !o.y.EqualApprox(op.y) {
 		return false
-	} else if o.dy != nil && !o.dy.EqualApprox(operation.dy) {
+	} else if o.dx != nil && !o.dx.EqualApprox(op.dx) {
+		return false
+	} else if o.dy != nil && !o.dy.EqualApprox(op.dy) {
 		return false
 	}
 

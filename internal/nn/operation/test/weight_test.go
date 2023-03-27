@@ -226,7 +226,7 @@ func TestWeight_ApplyOptim(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			weight := fabrics.NewWeight(t, test.weight)
+			weight := fabrics.NewWeight(t, test.weight).(*operation.ParamOperation)
 			in := fabrics.NewMatrix(t, test.in)
 			out, err := weight.Forward(in)
 			require.NoError(t, err)

@@ -37,7 +37,10 @@ func generateMask(rows, cols int, probability percent.Percent) *matrix.Matrix {
 //     - dx = dy * mask.
 //
 // Throws ErrCreate error.
-func NewDropout(keepProbability percent.Percent) (*ConstOperation, error) {
+func NewDropout(keepProbability percent.Percent) (o IOperation, err error) {
+	defer logger.CatchErr(&err)
+	defer wraperr.WrapError(ErrCreate, &err)
+
 	logger.Debug("create new dropout operation")
 	params := []*matrix.Matrix{nil}
 	return &ConstOperation{
@@ -60,11 +63,11 @@ func NewDropout(keepProbability percent.Percent) (*ConstOperation, error) {
 //     where Ki is i'th coeff of <coeffs>. Coeffs count must match layer size.
 //
 // Throws ErrCreate error.
-func NewSigmoidParam(coeffs *vector.Vector) (oper *ConstOperation, err error) {
+func NewSigmoidParam(coeffs *vector.Vector) (o IOperation, err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrCreate, &err)
 
-	logger.Debug("create new dropout operation")
+	logger.Debug("create new parametrized sigmoid activation")
 	if coeffs == nil {
 		return nil, fmt.Errorf("no coeffs provided: %v", coeffs)
 	}

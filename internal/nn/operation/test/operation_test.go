@@ -315,9 +315,9 @@ func TestOperation_Strings(t *testing.T) {
 func Test_OperationPipeline(t *testing.T) {
 	var err error
 	wweight := fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 1, Cols: 2, Values: []float64{1, 2}})
-	weight := fabrics.NewWeight(t, fabrics.WeightParameters{MatrixParameters: fabrics.MatrixParameters{Rows: 1, Cols: 2, Values: []float64{1, 2}}})
+	weight := fabrics.NewWeight(t, fabrics.WeightParameters{MatrixParameters: fabrics.MatrixParameters{Rows: 1, Cols: 2, Values: []float64{1, 2}}}).(*operation.ParamOperation)
 	bbias := fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 1, Cols: 2, Values: []float64{1, 2}})
-	bias := fabrics.NewBias(t, fabrics.BiasParameters{VectorParameters: fabrics.VectorParameters{Values: []float64{1, 2}}})
+	bias := fabrics.NewBias(t, fabrics.BiasParameters{VectorParameters: fabrics.VectorParameters{Values: []float64{1, 2}}}).(*operation.ParamOperation)
 	act := fabrics.NewActivation(t, fabrics.SigmoidAct, fabrics.ActivationParameters{}).(*operation.Operation)
 
 	in := fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 3, Cols: 1, Values: []float64{1, 2, 3}})

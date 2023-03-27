@@ -42,7 +42,7 @@ type WeightParameters struct {
 	MatrixParameters
 }
 
-func NewWeight(t *testing.T, parameters WeightParameters) *operation.ParamOperation {
+func NewWeight(t *testing.T, parameters WeightParameters) operation.IOperation {
 	weight := NewMatrix(t, parameters.MatrixParameters)
 
 	res, err := operation.NewWeightOperation(weight)
@@ -55,7 +55,7 @@ type BiasParameters struct {
 	VectorParameters
 }
 
-func NewBias(t *testing.T, parameters BiasParameters) *operation.ParamOperation {
+func NewBias(t *testing.T, parameters BiasParameters) operation.IOperation {
 	bias := NewVector(t, parameters.VectorParameters)
 
 	res, err := operation.NewBiasOperation(bias)
@@ -68,7 +68,7 @@ type DropoutParameters struct {
 	percent.Percent
 }
 
-func NewDropout(t *testing.T, parameters DropoutParameters) *operation.ConstOperation {
+func NewDropout(t *testing.T, parameters DropoutParameters) operation.IOperation {
 	res, err := operation.NewDropout(parameters.Percent)
 	require.NoError(t, err)
 

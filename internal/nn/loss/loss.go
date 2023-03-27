@@ -69,7 +69,7 @@ func (l *Loss) Backward() (grad *matrix.Matrix, err error) {
 	return grad, nil
 }
 
-func (l *Loss) Copy() *Loss {
+func (l *Loss) Copy() ILoss {
 	if l == nil {
 		return nil
 	}
@@ -91,44 +91,50 @@ func (l *Loss) Copy() *Loss {
 	return res
 }
 
-func (l *Loss) Equal(loss *Loss) bool {
+func (l *Loss) Equal(loss ILoss) bool {
 	if l == nil || loss == nil {
 		if (l != nil && loss == nil) || (l == nil && loss != nil) {
 			return false // non-nil != nil and nil != non-nil
 		} else {
 			return true // nil == nil
 		}
-	} else if l.name != loss.name {
+	}
+	if lo, ok := loss.(*Loss); !ok {
 		return false
-	} else if l.t != nil && !l.t.Equal(loss.t) {
+	} else if l.name != lo.name {
 		return false
-	} else if l.y != nil && !l.y.Equal(loss.y) {
+	} else if l.t != nil && !l.t.Equal(lo.t) {
 		return false
-	} else if l.d != nil && !l.d.Equal(loss.d) {
+	} else if l.y != nil && !l.y.Equal(lo.y) {
 		return false
-	} else if l.l != loss.l {
+	} else if l.d != nil && !l.d.Equal(lo.d) {
+		return false
+	} else if l.l != lo.l {
 		return false
 	}
 
 	return true
 }
 
-func (l *Loss) EqualApprox(loss *Loss) bool {
+func (l *Loss) EqualApprox(loss ILoss) bool {
 	if l == nil || loss == nil {
 		if (l != nil && loss == nil) || (l == nil && loss != nil) {
 			return false // non-nil != nil and nil != non-nil
 		} else {
 			return true // nil == nil
 		}
-	} else if l.name != loss.name {
+	}
+	if lo, ok := loss.(*Loss); !ok {
 		return false
-	} else if l.t != nil && !l.t.EqualApprox(loss.t) {
+	} else if l.name != lo.name {
 		return false
-	} else if l.y != nil && !l.y.EqualApprox(loss.y) {
+	} else if l.t != nil && !l.t.EqualApprox(lo.t) {
 		return false
-	} else if l.d != nil && !l.d.EqualApprox(loss.d) {
+	} else if l.y != nil && !l.y.EqualApprox(lo.y) {
 		return false
-	} else if l.l != loss.l {
+	} else if l.d != nil && !l.d.EqualApprox(lo.d) {
+		return false
+	} else if l.l != lo.l {
 		return false
 	}
 

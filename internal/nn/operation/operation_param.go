@@ -86,10 +86,12 @@ func (o *ParamOperation) ApplyOptim(optim Optimizer) (err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
 
-	if optim == nil {
+	if o == nil {
+		return ErrNil
+	} else if optim == nil {
 		return fmt.Errorf("no optimizer provided")
 	} else if o.dp == nil {
-		return fmt.Errorf("can not apply optimizer before gradiend computation: %v", o.dp)
+		return fmt.Errorf("can not apply optimizer before gradient computation: %v", o.dp)
 	}
 	newP, err := optim(o.p, o.dp)
 	if err != nil {
@@ -109,12 +111,12 @@ func (o *ParamOperation) Parameter() *matrix.Matrix {
 	return o.p.Copy()
 }
 
-func (o *ParamOperation) Copy() *ParamOperation {
+func (o *ParamOperation) Copy() IOperation {
 	if o == nil {
 		return nil
 	}
 	res := &ParamOperation{
-		Operation: o.Operation.Copy(),
+		Operation: o.Operation.Copy().(*Operation),
 		output:    o.output,
 		gradient:  o.gradient,
 	}
@@ -127,32 +129,42 @@ func (o *ParamOperation) Copy() *ParamOperation {
 	return res
 }
 
-func (o *ParamOperation) Equal(operation *ParamOperation) bool {
+func (o *ParamOperation) Equal(operation IOperation) bool {
 	if o == nil || operation == nil {
 		if (o != nil && operation == nil) || (o == nil && operation != nil) {
 			return false // non-nil != nil and nil != non-nil
 		} else {
 			return true // nil == nil
 		}
-	} else if !o.Operation.Equal(operation.Operation) {
+	}
+	if op, ok := operation.(*ParamOperation); !ok {
 		return false
-	} else if o.p != nil && !o.p.Equal(operation.p) {
+	} else if !o.Operation.Equal(op.Operation) {
 		return false
-	} else if o.dp != nil && !o.dp.Equal(operation.dp) {
+	} else if o.p != nil && !o.p.Equal(op.p) {
+		return false
+	} else if o.dp != nil && !o.dp.Equal(op.dp) {
 		return false
 	}
 
 	return true
 }
 
-func (o *ParamOperation) EqualApprox(operation *ParamOperation) bool {
-	if operation == nil {
+func (o *ParamOperation) EqualApprox(operation IOperation) bool {
+	if o == nil || operation == nil {
+		if (o != nil && operation == nil) || (o == nil && operation != nil) {
+			return false // non-nil != nil and nil != non-nil
+		} else {
+			return true // nil == nil
+		}
+	}
+	if op, ok := operation.(*ParamOperation); !ok {
 		return false
-	} else if !o.Operation.EqualApprox(operation.Operation) {
+	} else if !o.Operation.EqualApprox(op.Operation) {
 		return false
-	} else if o.p != nil && !o.p.EqualApprox(operation.p) {
+	} else if o.p != nil && !o.p.EqualApprox(op.p) {
 		return false
-	} else if o.dp != nil && !o.dp.EqualApprox(operation.dp) {
+	} else if o.dp != nil && !o.dp.EqualApprox(op.dp) {
 		return false
 	}
 

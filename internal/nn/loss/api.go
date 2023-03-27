@@ -11,4 +11,17 @@ type ILoss interface {
 
 	// Backward calculates input gradient for targets and outputs given during previous Forward() call
 	Backward() (*matrix.Matrix, error)
+
+	// Copy create deep-copy of ILoss
+	Copy() ILoss
+
+	// Equal return true if this and loss are deep-equal
+	Equal(loss ILoss) bool
+
+	// EqualApprox same as Equal, but it compares floats using some epsilon
+	EqualApprox(loss ILoss) bool
+
+	String() string
+	PrettyString() string
+	ShortString() string
 }

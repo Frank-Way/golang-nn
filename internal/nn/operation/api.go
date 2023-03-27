@@ -11,4 +11,17 @@ type IOperation interface {
 
 	// Backward makes backward propagation step, consuming output gradient and producing input gradient
 	Backward(dy *matrix.Matrix) (*matrix.Matrix, error)
+
+	// Copy create deep-copy of IOperation
+	Copy() IOperation
+
+	// Equal return true if this and operation are deep-equal
+	Equal(operation IOperation) bool
+
+	// EqualApprox same as Equal, but it compares floats using some epsilon
+	EqualApprox(operation IOperation) bool
+
+	String() string
+	PrettyString() string
+	ShortString() string
 }

@@ -66,12 +66,12 @@ func (o *ConstOperation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err err
 	return dx, nil
 }
 
-func (o *ConstOperation) Copy() *ConstOperation {
+func (o *ConstOperation) Copy() IOperation {
 	if o == nil {
 		return nil
 	}
 	res := &ConstOperation{
-		Operation: o.Operation.Copy(),
+		Operation: o.Operation.Copy().(*Operation),
 		output:    o.output,
 		gradient:  o.gradient,
 	}
@@ -86,24 +86,27 @@ func (o *ConstOperation) Copy() *ConstOperation {
 	return res
 }
 
-func (o *ConstOperation) Equal(operation *ConstOperation) bool {
+func (o *ConstOperation) Equal(operation IOperation) bool {
 	if o == nil || operation == nil {
 		if (o != nil && operation == nil) || (o == nil && operation != nil) {
 			return false // non-nil != nil and nil != non-nil
 		} else {
 			return true // nil == nil
 		}
-	} else if !o.Operation.Equal(operation.Operation) {
+	}
+	if op, ok := operation.(*ConstOperation); !ok {
 		return false
-	} else if o.p == nil || operation.p == nil {
-		if (o.p != nil && operation.p == nil) || (o.p == nil && operation.p != nil) {
+	} else if !o.Operation.Equal(op.Operation) {
+		return false
+	} else if o.p == nil || op.p == nil {
+		if (o.p != nil && op.p == nil) || (o.p == nil && op.p != nil) {
 			return false // non-nil != nil and nil != non-nil
 		} else {
-			if len(o.p) != len(operation.p) {
+			if len(o.p) != len(op.p) {
 				return false
 			}
 			for i := 0; i < len(o.p); i++ {
-				if !o.p[i].Equal(operation.p[i]) {
+				if !o.p[i].Equal(op.p[i]) {
 					return false
 				}
 			}
@@ -113,24 +116,27 @@ func (o *ConstOperation) Equal(operation *ConstOperation) bool {
 	return true
 }
 
-func (o *ConstOperation) EqualApprox(operation *ConstOperation) bool {
+func (o *ConstOperation) EqualApprox(operation IOperation) bool {
 	if o == nil || operation == nil {
 		if (o != nil && operation == nil) || (o == nil && operation != nil) {
 			return false // non-nil != nil and nil != non-nil
 		} else {
 			return true // nil == nil
 		}
-	} else if !o.Operation.EqualApprox(operation.Operation) {
+	}
+	if op, ok := operation.(*ConstOperation); !ok {
 		return false
-	} else if o.p == nil || operation.p == nil {
-		if (o.p != nil && operation.p == nil) || (o.p == nil && operation.p != nil) {
+	} else if !o.Operation.EqualApprox(op.Operation) {
+		return false
+	} else if o.p == nil || op.p == nil {
+		if (o.p != nil && op.p == nil) || (o.p == nil && op.p != nil) {
 			return false // non-nil != nil and nil != non-nil
 		} else {
-			if len(o.p) != len(operation.p) {
+			if len(o.p) != len(op.p) {
 				return false
 			}
 			for i := 0; i < len(o.p); i++ {
-				if !o.p[i].EqualApprox(operation.p[i]) {
+				if !o.p[i].EqualApprox(op.p[i]) {
 					return false
 				}
 			}

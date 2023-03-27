@@ -14,7 +14,7 @@ const (
 type LossParameters struct {
 }
 
-func NewLoss(t *testing.T, lossType LossType, parameters LossParameters) *loss.Loss {
+func NewLoss(t *testing.T, lossType LossType, parameters LossParameters) loss.ILoss {
 	switch lossType {
 	case MSELoss:
 		return loss.NewMSELoss()
