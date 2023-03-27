@@ -9,6 +9,7 @@ import (
 
 var _ ILoss = (*Loss)(nil)
 
+// Loss represent loss module that holds inputs and computed outputs
 type Loss struct {
 	name string
 
@@ -69,6 +70,9 @@ func (l *Loss) Backward() (grad *matrix.Matrix, err error) {
 }
 
 func (l *Loss) Copy() *Loss {
+	if l == nil {
+		return nil
+	}
 	res := &Loss{
 		name:     l.name,
 		l:        l.l,

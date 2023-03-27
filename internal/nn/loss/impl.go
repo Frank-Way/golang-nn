@@ -4,6 +4,7 @@ import (
 	"nn/pkg/mmath/matrix"
 )
 
+// NewMSELoss create new mean-squared loss module
 func NewMSELoss() *Loss {
 	logger.Debug("create new MSE loss")
 	return &Loss{
