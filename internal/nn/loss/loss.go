@@ -28,7 +28,7 @@ func (l *Loss) Forward(t *matrix.Matrix, y *matrix.Matrix) (loss float64, err er
 	defer wraperr.WrapError(ErrExec, &err)
 
 	if l == nil {
-		return 0, fmt.Errorf("calling nil")
+		return 0, ErrNil
 	} else if t == nil {
 		return 0, fmt.Errorf("no targets provided: %v", t)
 	} else if y == nil {
@@ -55,7 +55,7 @@ func (l *Loss) Backward() (grad *matrix.Matrix, err error) {
 	defer wraperr.WrapError(ErrExec, &err)
 
 	if l == nil {
-		return nil, fmt.Errorf("calling nil")
+		return nil, ErrNil
 	} else if l.t == nil || l.y == nil {
 		return nil, fmt.Errorf("calling backward before forward (missing targets or outputs): %v, %v", l.t, l.y)
 	}

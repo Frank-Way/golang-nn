@@ -1,6 +1,7 @@
 package operation
 
 import (
+	"fmt"
 	"nn/internal/utils"
 	"nn/pkg/mmath/matrix"
 	"nn/pkg/wraperr"
@@ -27,6 +28,12 @@ func (o *Operation) Forward(x *matrix.Matrix) (y *matrix.Matrix, err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
 
+	if o == nil {
+		return nil, ErrNil
+	} else if x == nil {
+		return nil, fmt.Errorf("no input provided: %v", x)
+	}
+
 	o.x = x.Copy()
 	y, err = o.output(x)
 	if err != nil {
@@ -39,6 +46,14 @@ func (o *Operation) Forward(x *matrix.Matrix) (y *matrix.Matrix, err error) {
 func (o *Operation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
+
+	if o == nil {
+		return nil, ErrNil
+	} else if dy == nil {
+		return nil, fmt.Errorf("no output gradient provided: %v", dy)
+	} else if o.y == nil || o.x == nil {
+		return nil, fmt.Errorf("call Backward() before Forward()")
+	}
 
 	o.dy = dy.Copy()
 	if err := o.y.CheckEqualShape(dy); err != nil {
@@ -56,6 +71,9 @@ func (o *Operation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err error) {
 
 // Copy returns deep copy of Operation
 func (o *Operation) Copy() *Operation {
+	if o == nil {
+		return nil
+	}
 	res := &Operation{
 		name:     o.name,
 		output:   o.output,

@@ -23,9 +23,12 @@ func (o *ConstOperation) Forward(x *matrix.Matrix) (y *matrix.Matrix, err error)
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
 
-	if x == nil {
+	if o == nil {
+		return nil, ErrNil
+	} else if x == nil {
 		return nil, fmt.Errorf("no input provided: %v", x)
 	}
+
 	o.x = x.Copy()
 	y, err = o.output(x, o.p)
 	if err != nil {
@@ -39,10 +42,12 @@ func (o *ConstOperation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err err
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
 
-	if dy == nil {
-		return nil, fmt.Errorf("no out gradient provided: %v", dy)
-	} else if o.x == nil {
-		return nil, fmt.Errorf("backward before forward: %v", o.x)
+	if o == nil {
+		return nil, ErrNil
+	} else if dy == nil {
+		return nil, fmt.Errorf("no output gradient provided: %v", dy)
+	} else if o.x == nil || o.y == nil {
+		return nil, fmt.Errorf("call Backward() before Forward()")
 	}
 
 	o.dy = dy.Copy()
@@ -62,6 +67,9 @@ func (o *ConstOperation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err err
 }
 
 func (o *ConstOperation) Copy() *ConstOperation {
+	if o == nil {
+		return nil
+	}
 	res := &ConstOperation{
 		Operation: o.Operation.Copy(),
 		output:    o.output,
