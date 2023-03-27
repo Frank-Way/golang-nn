@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strings"
 )
 
 var lvlMap = map[Level]string{
@@ -39,8 +40,13 @@ func (l *leveledLogger) log(lvl Level, msg string) {
 	if lvl > l.level {
 		return
 	}
-
-	l.logger.Println(fmt.Sprintf("[%s] %s", lvlMap[lvl], msg))
+	if strings.Contains(msg, "\n") {
+		for _, s := range strings.Split(msg, "\n") {
+			l.logger.Println(fmt.Sprintf("[%s] %s", lvlMap[lvl], s))
+		}
+	} else {
+		l.logger.Println(fmt.Sprintf("[%s] %s", lvlMap[lvl], msg))
+	}
 }
 
 func (w *logsWrapper) log(lvl Level, msg string) {
