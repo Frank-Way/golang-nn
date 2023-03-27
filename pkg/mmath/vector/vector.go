@@ -66,6 +66,9 @@ func Zeros(size int) (*Vector, error) {
 
 // Size returns count of Vector's elements
 func (v *Vector) Size() int {
+	if v == nil {
+		panic(ErrNil)
+	}
 	return v.size
 }
 
@@ -153,6 +156,12 @@ func (v *Vector) Raw() []float64 {
 
 // Copy return deep copy of Vector
 func (v *Vector) Copy() *Vector {
-	vector, _ := NewVector(v.Raw())
+	if v == nil {
+		return nil
+	}
+	vector, err := NewVector(v.Raw())
+	if err != nil {
+		panic(err)
+	}
 	return vector
 }

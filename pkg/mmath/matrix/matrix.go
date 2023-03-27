@@ -93,7 +93,7 @@ func NewMatrixFlat(rows, cols int, flat *vector.Vector) (m *Matrix, err error) {
 func NewMatrixRaw(values [][]float64) (m *Matrix, err error) {
 	defer wraperr.WrapError(ErrCreate, &err)
 
-	if values == nil {
+	if len(values) < 1 {
 		return nil, fmt.Errorf("no values provided: %v", values)
 	}
 	var vectors []*vector.Vector
@@ -260,10 +260,7 @@ func (m *Matrix) Copy() *Matrix {
 
 // Size return rows and cols count of Matrix
 func (m *Matrix) Size() (rows int, cols int) {
-	if m == nil {
-		return 0, 0
-	}
-	return m.rows, m.cols
+	return m.Rows(), m.Cols()
 }
 
 // Rows return rows count of Matrix
