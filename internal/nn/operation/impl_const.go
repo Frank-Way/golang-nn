@@ -49,7 +49,7 @@ func NewDropout(keepProbability percent.Percent) (o IOperation, err error) {
 	logger.Debug("create new dropout operation")
 	params := []*matrix.Matrix{nil}
 	return &ConstOperation{
-		Operation: &Operation{kind: Dropout},
+		Operation: &Operation{kind: Dropout, activation: true},
 		p:         params,
 		output: func(x *matrix.Matrix, p []*matrix.Matrix) (*matrix.Matrix, error) {
 			mask := generateMask(x.Rows(), x.Cols(), keepProbability)
@@ -83,7 +83,7 @@ func NewSigmoidParam(coeffs *vector.Vector) (o IOperation, err error) {
 
 	params := []*matrix.Matrix{param}
 	return &ConstOperation{
-		Operation: &Operation{kind: SigmoidParamActivation},
+		Operation: &Operation{kind: SigmoidParamActivation, activation: true},
 		p:         params,
 		output: func(x *matrix.Matrix, p []*matrix.Matrix) (*matrix.Matrix, error) {
 			multiplied, err := x.MulRowM(p[0])

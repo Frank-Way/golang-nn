@@ -12,7 +12,8 @@ var _ IOperation = (*Operation)(nil)
 // Operation represents main part of all operations. It stores all given and computed data. It defines operation
 // behavior.
 type Operation struct {
-	kind Kind
+	kind       Kind
+	activation bool
 
 	x *matrix.Matrix
 	y *matrix.Matrix
@@ -71,6 +72,10 @@ func (o *Operation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err error) {
 
 func (o *Operation) Is(kind Kind) bool {
 	return o.kind == kind
+}
+
+func (o *Operation) IsActivation() bool {
+	return o.activation
 }
 
 func (o *Operation) Copy() IOperation {

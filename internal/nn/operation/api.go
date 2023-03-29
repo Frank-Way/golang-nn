@@ -26,6 +26,7 @@ type IOperation interface {
 	ShortString() string
 
 	Is(kind Kind) bool
+	IsActivation() bool
 }
 
 type Kind string

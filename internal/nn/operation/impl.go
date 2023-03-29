@@ -17,9 +17,10 @@ const (
 func NewLinearActivation() IOperation {
 	logger.Debug("create new linear activation")
 	return &Operation{
-		kind:     LinearActivation,
-		output:   func(x *matrix.Matrix) (*matrix.Matrix, error) { return x.Copy(), nil },
-		gradient: func(dy *matrix.Matrix) (*matrix.Matrix, error) { return dy.Copy(), nil },
+		kind:       LinearActivation,
+		activation: true,
+		output:     func(x *matrix.Matrix) (*matrix.Matrix, error) { return x.Copy(), nil },
+		gradient:   func(dy *matrix.Matrix) (*matrix.Matrix, error) { return dy.Copy(), nil },
 	}
 }
 
@@ -29,7 +30,8 @@ func NewLinearActivation() IOperation {
 func NewSigmoidActivation() IOperation {
 	logger.Debug("create new sigmoid activation")
 	return &Operation{
-		kind: SigmoidActivation,
+		kind:       SigmoidActivation,
+		activation: true,
 		output: func(x *matrix.Matrix) (*matrix.Matrix, error) {
 			return x.ApplyFunc(func(value float64) float64 {
 				return 1 / (1 + math.Exp(-value))
@@ -49,7 +51,8 @@ func NewSigmoidActivation() IOperation {
 func NewTanhActivation() IOperation {
 	logger.Debug("create new tanh activation")
 	return &Operation{
-		kind: TanhActivation,
+		kind:       TanhActivation,
+		activation: true,
 		output: func(x *matrix.Matrix) (*matrix.Matrix, error) {
 			return x.Tanh(), nil
 		},
