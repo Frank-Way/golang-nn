@@ -14,7 +14,7 @@ import (
 func TestOperation_Copy(t *testing.T) {
 	tests := []struct {
 		testutils.Base
-		oper    interface{}
+		oper    operation.IOperation
 		in      *matrix.Matrix
 		outGrad *matrix.Matrix
 	}{
@@ -112,64 +112,30 @@ func TestOperation_Copy(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			switch oper := test.oper.(type) {
-			case *operation.Operation:
-				if test.in != nil {
-					_, err := oper.Forward(test.in)
-					require.NoError(t, err)
+			if test.in != nil {
+				_, err := test.oper.Forward(test.in)
+				require.NoError(t, err)
 
-					if test.outGrad != nil {
-						_, err := oper.Backward(test.outGrad)
-						require.NoError(t, err)
-					}
-				}
-				cp := oper.Copy()
-				require.True(t, cp != oper)
-				require.True(t, cp.Equal(oper))
-				require.True(t, oper.Equal(cp))
-				require.True(t, cp.EqualApprox(oper))
-				require.True(t, oper.EqualApprox(cp))
-			case *operation.ParamOperation:
-				if test.in != nil {
-					_, err := oper.Forward(test.in)
+				if test.outGrad != nil {
+					_, err := test.oper.Backward(test.outGrad)
 					require.NoError(t, err)
-
-					if test.outGrad != nil {
-						_, err := oper.Backward(test.outGrad)
-						require.NoError(t, err)
-					}
 				}
-				cp := oper.Copy()
-				require.True(t, cp != oper)
-				require.True(t, cp.Equal(oper))
-				require.True(t, oper.Equal(cp))
-				require.True(t, cp.EqualApprox(oper))
-				require.True(t, oper.EqualApprox(cp))
-			case *operation.ConstOperation:
-				if test.in != nil {
-					_, err := oper.Forward(test.in)
-					require.NoError(t, err)
-
-					if test.outGrad != nil {
-						_, err := oper.Backward(test.outGrad)
-						require.NoError(t, err)
-					}
-				}
-				cp := oper.Copy()
-				require.True(t, cp != oper)
-				require.True(t, cp.Equal(oper))
-				require.True(t, oper.Equal(cp))
-				require.True(t, cp.EqualApprox(oper))
-				require.True(t, oper.EqualApprox(cp))
 			}
+			cp := test.oper.Copy()
+			require.True(t, cp != test.oper)
+			require.True(t, cp.Equal(test.oper))
+			require.True(t, test.oper.Equal(cp))
+			require.True(t, cp.EqualApprox(test.oper))
+			require.True(t, test.oper.EqualApprox(cp))
 		})
 	}
 }
 
 func TestOperation_Strings(t *testing.T) {
+	testutils.SetupLogger()
 	tests := []struct {
 		testutils.Base
-		oper    interface{}
+		oper    operation.IOperation
 		in      *matrix.Matrix
 		outGrad *matrix.Matrix
 	}{
@@ -267,52 +233,24 @@ func TestOperation_Strings(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			switch oper := test.oper.(type) {
-			case *operation.Operation:
-				if test.in != nil {
-					_, err := oper.Forward(test.in)
-					require.NoError(t, err)
+			if test.in != nil {
+				_, err := test.oper.Forward(test.in)
+				require.NoError(t, err)
 
-					if test.outGrad != nil {
-						_, err := oper.Backward(test.outGrad)
-						require.NoError(t, err)
-					}
-				}
-				t.Log("ShortString():\n" + oper.ShortString())
-				t.Log("FormatObject():\n" + oper.String())
-				t.Log("PrettyStringField():\n" + oper.PrettyString())
-			case *operation.ParamOperation:
-				if test.in != nil {
-					_, err := oper.Forward(test.in)
+				if test.outGrad != nil {
+					_, err := test.oper.Backward(test.outGrad)
 					require.NoError(t, err)
-
-					if test.outGrad != nil {
-						_, err := oper.Backward(test.outGrad)
-						require.NoError(t, err)
-					}
 				}
-				t.Log("ShortString():\n" + oper.ShortString())
-				t.Log("FormatObject():\n" + oper.String())
-				t.Log("PrettyStringField():\n" + oper.PrettyString())
-			case *operation.ConstOperation:
-				if test.in != nil {
-					_, err := oper.Forward(test.in)
-					require.NoError(t, err)
-
-					if test.outGrad != nil {
-						_, err := oper.Backward(test.outGrad)
-						require.NoError(t, err)
-					}
-				}
-				t.Log("ShortString():\n" + oper.ShortString())
-				t.Log("FormatObject():\n" + oper.String())
-				t.Log("PrettyStringField():\n" + oper.PrettyString())
 			}
+			t.Log("ShortString():\n" + test.oper.ShortString())
+			t.Log("String():\n" + test.oper.String())
+			t.Log("PrettyString():\n" + test.oper.PrettyString())
 		})
 	}
 }
 
 func Test_OperationPipeline(t *testing.T) {
+	testutils.SetupLogger()
 	var err error
 	wweight := fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 1, Cols: 2, Values: []float64{1, 2}})
 	weight := fabrics.NewWeight(t, fabrics.WeightParameters{MatrixParameters: fabrics.MatrixParameters{Rows: 1, Cols: 2, Values: []float64{1, 2}}}).(*operation.ParamOperation)

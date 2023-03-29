@@ -12,7 +12,7 @@ var _ IOperation = (*Operation)(nil)
 // Operation represents main part of all operations. It stores all given and computed data. It defines operation
 // behavior.
 type Operation struct {
-	name string
+	kind Kind
 
 	x *matrix.Matrix
 	y *matrix.Matrix
@@ -69,12 +69,16 @@ func (o *Operation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err error) {
 	return dx, nil
 }
 
+func (o *Operation) Is(kind Kind) bool {
+	return o.kind == kind
+}
+
 func (o *Operation) Copy() IOperation {
 	if o == nil {
 		return nil
 	}
 	res := &Operation{
-		name:     o.name,
+		kind:     o.kind,
 		output:   o.output,
 		gradient: o.gradient,
 	}
@@ -103,7 +107,7 @@ func (o *Operation) Equal(operation IOperation) bool {
 	}
 	if op, ok := operation.(*Operation); !ok {
 		return false
-	} else if o.name != op.name {
+	} else if o.kind != op.kind {
 		return false
 	} else if o.x != nil && !o.x.Equal(op.x) {
 		return false
@@ -128,7 +132,7 @@ func (o *Operation) EqualApprox(operation IOperation) bool {
 	}
 	if op, ok := operation.(*Operation); !ok {
 		return false
-	} else if o.name != op.name {
+	} else if o.kind != op.kind {
 		return false
 	} else if o.x != nil && !o.x.EqualApprox(op.x) {
 		return false
@@ -145,7 +149,7 @@ func (o *Operation) EqualApprox(operation IOperation) bool {
 
 func (o *Operation) toMap(stringer func(spStringer utils.SPStringer) string) map[string]string {
 	return map[string]string{
-		"name": o.name,
+		"kind": string(o.kind),
 		"x":    stringer(o.x),
 		"y":    stringer(o.y),
 		"dx":   stringer(o.dx),

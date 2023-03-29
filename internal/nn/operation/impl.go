@@ -5,13 +5,19 @@ import (
 	"nn/pkg/mmath/matrix"
 )
 
+const (
+	LinearActivation  Kind = "linear activation"
+	SigmoidActivation Kind = "sigmoid activation"
+	TanhActivation    Kind = "tanh activation"
+)
+
 // NewLinearActivation return operation:
 //     y = f(x) = x;
 //     dx = f(dy) = dy.
 func NewLinearActivation() IOperation {
 	logger.Debug("create new linear activation")
 	return &Operation{
-		name:     "linear activation",
+		kind:     LinearActivation,
 		output:   func(x *matrix.Matrix) (*matrix.Matrix, error) { return x.Copy(), nil },
 		gradient: func(dy *matrix.Matrix) (*matrix.Matrix, error) { return dy.Copy(), nil },
 	}
@@ -23,7 +29,7 @@ func NewLinearActivation() IOperation {
 func NewSigmoidActivation() IOperation {
 	logger.Debug("create new sigmoid activation")
 	return &Operation{
-		name: "sigmoid activation",
+		kind: SigmoidActivation,
 		output: func(x *matrix.Matrix) (*matrix.Matrix, error) {
 			return x.ApplyFunc(func(value float64) float64 {
 				return 1 / (1 + math.Exp(-value))
@@ -43,7 +49,7 @@ func NewSigmoidActivation() IOperation {
 func NewTanhActivation() IOperation {
 	logger.Debug("create new tanh activation")
 	return &Operation{
-		name: "tanh activation",
+		kind: TanhActivation,
 		output: func(x *matrix.Matrix) (*matrix.Matrix, error) {
 			return x.Tanh(), nil
 		},

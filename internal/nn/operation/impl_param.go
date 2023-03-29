@@ -7,6 +7,11 @@ import (
 	"nn/pkg/wraperr"
 )
 
+const (
+	BiasAdd        Kind = "bias add"
+	WeightMultiply Kind = "weight multiply"
+)
+
 // NewBiasOperation returns operation of adding bias
 //
 // Throws ErrCreate error
@@ -20,7 +25,7 @@ func NewBiasOperation(bias *vector.Vector) (o IOperation, err error) {
 	}
 	biasAsMatrix, _ := matrix.NewMatrix([]*vector.Vector{bias.Copy()})
 	return &ParamOperation{
-		Operation: &Operation{name: "bias add"},
+		Operation: &Operation{kind: BiasAdd},
 		p:         biasAsMatrix,
 		output: func(x *matrix.Matrix, b *matrix.Matrix) (*matrix.Matrix, error) {
 			return x.AddRowM(b)
@@ -46,7 +51,7 @@ func NewWeightOperation(weight *matrix.Matrix) (o IOperation, err error) {
 		return nil, fmt.Errorf("no weight provided: %v", weight)
 	}
 	return &ParamOperation{
-		Operation: &Operation{name: "weight multiply"},
+		Operation: &Operation{kind: WeightMultiply},
 		p:         weight.Copy(),
 		output: func(x *matrix.Matrix, w *matrix.Matrix) (*matrix.Matrix, error) {
 			return x.MatMul(w)

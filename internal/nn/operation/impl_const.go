@@ -9,6 +9,11 @@ import (
 	"nn/pkg/wraperr"
 )
 
+const (
+	Dropout                Kind = "dropout"
+	SigmoidParamActivation Kind = "parametrized sigmoid activation"
+)
+
 // generateMask return Matrix containing only values 0 and 1 distributed by given probability (count of 1 is defined
 // by <probability>)
 func generateMask(rows, cols int, probability percent.Percent) *matrix.Matrix {
@@ -44,7 +49,7 @@ func NewDropout(keepProbability percent.Percent) (o IOperation, err error) {
 	logger.Debug("create new dropout operation")
 	params := []*matrix.Matrix{nil}
 	return &ConstOperation{
-		Operation: &Operation{name: "dropout"},
+		Operation: &Operation{kind: Dropout},
 		p:         params,
 		output: func(x *matrix.Matrix, p []*matrix.Matrix) (*matrix.Matrix, error) {
 			mask := generateMask(x.Rows(), x.Cols(), keepProbability)
@@ -78,10 +83,8 @@ func NewSigmoidParam(coeffs *vector.Vector) (o IOperation, err error) {
 
 	params := []*matrix.Matrix{param}
 	return &ConstOperation{
-		Operation: &Operation{
-			name: "parametrized sigmoid activation",
-		},
-		p: params,
+		Operation: &Operation{kind: SigmoidParamActivation},
+		p:         params,
 		output: func(x *matrix.Matrix, p []*matrix.Matrix) (*matrix.Matrix, error) {
 			multiplied, err := x.MulRowM(p[0])
 			if err != nil {
