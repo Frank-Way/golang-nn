@@ -24,4 +24,8 @@ type ILoss interface {
 	String() string
 	PrettyString() string
 	ShortString() string
+
+	Is(kind Kind) bool
 }
+
+type Kind string

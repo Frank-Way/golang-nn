@@ -4,11 +4,15 @@ import (
 	"nn/pkg/mmath/matrix"
 )
 
+const (
+	MSELoss Kind = "MSE loss"
+)
+
 // NewMSELoss create new mean-squared loss module
 func NewMSELoss() ILoss {
 	logger.Debug("create new MSE loss")
 	return &Loss{
-		name: "MSE loss",
+		kind: MSELoss,
 		output: func(t, y *matrix.Matrix) (float64, error) {
 			// 1 / (2 * N) * sum[(y - t) ** 2]
 			delta, err := y.Sub(t)

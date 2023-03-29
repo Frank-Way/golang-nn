@@ -11,7 +11,7 @@ var _ ILoss = (*Loss)(nil)
 
 // Loss represent loss module that holds inputs and computed outputs
 type Loss struct {
-	name string
+	kind Kind
 
 	t *matrix.Matrix
 	y *matrix.Matrix
@@ -69,12 +69,16 @@ func (l *Loss) Backward() (grad *matrix.Matrix, err error) {
 	return grad, nil
 }
 
+func (l *Loss) Is(kind Kind) bool {
+	return l.kind == kind
+}
+
 func (l *Loss) Copy() ILoss {
 	if l == nil {
 		return nil
 	}
 	res := &Loss{
-		name:     l.name,
+		kind:     l.kind,
 		l:        l.l,
 		output:   l.output,
 		gradient: l.gradient,
@@ -101,7 +105,7 @@ func (l *Loss) Equal(loss ILoss) bool {
 	}
 	if lo, ok := loss.(*Loss); !ok {
 		return false
-	} else if l.name != lo.name {
+	} else if l.kind != lo.kind {
 		return false
 	} else if l.t != nil && !l.t.Equal(lo.t) {
 		return false
@@ -126,7 +130,7 @@ func (l *Loss) EqualApprox(loss ILoss) bool {
 	}
 	if lo, ok := loss.(*Loss); !ok {
 		return false
-	} else if l.name != lo.name {
+	} else if l.kind != lo.kind {
 		return false
 	} else if l.t != nil && !l.t.EqualApprox(lo.t) {
 		return false
@@ -143,7 +147,7 @@ func (l *Loss) EqualApprox(loss ILoss) bool {
 
 func (l *Loss) toMap(stringer func(spStringer utils.SPStringer) string) map[string]string {
 	return map[string]string{
-		"name": l.name,
+		"kind": string(l.kind),
 		"t":    stringer(l.t),
 		"y":    stringer(l.y),
 		"d":    stringer(l.d),
