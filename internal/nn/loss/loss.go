@@ -76,6 +76,10 @@ func (l *Loss) Is(kind nn.Kind) bool {
 	return l.kind == kind
 }
 
+func (l *Loss) Output() float64 {
+	return l.l
+}
+
 func (l *Loss) Copy() nn.IModule {
 	if l == nil {
 		return nil

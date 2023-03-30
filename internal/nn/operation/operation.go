@@ -81,6 +81,13 @@ func (o *Operation) IsActivation() bool {
 	return o.activation
 }
 
+func (o *Operation) Output() *matrix.Matrix {
+	if o.y == nil {
+		return nil
+	}
+	return o.y.Copy()
+}
+
 func (o *Operation) Copy() nn.IModule {
 	if o == nil {
 		return nil

@@ -15,5 +15,7 @@ type IOperation interface {
 
 	// Backward makes backward propagation step, consuming output gradient and producing input gradient
 	Backward(dy *matrix.Matrix) (*matrix.Matrix, error)
+
+	Output() *matrix.Matrix
 	IsActivation() bool
 }

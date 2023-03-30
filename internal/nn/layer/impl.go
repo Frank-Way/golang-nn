@@ -35,14 +35,29 @@ func NewDenseLayer(weight *matrix.Matrix, bias *vector.Vector, activation operat
 			weight.Cols(), bias.Size())
 	}
 
-	logger.Debug("check if provided operation is actually activation")
+	logger.Debug("check activation")
 	if !activation.IsActivation() {
 		return nil, fmt.Errorf("provided operation it is not an activation: %s", activation.ShortString())
 	}
 
+	if activation.Is(operation.SigmoidParamActivation) {
+		casted, ok := activation.(*operation.ConstOperation)
+		if !ok {
+			return nil, fmt.Errorf("error casting activation")
+		}
+		p := casted.Parameters()
+		if p[0].Cols() != weight.Cols() {
+			return nil, fmt.Errorf("parametrized sigmoid parameters count does not match weight cols count (layer's size): %d != %d",
+				p[0].Cols(), weight.Cols())
+		}
+
+	}
+
 	return &Layer{
-		kind:       DenseLayer,
-		operations: []operation.IOperation{w, b, activation.Copy().(operation.IOperation)},
+		kind:        DenseLayer,
+		inputsCount: weight.Rows(),
+		size:        weight.Cols(),
+		operations:  []operation.IOperation{w, b, activation.Copy().(operation.IOperation)},
 	}, nil
 }
 

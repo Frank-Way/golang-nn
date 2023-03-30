@@ -17,7 +17,7 @@ func TestNewDropoutOperation(t *testing.T) {
 
 func TestDropout_Forward(t *testing.T) {
 	prob := percent.Percent30
-	dropout := fabrics.NewDropout(t, fabrics.DropoutParameters{Percent: prob})
+	dropout := fabrics.NewOperation(t, operation.Dropout, prob)
 	in, err := matrix.NewMatrixOf(10, 10, 1)
 	require.NoError(t, err)
 	inSum := in.Sum()
@@ -49,7 +49,7 @@ func TestDropout_Forward(t *testing.T) {
 
 func TestDropout_Backward(t *testing.T) {
 	prob := percent.Percent30
-	dropout := fabrics.NewDropout(t, fabrics.DropoutParameters{Percent: prob})
+	dropout := fabrics.NewOperation(t, operation.Dropout, prob)
 	in, err := matrix.NewMatrixOf(10, 10, 1)
 	require.NoError(t, err)
 	outGrad := in.Copy()

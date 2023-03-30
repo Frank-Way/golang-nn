@@ -12,8 +12,10 @@ import (
 var _ ILayer = (*Layer)(nil)
 
 type Layer struct {
-	kind       nn.Kind
-	operations []operation.IOperation
+	kind        nn.Kind
+	operations  []operation.IOperation
+	inputsCount int
+	size        int
 }
 
 func (l *Layer) Forward(x *matrix.Matrix) (y *matrix.Matrix, err error) {
@@ -23,6 +25,8 @@ func (l *Layer) Forward(x *matrix.Matrix) (y *matrix.Matrix, err error) {
 
 	if l == nil {
 		return nil, ErrNil
+	} else if x == nil {
+		return nil, fmt.Errorf("no input provided: %v", x)
 	}
 
 	y = x.Copy()
@@ -43,6 +47,8 @@ func (l *Layer) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err error) {
 
 	if l == nil {
 		return nil, ErrNil
+	} else if dy == nil {
+		return nil, fmt.Errorf("no output gradient provided: %v", dy)
 	}
 
 	dx = dy.Copy()
@@ -81,12 +87,26 @@ func (l *Layer) Is(kind nn.Kind) bool {
 	return l.kind == kind
 }
 
+func (l *Layer) Output() *matrix.Matrix {
+	return l.operations[len(l.operations)-1].Output()
+}
+
+func (l *Layer) InputsCount() int {
+	return l.inputsCount
+}
+
+func (l *Layer) Size() int {
+	return l.size
+}
+
 func (l *Layer) Copy() nn.IModule {
 	if l == nil {
 		return nil
 	}
 	res := &Layer{
-		kind: l.kind,
+		kind:        l.kind,
+		inputsCount: l.inputsCount,
+		size:        l.size,
 	}
 	res.operations = make([]operation.IOperation, len(l.operations))
 	for i, op := range l.operations {

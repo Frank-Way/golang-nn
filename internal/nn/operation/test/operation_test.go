@@ -20,91 +20,91 @@ func TestOperation_Copy(t *testing.T) {
 	}{
 		{
 			Base: testutils.Base{Name: "weight"},
-			oper: fabrics.NewWeight(t, fabrics.WeightParameters{MatrixParameters: fabrics.MatrixParameters{Rows: 2, Cols: 3}}),
+			oper: fabrics.NewOperation(t, operation.WeightMultiply, fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 2, Cols: 3})),
 		},
 		{
 			Base: testutils.Base{Name: "weight after forward"},
-			oper: fabrics.NewWeight(t, fabrics.WeightParameters{MatrixParameters: fabrics.MatrixParameters{Rows: 2, Cols: 3}}),
+			oper: fabrics.NewOperation(t, operation.WeightMultiply, fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 2, Cols: 3})),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
 			Base:    testutils.Base{Name: "weight after backward"},
-			oper:    fabrics.NewWeight(t, fabrics.WeightParameters{MatrixParameters: fabrics.MatrixParameters{Rows: 2, Cols: 3}}),
+			oper:    fabrics.NewOperation(t, operation.WeightMultiply, fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 2, Cols: 3})),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 3}),
 		},
 		{
 			Base: testutils.Base{Name: "bias"},
-			oper: fabrics.NewBias(t, fabrics.BiasParameters{VectorParameters: fabrics.VectorParameters{Size: 3}}),
+			oper: fabrics.NewOperation(t, operation.BiasAdd, fabrics.NewVector(t, fabrics.VectorParameters{Size: 3})),
 		},
 		{
 			Base: testutils.Base{Name: "bias after forward"},
-			oper: fabrics.NewBias(t, fabrics.BiasParameters{VectorParameters: fabrics.VectorParameters{Size: 3}}),
+			oper: fabrics.NewOperation(t, operation.BiasAdd, fabrics.NewVector(t, fabrics.VectorParameters{Size: 3})),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 3}),
 		},
 		{
 			Base:    testutils.Base{Name: "bias after backward"},
-			oper:    fabrics.NewBias(t, fabrics.BiasParameters{VectorParameters: fabrics.VectorParameters{Size: 3}}),
+			oper:    fabrics.NewOperation(t, operation.BiasAdd, fabrics.NewVector(t, fabrics.VectorParameters{Size: 3})),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 3}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 3}),
 		},
 		{
 			Base: testutils.Base{Name: "linear"},
-			oper: fabrics.NewActivation(t, fabrics.LinearAct, fabrics.ActivationParameters{}),
+			oper: fabrics.NewOperation(t, operation.LinearActivation),
 		},
 		{
 			Base: testutils.Base{Name: "linear after forward"},
-			oper: fabrics.NewActivation(t, fabrics.LinearAct, fabrics.ActivationParameters{}),
+			oper: fabrics.NewOperation(t, operation.LinearActivation),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
 			Base:    testutils.Base{Name: "linear after backward"},
-			oper:    fabrics.NewActivation(t, fabrics.LinearAct, fabrics.ActivationParameters{}),
+			oper:    fabrics.NewOperation(t, operation.LinearActivation),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
 			Base: testutils.Base{Name: "sigmoid"},
-			oper: fabrics.NewActivation(t, fabrics.SigmoidAct, fabrics.ActivationParameters{}),
+			oper: fabrics.NewOperation(t, operation.SigmoidActivation),
 		},
 		{
 			Base: testutils.Base{Name: "sigmoid after forward"},
-			oper: fabrics.NewActivation(t, fabrics.SigmoidAct, fabrics.ActivationParameters{}),
+			oper: fabrics.NewOperation(t, operation.SigmoidActivation),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
 			Base:    testutils.Base{Name: "sigmoid after backward"},
-			oper:    fabrics.NewActivation(t, fabrics.SigmoidAct, fabrics.ActivationParameters{}),
+			oper:    fabrics.NewOperation(t, operation.SigmoidActivation),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
 			Base: testutils.Base{Name: "tanh"},
-			oper: fabrics.NewActivation(t, fabrics.TanhAct, fabrics.ActivationParameters{}),
+			oper: fabrics.NewOperation(t, operation.TanhActivation),
 		},
 		{
 			Base: testutils.Base{Name: "tanh after forward"},
-			oper: fabrics.NewActivation(t, fabrics.TanhAct, fabrics.ActivationParameters{}),
+			oper: fabrics.NewOperation(t, operation.TanhActivation),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
 			Base:    testutils.Base{Name: "tanh after backward"},
-			oper:    fabrics.NewActivation(t, fabrics.TanhAct, fabrics.ActivationParameters{}),
+			oper:    fabrics.NewOperation(t, operation.TanhActivation),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
 			Base: testutils.Base{Name: "dropout"},
-			oper: fabrics.NewDropout(t, fabrics.DropoutParameters{Percent: percent.Percent10}),
+			oper: fabrics.NewOperation(t, operation.Dropout, percent.Percent10),
 		},
 		{
 			Base: testutils.Base{Name: "dropout after forward"},
-			oper: fabrics.NewDropout(t, fabrics.DropoutParameters{Percent: percent.Percent10}),
+			oper: fabrics.NewOperation(t, operation.Dropout, percent.Percent10),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
 			Base:    testutils.Base{Name: "dropout after backward"},
-			oper:    fabrics.NewDropout(t, fabrics.DropoutParameters{Percent: percent.Percent10}),
+			oper:    fabrics.NewOperation(t, operation.Dropout, percent.Percent10),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
@@ -141,91 +141,91 @@ func TestOperation_Strings(t *testing.T) {
 	}{
 		{
 			Base: testutils.Base{Name: "weight"},
-			oper: fabrics.NewWeight(t, fabrics.WeightParameters{MatrixParameters: fabrics.MatrixParameters{Rows: 2, Cols: 3}}),
+			oper: fabrics.NewOperation(t, operation.WeightMultiply, fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 2, Cols: 3})),
 		},
 		{
 			Base: testutils.Base{Name: "weight after forward"},
-			oper: fabrics.NewWeight(t, fabrics.WeightParameters{MatrixParameters: fabrics.MatrixParameters{Rows: 2, Cols: 3}}),
+			oper: fabrics.NewOperation(t, operation.WeightMultiply, fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 2, Cols: 3})),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
 			Base:    testutils.Base{Name: "weight after backward"},
-			oper:    fabrics.NewWeight(t, fabrics.WeightParameters{MatrixParameters: fabrics.MatrixParameters{Rows: 2, Cols: 3}}),
+			oper:    fabrics.NewOperation(t, operation.WeightMultiply, fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 2, Cols: 3})),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 3}),
 		},
 		{
 			Base: testutils.Base{Name: "bias"},
-			oper: fabrics.NewBias(t, fabrics.BiasParameters{VectorParameters: fabrics.VectorParameters{Size: 3}}),
+			oper: fabrics.NewOperation(t, operation.BiasAdd, fabrics.NewVector(t, fabrics.VectorParameters{Size: 3})),
 		},
 		{
 			Base: testutils.Base{Name: "bias after forward"},
-			oper: fabrics.NewBias(t, fabrics.BiasParameters{VectorParameters: fabrics.VectorParameters{Size: 3}}),
+			oper: fabrics.NewOperation(t, operation.BiasAdd, fabrics.NewVector(t, fabrics.VectorParameters{Size: 3})),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 3}),
 		},
 		{
 			Base:    testutils.Base{Name: "bias after backward"},
-			oper:    fabrics.NewBias(t, fabrics.BiasParameters{VectorParameters: fabrics.VectorParameters{Size: 3}}),
+			oper:    fabrics.NewOperation(t, operation.BiasAdd, fabrics.NewVector(t, fabrics.VectorParameters{Size: 3})),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 3}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 3}),
 		},
 		{
 			Base: testutils.Base{Name: "linear"},
-			oper: fabrics.NewActivation(t, fabrics.LinearAct, fabrics.ActivationParameters{}),
+			oper: fabrics.NewOperation(t, operation.LinearActivation),
 		},
 		{
 			Base: testutils.Base{Name: "linear after forward"},
-			oper: fabrics.NewActivation(t, fabrics.LinearAct, fabrics.ActivationParameters{}),
+			oper: fabrics.NewOperation(t, operation.LinearActivation),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
 			Base:    testutils.Base{Name: "linear after backward"},
-			oper:    fabrics.NewActivation(t, fabrics.LinearAct, fabrics.ActivationParameters{}),
+			oper:    fabrics.NewOperation(t, operation.LinearActivation),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
 			Base: testutils.Base{Name: "sigmoid"},
-			oper: fabrics.NewActivation(t, fabrics.SigmoidAct, fabrics.ActivationParameters{}),
+			oper: fabrics.NewOperation(t, operation.SigmoidActivation),
 		},
 		{
 			Base: testutils.Base{Name: "sigmoid after forward"},
-			oper: fabrics.NewActivation(t, fabrics.SigmoidAct, fabrics.ActivationParameters{}),
+			oper: fabrics.NewOperation(t, operation.SigmoidActivation),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
 			Base:    testutils.Base{Name: "sigmoid after backward"},
-			oper:    fabrics.NewActivation(t, fabrics.SigmoidAct, fabrics.ActivationParameters{}),
+			oper:    fabrics.NewOperation(t, operation.SigmoidActivation),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
 			Base: testutils.Base{Name: "tanh"},
-			oper: fabrics.NewActivation(t, fabrics.TanhAct, fabrics.ActivationParameters{}),
+			oper: fabrics.NewOperation(t, operation.TanhActivation),
 		},
 		{
 			Base: testutils.Base{Name: "tanh after forward"},
-			oper: fabrics.NewActivation(t, fabrics.TanhAct, fabrics.ActivationParameters{}),
+			oper: fabrics.NewOperation(t, operation.TanhActivation),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
 			Base:    testutils.Base{Name: "tanh after backward"},
-			oper:    fabrics.NewActivation(t, fabrics.TanhAct, fabrics.ActivationParameters{}),
+			oper:    fabrics.NewOperation(t, operation.TanhActivation),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
 			Base: testutils.Base{Name: "dropout"},
-			oper: fabrics.NewDropout(t, fabrics.DropoutParameters{Percent: percent.Percent10}),
+			oper: fabrics.NewOperation(t, operation.Dropout, percent.Percent50),
 		},
 		{
 			Base: testutils.Base{Name: "dropout after forward"},
-			oper: fabrics.NewDropout(t, fabrics.DropoutParameters{Percent: percent.Percent10}),
+			oper: fabrics.NewOperation(t, operation.Dropout, percent.Percent50),
 			in:   fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
 		{
 			Base:    testutils.Base{Name: "dropout after backward"},
-			oper:    fabrics.NewDropout(t, fabrics.DropoutParameters{Percent: percent.Percent10}),
+			oper:    fabrics.NewOperation(t, operation.Dropout, percent.Percent50),
 			in:      fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 			outGrad: fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 5, Cols: 2}),
 		},
@@ -253,10 +253,12 @@ func Test_OperationPipeline(t *testing.T) {
 	testutils.SetupLogger()
 	var err error
 	wweight := fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 1, Cols: 2, Values: []float64{1, 2}})
-	weight := fabrics.NewWeight(t, fabrics.WeightParameters{MatrixParameters: fabrics.MatrixParameters{Rows: 1, Cols: 2, Values: []float64{1, 2}}}).(*operation.ParamOperation)
+	weight := fabrics.NewOperation(t, operation.WeightMultiply,
+		fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 1, Cols: 2, Values: []float64{1, 2}})).(*operation.ParamOperation)
 	bbias := fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 1, Cols: 2, Values: []float64{1, 2}})
-	bias := fabrics.NewBias(t, fabrics.BiasParameters{VectorParameters: fabrics.VectorParameters{Values: []float64{1, 2}}}).(*operation.ParamOperation)
-	act := fabrics.NewActivation(t, fabrics.SigmoidAct, fabrics.ActivationParameters{}).(*operation.Operation)
+	bias := fabrics.NewOperation(t, operation.BiasAdd,
+		fabrics.NewVector(t, fabrics.VectorParameters{Values: []float64{1, 2}})).(*operation.ParamOperation)
+	act := fabrics.NewOperation(t, operation.SigmoidActivation).(*operation.Operation)
 
 	in := fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 3, Cols: 1, Values: []float64{1, 2, 3}})
 	outExpected, err := in.MatMul(wweight)

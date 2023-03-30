@@ -69,6 +69,16 @@ func (o *ConstOperation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err err
 	return dx, nil
 }
 
+func (o *ConstOperation) Parameters() []*matrix.Matrix {
+	p := make([]*matrix.Matrix, len(o.p))
+	for i, param := range o.p {
+		if param != nil {
+			p[i] = param.Copy()
+		}
+	}
+	return p
+}
+
 func (o *ConstOperation) Copy() nn.IModule {
 	if o == nil {
 		return nil

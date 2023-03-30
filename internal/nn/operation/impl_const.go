@@ -50,7 +50,7 @@ func NewDropout(keepProbability percent.Percent) (o IOperation, err error) {
 	logger.Debug("create new dropout operation")
 	params := []*matrix.Matrix{nil}
 	return &ConstOperation{
-		Operation: &Operation{kind: Dropout, activation: true},
+		Operation: &Operation{kind: Dropout},
 		p:         params,
 		output: func(x *matrix.Matrix, p []*matrix.Matrix) (*matrix.Matrix, error) {
 			mask := generateMask(x.Rows(), x.Cols(), keepProbability)

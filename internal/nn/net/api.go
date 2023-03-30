@@ -1,4 +1,4 @@
-package layer
+package net
 
 import (
 	"nn/internal/nn"
@@ -6,12 +6,10 @@ import (
 	"nn/pkg/mmath/matrix"
 )
 
-type ILayer interface {
+type INetwork interface {
 	nn.IModule
 	Forward(x *matrix.Matrix) (*matrix.Matrix, error)
-	Backward(dy *matrix.Matrix) (*matrix.Matrix, error)
+	Loss(t *matrix.Matrix) (float64, error)
+	Backward() (*matrix.Matrix, error)
 	ApplyOptim(optimizer operation.Optimizer) error
-	Output() *matrix.Matrix
-	InputsCount() int
-	Size() int
 }

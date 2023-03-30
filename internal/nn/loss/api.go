@@ -15,4 +15,6 @@ type ILoss interface {
 
 	// Backward calculates input gradient for targets and outputs given during previous Forward() call
 	Backward() (*matrix.Matrix, error)
+
+	Output() float64
 }

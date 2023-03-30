@@ -11,99 +11,130 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-	testcases := []struct {
+	type testcase struct {
 		testutils.Base
 		kind     nn.Kind
 		args     []interface{}
 		expected operation.IOperation
-	}{
-		{Base: testutils.Base{Name: "create linear activation"},
+	}
+	testcases := make([]testcase, 0)
+	testcases = append(testcases,
+		testcase{
+			Base:     testutils.Base{Name: "create linear activation"},
 			kind:     operation.LinearActivation,
-			expected: fabrics.NewActivation(t, fabrics.LinearAct, fabrics.ActivationParameters{}),
+			expected: operation.NewLinearActivation(),
 		},
-		{Base: testutils.Base{Name: "create sigmoid activation"},
+		testcase{
+			Base:     testutils.Base{Name: "create sigmoid activation"},
 			kind:     operation.SigmoidActivation,
-			expected: fabrics.NewActivation(t, fabrics.SigmoidAct, fabrics.ActivationParameters{}),
+			expected: operation.NewSigmoidActivation(),
 		},
-		{Base: testutils.Base{Name: "create tanh activation"},
+		testcase{
+			Base:     testutils.Base{Name: "create tanh activation"},
 			kind:     operation.TanhActivation,
-			expected: fabrics.NewActivation(t, fabrics.TanhAct, fabrics.ActivationParameters{}),
+			expected: operation.NewTanhActivation(),
 		},
-		{Base: testutils.Base{Name: "create param sigmoid activation"},
+	)
+	o, err := operation.NewSigmoidParam(fabrics.NewVector(t, fabrics.VectorParameters{Values: []float64{1, 2, 3, 4, 5}}))
+	require.NoError(t, err)
+	testcases = append(testcases,
+		testcase{
+			Base:     testutils.Base{Name: "create param sigmoid activation"},
+			kind:     operation.SigmoidParamActivation,
+			args:     []interface{}{fabrics.NewVector(t, fabrics.VectorParameters{Values: []float64{1, 2, 3, 4, 5}})},
+			expected: o,
+		},
+		testcase{
+			Base: testutils.Base{Name: "create param sigmoid activation, no args", Err: operation.ErrCreate},
 			kind: operation.SigmoidParamActivation,
-			args: []interface{}{fabrics.NewVector(t, fabrics.VectorParameters{Values: []float64{1, 2, 3, 4, 5}})},
-			expected: fabrics.NewActivation(t, fabrics.SigmoidParamAct, fabrics.ActivationParameters{
-				SigmoidParamParameters: fabrics.VectorParameters{Values: []float64{1, 2, 3, 4, 5}},
-			}),
 		},
-		{Base: testutils.Base{Name: "create param sigmoid activation, no args", Err: operation.ErrCreate},
+		testcase{
+			Base: testutils.Base{Name: "create param sigmoid activation, empty args", Err: operation.ErrCreate},
 			kind: operation.SigmoidParamActivation,
-		},
-		{Base: testutils.Base{Name: "create param sigmoid activation, empty args", Err: operation.ErrCreate},
 			args: []interface{}{},
-			kind: operation.SigmoidParamActivation,
 		},
-		{Base: testutils.Base{Name: "create param sigmoid activation, wrong args", Err: operation.ErrCreate},
+		testcase{
+			Base: testutils.Base{Name: "create param sigmoid activation, wrong args", Err: operation.ErrCreate},
 			kind: operation.SigmoidParamActivation,
 			args: []interface{}{[]float64{1, 2, 3, 4, 5}},
 		},
-		{Base: testutils.Base{Name: "create dropout"},
+	)
+	o, err = operation.NewDropout(percent.Percent50)
+	require.NoError(t, err)
+	testcases = append(testcases,
+		testcase{
+			Base:     testutils.Base{Name: "create dropout"},
 			kind:     operation.Dropout,
-			args:     []interface{}{percent.Percent10},
-			expected: fabrics.NewDropout(t, fabrics.DropoutParameters{Percent: percent.Percent10}),
+			args:     []interface{}{percent.Percent50},
+			expected: o,
 		},
-		{Base: testutils.Base{Name: "create dropout, no args", Err: operation.ErrCreate},
+		testcase{
+			Base: testutils.Base{Name: "create dropout, no args", Err: operation.ErrCreate},
 			kind: operation.Dropout,
 		},
-		{Base: testutils.Base{Name: "create dropout, empty args", Err: operation.ErrCreate},
+		testcase{
+			Base: testutils.Base{Name: "create dropout, empty args", Err: operation.ErrCreate},
 			kind: operation.Dropout,
 			args: []interface{}{},
 		},
-		{Base: testutils.Base{Name: "create dropout, wrong args", Err: operation.ErrCreate},
+		testcase{
+			Base: testutils.Base{Name: "create dropout, wrong args", Err: operation.ErrCreate},
 			kind: operation.Dropout,
-			args: []interface{}{10},
+			args: []interface{}{50},
 		},
-		{Base: testutils.Base{Name: "create weight"},
+	)
+	o, err = operation.NewWeightOperation(fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 2, Cols: 2, Values: []float64{1, 2, 3, 4}}))
+	require.NoError(t, err)
+	testcases = append(testcases,
+		testcase{
+			Base:     testutils.Base{Name: "create weight"},
+			kind:     operation.WeightMultiply,
+			args:     []interface{}{fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 2, Cols: 2, Values: []float64{1, 2, 3, 4}})},
+			expected: o,
+		},
+		testcase{
+			Base: testutils.Base{Name: "create weight, no args", Err: operation.ErrCreate},
 			kind: operation.WeightMultiply,
-			args: []interface{}{fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 2, Cols: 2, Values: []float64{1, 2, 3, 4}})},
-			expected: fabrics.NewWeight(t, fabrics.WeightParameters{
-				MatrixParameters: fabrics.MatrixParameters{Rows: 2, Cols: 2, Values: []float64{1, 2, 3, 4}},
-			}),
 		},
-		{Base: testutils.Base{Name: "create weight, no args", Err: operation.ErrCreate},
-			kind: operation.WeightMultiply,
-		},
-		{Base: testutils.Base{Name: "create weight, empty args", Err: operation.ErrCreate},
+		testcase{
+			Base: testutils.Base{Name: "create weight, empty args", Err: operation.ErrCreate},
 			kind: operation.WeightMultiply,
 			args: []interface{}{},
 		},
-		{Base: testutils.Base{Name: "create weight, wrong args", Err: operation.ErrCreate},
+		testcase{
+			Base: testutils.Base{Name: "create weight, wrong args", Err: operation.ErrCreate},
 			kind: operation.WeightMultiply,
-			args: []interface{}{fabrics.NewVector(t, fabrics.VectorParameters{Values: []float64{1, 2, 3, 4}})},
+			args: []interface{}{50},
 		},
-		{Base: testutils.Base{Name: "create bias"},
+	)
+	o, err = operation.NewBiasOperation(fabrics.NewVector(t, fabrics.VectorParameters{Values: []float64{1, 2, 3, 4}}))
+	require.NoError(t, err)
+	testcases = append(testcases,
+		testcase{
+			Base:     testutils.Base{Name: "create bias"},
+			kind:     operation.BiasAdd,
+			args:     []interface{}{fabrics.NewVector(t, fabrics.VectorParameters{Values: []float64{1, 2, 3, 4}})},
+			expected: o,
+		},
+		testcase{
+			Base: testutils.Base{Name: "create bias, no args", Err: operation.ErrCreate},
 			kind: operation.BiasAdd,
-			args: []interface{}{fabrics.NewVector(t, fabrics.VectorParameters{Values: []float64{1, 2, 3, 4, 5}})},
-			expected: fabrics.NewBias(t, fabrics.BiasParameters{
-				VectorParameters: fabrics.VectorParameters{Values: []float64{1, 2, 3, 4, 5}},
-			}),
 		},
-		{Base: testutils.Base{Name: "create bias, no args", Err: operation.ErrCreate},
-			kind: operation.BiasAdd,
-		},
-		{Base: testutils.Base{Name: "create bias, empty args", Err: operation.ErrCreate},
+		testcase{
+			Base: testutils.Base{Name: "create bias, empty args", Err: operation.ErrCreate},
 			kind: operation.BiasAdd,
 			args: []interface{}{},
 		},
-		{Base: testutils.Base{Name: "create bias, wrong args", Err: operation.ErrCreate},
+		testcase{
+			Base: testutils.Base{Name: "create bias, wrong args", Err: operation.ErrCreate},
 			kind: operation.BiasAdd,
-			args: []interface{}{fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 2, Cols: 2})},
+			args: []interface{}{50},
 		},
-		{
+		testcase{
 			Base: testutils.Base{Name: "unknown operation", Err: operation.ErrCreate},
-			kind: "abcde",
+			kind: "unknown operation",
 		},
-	}
+	)
 
 	for _, tc := range testcases {
 		t.Run(tc.Name, func(t *testing.T) {
@@ -138,43 +169,37 @@ func TestIs(t *testing.T) {
 	}{
 		{
 			Base:   testutils.Base{Name: string(operation.LinearActivation)},
-			op:     fabrics.NewActivation(t, fabrics.LinearAct, fabrics.ActivationParameters{}),
+			op:     fabrics.NewOperation(t, operation.LinearActivation),
 			hitIdx: 0,
 		},
 		{
 			Base:   testutils.Base{Name: string(operation.SigmoidActivation)},
-			op:     fabrics.NewActivation(t, fabrics.SigmoidAct, fabrics.ActivationParameters{}),
+			op:     fabrics.NewOperation(t, operation.SigmoidActivation),
 			hitIdx: 1,
 		},
 		{
 			Base:   testutils.Base{Name: string(operation.TanhActivation)},
-			op:     fabrics.NewActivation(t, fabrics.TanhAct, fabrics.ActivationParameters{}),
+			op:     fabrics.NewOperation(t, operation.TanhActivation),
 			hitIdx: 2,
 		},
 		{
-			Base: testutils.Base{Name: string(operation.SigmoidParamActivation)},
-			op: fabrics.NewActivation(t, fabrics.SigmoidParamAct, fabrics.ActivationParameters{
-				SigmoidParamParameters: fabrics.VectorParameters{Size: 5},
-			}),
+			Base:   testutils.Base{Name: string(operation.SigmoidParamActivation)},
+			op:     fabrics.NewOperation(t, operation.SigmoidParamActivation, fabrics.NewVector(t, fabrics.VectorParameters{Size: 5})),
 			hitIdx: 3,
 		},
 		{
 			Base:   testutils.Base{Name: string(operation.Dropout)},
-			op:     fabrics.NewDropout(t, fabrics.DropoutParameters{Percent: percent.Percent10}),
+			op:     fabrics.NewOperation(t, operation.Dropout, percent.Percent50),
 			hitIdx: 4,
 		},
 		{
-			Base: testutils.Base{Name: string(operation.WeightMultiply)},
-			op: fabrics.NewWeight(t, fabrics.WeightParameters{
-				MatrixParameters: fabrics.MatrixParameters{Rows: 2, Cols: 2},
-			}),
+			Base:   testutils.Base{Name: string(operation.WeightMultiply)},
+			op:     fabrics.NewOperation(t, operation.WeightMultiply, fabrics.NewMatrix(t, fabrics.MatrixParameters{Rows: 2, Cols: 2})),
 			hitIdx: 5,
 		},
 		{
-			Base: testutils.Base{Name: string(operation.BiasAdd)},
-			op: fabrics.NewBias(t, fabrics.BiasParameters{
-				VectorParameters: fabrics.VectorParameters{Size: 5},
-			}),
+			Base:   testutils.Base{Name: string(operation.BiasAdd)},
+			op:     fabrics.NewOperation(t, operation.BiasAdd, fabrics.NewVector(t, fabrics.VectorParameters{Size: 5})),
 			hitIdx: 6,
 		},
 	}
