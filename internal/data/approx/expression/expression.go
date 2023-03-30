@@ -56,7 +56,7 @@ func newExpression(tree *sTree) (*Expression, error) {
 		// other children of operation is it's arguments (e.g. tuple of expressions)
 		tuple, err := newTuple(tree.children[1:])
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error parsing tuple: %w", err)
 		}
 		if !operation.checkInputsCount(len(tuple.expressions)) {
 			return nil, fmt.Errorf("wrong arguments count for operation %q: required %d, provided %d",
@@ -68,7 +68,7 @@ func newExpression(tree *sTree) (*Expression, error) {
 		logger.Tracef("create number from root %q", tree.root)
 		num, err := newNumber(tree.root)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error parsing number %q: %w", tree.root, err)
 		}
 		res.number = num
 		return res, nil
@@ -76,7 +76,7 @@ func newExpression(tree *sTree) (*Expression, error) {
 		logger.Tracef("create symbol from root %q", tree.root)
 		sym, err := newSymbol(tree.root)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error parsing symbol %q: %w", tree.root, err)
 		}
 		res.symbol = sym
 		return res, nil

@@ -24,14 +24,11 @@ func NewData(x *matrix.Matrix, y *matrix.Matrix) (data *Data, err error) {
 
 	logger.Infof("create data from x %q and y %q", x.ShortString(), y.ShortString())
 	if x == nil {
-		err = fmt.Errorf("no inputs provided: %v", x)
+		return nil, fmt.Errorf("no inputs provided: %v", x)
 	} else if y == nil {
-		err = fmt.Errorf("no outputs provided: %v", y)
+		return nil, fmt.Errorf("no outputs provided: %v", y)
 	} else if x.Rows() != y.Rows() {
-		err = fmt.Errorf("rows count mismatches in inputs and outputs: %d != %d", x.Rows(), y.Rows())
-	}
-	if err != nil {
-		return nil, wraperr.NewWrapErr(ErrCreate, err)
+		return nil, fmt.Errorf("rows count mismatches in inputs and outputs: %d != %d", x.Rows(), y.Rows())
 	}
 
 	data = &Data{X: x, Y: y}
@@ -165,23 +162,23 @@ func (d *Data) Split(pivot int) (first *Data, second *Data, err error) {
 	var firstX, firstY, secondX, secondY *matrix.Matrix
 
 	if firstX, err = d.X.SubMatrix(0, pivot, 1, 0, d.X.Cols(), 1); err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("error getting first part from inputs: %w", err)
 	}
 	if secondX, err = d.X.SubMatrix(pivot, d.X.Rows(), 1, 0, d.X.Cols(), 1); err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("error getting second part from inputs: %w", err)
 	}
 	if firstY, err = d.Y.SubMatrix(0, pivot, 1, 0, d.Y.Cols(), 1); err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("error getting first part from outputs: %w", err)
 	}
 	if secondY, err = d.Y.SubMatrix(pivot, d.Y.Rows(), 1, 0, d.Y.Cols(), 1); err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("error getting second part from outputs: %w", err)
 	}
 
 	if first, err = NewData(firstX, firstY); err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("error getting data from first parts of inputs and outputs: %w", err)
 	}
 	if second, err = NewData(secondX, secondY); err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("error getting data from second parts of inputs and outputs: %w", err)
 	}
 
 	logger.Tracef("first part: %s", first.ShortString())
@@ -196,6 +193,7 @@ func (d *Data) Split(pivot int) (first *Data, second *Data, err error) {
 //
 // Throws ErrSplit error.
 func (d *Data) Batches(batchSize int) (generator func(i int) (*Data, error), count int, err error) {
+	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrSplit, &err)
 
 	if batchSize < 1 {
@@ -217,7 +215,7 @@ func (d *Data) Batches(batchSize int) (generator func(i int) (*Data, error), cou
 		}
 		first, second, err = first.Split(batchSize)
 		if err != nil {
-			return nil, 0, err
+			return nil, 0, fmt.Errorf("error getting %d'th batch: %w", i, err)
 		}
 
 		batches[i] = first

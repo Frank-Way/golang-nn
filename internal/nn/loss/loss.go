@@ -26,6 +26,7 @@ type Loss struct {
 func (l *Loss) Forward(t *matrix.Matrix, y *matrix.Matrix) (loss float64, err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
+	defer wraperr.WrapError(fmt.Errorf("error during Forward propagation on %s", l.kind), &err)
 
 	if l == nil {
 		return 0, ErrNil
@@ -43,7 +44,7 @@ func (l *Loss) Forward(t *matrix.Matrix, y *matrix.Matrix) (loss float64, err er
 
 	loss, err = l.output(t, y)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("error computing output: %w", err)
 	}
 
 	l.l = loss
@@ -53,6 +54,7 @@ func (l *Loss) Forward(t *matrix.Matrix, y *matrix.Matrix) (loss float64, err er
 func (l *Loss) Backward() (grad *matrix.Matrix, err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
+	defer wraperr.WrapError(fmt.Errorf("error during Backward propagation on %s", l.kind), &err)
 
 	if l == nil {
 		return nil, ErrNil
@@ -62,7 +64,7 @@ func (l *Loss) Backward() (grad *matrix.Matrix, err error) {
 
 	grad, err = l.gradient(l.t, l.y)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error computing input gradient: %w", err)
 	}
 
 	l.d = grad.Copy()

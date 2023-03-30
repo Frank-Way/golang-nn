@@ -1,6 +1,7 @@
 package layer
 
 import (
+	"fmt"
 	"nn/internal/nn/operation"
 	"nn/internal/utils"
 	"nn/pkg/mmath/matrix"
@@ -17,16 +18,17 @@ type Layer struct {
 func (l *Layer) Forward(x *matrix.Matrix) (y *matrix.Matrix, err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
+	defer wraperr.WrapError(fmt.Errorf("error during Forward propagation on %s", l.kind), &err)
 
 	if l == nil {
 		return nil, ErrNil
 	}
 
 	y = x.Copy()
-	for _, op := range l.operations {
+	for i, op := range l.operations {
 		y, err = op.Forward(y)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error computing %d'th operation: %w", i, err)
 		}
 	}
 
@@ -36,6 +38,7 @@ func (l *Layer) Forward(x *matrix.Matrix) (y *matrix.Matrix, err error) {
 func (l *Layer) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
+	defer wraperr.WrapError(fmt.Errorf("error during Backward propagation on %s", l.kind), &err)
 
 	if l == nil {
 		return nil, ErrNil
@@ -46,7 +49,7 @@ func (l *Layer) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err error) {
 	for i := length - 1; i >= 0; i-- {
 		dx, err = l.operations[i].Backward(dx)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error computing %d'th operation: %w", i, err)
 		}
 	}
 
@@ -56,16 +59,17 @@ func (l *Layer) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err error) {
 func (l *Layer) ApplyOptim(optimizer operation.Optimizer) (err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
+	defer wraperr.WrapError(fmt.Errorf("error during apply Optimizer on %s", l.kind), &err)
 
 	if l == nil {
 		return ErrNil
 	}
 
-	for _, op := range l.operations {
+	for i, op := range l.operations {
 		if paramOp, ok := op.(*operation.ParamOperation); ok {
 			err = paramOp.ApplyOptim(optimizer)
 			if err != nil {
-				return err
+				return fmt.Errorf("error optimizing %d'th operation's parameter: %w", i, err)
 			}
 		}
 	}

@@ -24,6 +24,7 @@ type ParamOperation struct {
 func (o *ParamOperation) Forward(x *matrix.Matrix) (y *matrix.Matrix, err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
+	defer wraperr.WrapError(fmt.Errorf("error during Forward propagation on %s", o.kind), &err)
 
 	if o == nil {
 		return nil, ErrNil
@@ -34,7 +35,7 @@ func (o *ParamOperation) Forward(x *matrix.Matrix) (y *matrix.Matrix, err error)
 	o.x = x.Copy()
 	y, err = o.output(x, o.p)
 	if err != nil {
-		return nil, err
+		return nil, wraperr.NewWrapErr(fmt.Errorf("error computing output"), err)
 	}
 	o.y = y.Copy()
 	return y, nil
@@ -45,6 +46,7 @@ func (o *ParamOperation) Forward(x *matrix.Matrix) (y *matrix.Matrix, err error)
 func (o *ParamOperation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
+	defer wraperr.WrapError(fmt.Errorf("error during Backward propagation on %s", o.kind), &err)
 
 	if o == nil {
 		return nil, ErrNil
@@ -56,7 +58,7 @@ func (o *ParamOperation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err err
 
 	dp, err := o.gradParam(dy, o.p, o.x)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error computing paramter gradient: %w", err)
 	} else if err = o.p.CheckEqualShape(dp); err != nil {
 		return nil, err
 	}
@@ -68,7 +70,7 @@ func (o *ParamOperation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err err
 	}
 	dx, err = o.gradient(dy, o.p, o.x)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error computing input gradient: %w", err)
 	} else if o.x != nil {
 		if err = o.x.CheckEqualShape(dx); err != nil {
 			return nil, err
@@ -85,6 +87,7 @@ type Optimizer func(param, grad *matrix.Matrix) (*matrix.Matrix, error)
 func (o *ParamOperation) ApplyOptim(optim Optimizer) (err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
+	defer wraperr.WrapError(fmt.Errorf("error during apply Optimizer on %s", o.kind), &err)
 
 	if o == nil {
 		return ErrNil
@@ -93,9 +96,9 @@ func (o *ParamOperation) ApplyOptim(optim Optimizer) (err error) {
 	} else if o.dp == nil {
 		return fmt.Errorf("can not apply optimizer before gradient computation: %v", o.dp)
 	}
-	newP, err := optim(o.p, o.dp)
+	newP, err := optim(o.p.Copy(), o.dp.Copy())
 	if err != nil {
-		return err
+		return fmt.Errorf("error computing new parameter: %w", err)
 	} else if err := o.p.CheckEqualShape(newP); err != nil {
 		return err
 	} else if newP == nil {

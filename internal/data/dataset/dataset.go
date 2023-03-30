@@ -24,22 +24,19 @@ func NewDataset(train *Data, tests *Data, valid *Data) (ds *Dataset, err error) 
 
 	logger.Infof("create dataset from train %q tests %q valid %q", train.ShortString(), tests.ShortString(), valid.ShortString())
 	if train == nil {
-		err = fmt.Errorf("no train data: %v", train)
+		return nil, fmt.Errorf("no train data: %v", train)
 	} else if tests == nil {
-		err = fmt.Errorf("no tests data: %v", tests)
+		return nil, fmt.Errorf("no tests data: %v", tests)
 	} else if valid == nil {
-		err = fmt.Errorf("no valid data: %v", valid)
+		return nil, fmt.Errorf("no valid data: %v", valid)
 	} else if train.X.Cols() != tests.X.Cols() {
-		err = fmt.Errorf("cols count in train and tests input data mismatches: %d != %d", train.X.Cols(), tests.X.Cols())
+		return nil, fmt.Errorf("cols count in train and tests input data mismatches: %d != %d", train.X.Cols(), tests.X.Cols())
 	} else if tests.X.Cols() != valid.X.Cols() {
-		err = fmt.Errorf("cols count in tests and valid input data mismatches: %d != %d", tests.X.Cols(), valid.X.Cols())
+		return nil, fmt.Errorf("cols count in tests and valid input data mismatches: %d != %d", tests.X.Cols(), valid.X.Cols())
 	} else if train.Y.Cols() != tests.Y.Cols() {
-		err = fmt.Errorf("cols count in train and tests output data mismatches: %d != %d", train.Y.Cols(), tests.Y.Cols())
+		return nil, fmt.Errorf("cols count in train and tests output data mismatches: %d != %d", train.Y.Cols(), tests.Y.Cols())
 	} else if tests.Y.Cols() != valid.Y.Cols() {
-		err = fmt.Errorf("cols count in tests and valid output data mismatches: %d != %d", tests.Y.Cols(), valid.Y.Cols())
-	}
-	if err != nil {
-		return nil, wraperr.NewWrapErr(ErrCreate, err)
+		return nil, fmt.Errorf("cols count in tests and valid output data mismatches: %d != %d", tests.Y.Cols(), valid.Y.Cols())
 	}
 
 	ds = &Dataset{Train: train, Tests: tests, Valid: valid}

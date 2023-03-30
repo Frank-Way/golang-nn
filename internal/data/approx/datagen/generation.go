@@ -26,7 +26,7 @@ func NewParameters(
 	ranges []*InputRange,
 	dataSplitParameters *dataset.DataSplitParameters,
 ) (params *Parameters, err error) {
-	logger.CatchErr(&err)
+	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrCreate, &err)
 
 	if expression == "" {
@@ -43,26 +43,26 @@ func NewParameters(
 //
 // Throws ErrCreate error.
 func (p *Parameters) Generate() (ds *dataset.Dataset, err error) {
-	logger.CatchErr(&err)
+	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrCreate, &err)
 
 	logger.Infof("parse expression %s", p.Expression)
 	expr, err := expression.NewExpression(p.Expression) // parse expression
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error parsing expression %q: %w", p.Expression, err)
 	}
 
 	inCols := make([]*vector.Vector, len(p.Ranges)) // generate inputs
 	for i, inRange := range p.Ranges {
 		if inCols[i], err = inRange.inputs(); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error generating %d'th inputs: %w", i, err)
 		}
 	}
 
 	logger.Debug("combine inputs")
 	inMat, err := matrix.CartesianProduct(inCols) // combine inputs
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error combining inputs: %w", err)
 	}
 	inRaw := inMat.Raw()
 
@@ -71,21 +71,21 @@ func (p *Parameters) Generate() (ds *dataset.Dataset, err error) {
 	for i := 0; i < inMat.Rows(); i++ {
 		exec, err := expr.Exec(inRaw[i])
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error computing outputs: %w", err)
 		}
 		if outRows[i], err = vector.NewVector([]float64{exec}); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error wrapping outputs to Vector: %w", err)
 		}
 	}
 
 	outMat, err := matrix.NewMatrix(outRows)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error wrapping outputs to Matrix: %w", err)
 	}
 
 	data, err := dataset.NewData(inMat, outMat)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error wrapping inputs and outputs to Data: %w", err)
 	}
 
 	return dataset.NewDatasetSplit(data, p.DataSplitParameters) // split data
