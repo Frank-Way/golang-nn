@@ -2,13 +2,14 @@ package operation
 
 import (
 	"math"
+	"nn/internal/nn"
 	"nn/pkg/mmath/matrix"
 )
 
 const (
-	LinearActivation  Kind = "linear activation"
-	SigmoidActivation Kind = "sigmoid activation"
-	TanhActivation    Kind = "tanh activation"
+	LinearActivation  nn.Kind = "linear activation"
+	SigmoidActivation nn.Kind = "sigmoid activation"
+	TanhActivation    nn.Kind = "tanh activation"
 )
 
 // NewLinearActivation return operation:

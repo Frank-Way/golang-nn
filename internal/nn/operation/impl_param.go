@@ -2,14 +2,15 @@ package operation
 
 import (
 	"fmt"
+	"nn/internal/nn"
 	"nn/pkg/mmath/matrix"
 	"nn/pkg/mmath/vector"
 	"nn/pkg/wraperr"
 )
 
 const (
-	BiasAdd        Kind = "bias add"
-	WeightMultiply Kind = "weight multiply"
+	BiasAdd        nn.Kind = "bias add"
+	WeightMultiply nn.Kind = "weight multiply"
 )
 
 // NewBiasOperation returns operation of adding bias

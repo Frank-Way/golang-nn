@@ -1,11 +1,12 @@
 package loss
 
 import (
+	"nn/internal/nn"
 	"nn/pkg/mmath/matrix"
 )
 
 const (
-	MSELoss Kind = "MSE loss"
+	MSELoss nn.Kind = "MSE loss"
 )
 
 // NewMSELoss create new mean-squared loss module

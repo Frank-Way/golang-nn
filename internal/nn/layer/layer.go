@@ -2,6 +2,7 @@ package layer
 
 import (
 	"fmt"
+	"nn/internal/nn"
 	"nn/internal/nn/operation"
 	"nn/internal/utils"
 	"nn/pkg/mmath/matrix"
@@ -11,7 +12,7 @@ import (
 var _ ILayer = (*Layer)(nil)
 
 type Layer struct {
-	kind       Kind
+	kind       nn.Kind
 	operations []operation.IOperation
 }
 
@@ -76,11 +77,11 @@ func (l *Layer) ApplyOptim(optimizer operation.Optimizer) (err error) {
 	return nil
 }
 
-func (l *Layer) Is(kind Kind) bool {
+func (l *Layer) Is(kind nn.Kind) bool {
 	return l.kind == kind
 }
 
-func (l *Layer) Copy() ILayer {
+func (l *Layer) Copy() nn.IModule {
 	if l == nil {
 		return nil
 	}
@@ -89,12 +90,12 @@ func (l *Layer) Copy() ILayer {
 	}
 	res.operations = make([]operation.IOperation, len(l.operations))
 	for i, op := range l.operations {
-		res.operations[i] = op.Copy()
+		res.operations[i] = op.Copy().(operation.IOperation)
 	}
 	return res
 }
 
-func (l *Layer) Equal(layer ILayer) bool {
+func (l *Layer) Equal(layer nn.IModule) bool {
 	if l == nil || layer == nil {
 		if (l != nil && layer == nil) || (l == nil && layer != nil) {
 			return false // non-nil != nil and nil != non-nil
@@ -121,7 +122,7 @@ func (l *Layer) Equal(layer ILayer) bool {
 	return true
 }
 
-func (l *Layer) EqualApprox(layer ILayer) bool {
+func (l *Layer) EqualApprox(layer nn.IModule) bool {
 	if l == nil || layer == nil {
 		if (l != nil && layer == nil) || (l == nil && layer != nil) {
 			return false // non-nil != nil and nil != non-nil

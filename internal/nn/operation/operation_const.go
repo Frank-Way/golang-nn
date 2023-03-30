@@ -2,6 +2,7 @@ package operation
 
 import (
 	"fmt"
+	"nn/internal/nn"
 	"nn/internal/utils"
 	"nn/pkg/mmath/matrix"
 	"nn/pkg/wraperr"
@@ -68,7 +69,7 @@ func (o *ConstOperation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err err
 	return dx, nil
 }
 
-func (o *ConstOperation) Copy() IOperation {
+func (o *ConstOperation) Copy() nn.IModule {
 	if o == nil {
 		return nil
 	}
@@ -88,7 +89,7 @@ func (o *ConstOperation) Copy() IOperation {
 	return res
 }
 
-func (o *ConstOperation) Equal(operation IOperation) bool {
+func (o *ConstOperation) Equal(operation nn.IModule) bool {
 	if o == nil || operation == nil {
 		if (o != nil && operation == nil) || (o == nil && operation != nil) {
 			return false // non-nil != nil and nil != non-nil
@@ -118,7 +119,7 @@ func (o *ConstOperation) Equal(operation IOperation) bool {
 	return true
 }
 
-func (o *ConstOperation) EqualApprox(operation IOperation) bool {
+func (o *ConstOperation) EqualApprox(operation nn.IModule) bool {
 	if o == nil || operation == nil {
 		if (o != nil && operation == nil) || (o == nil && operation != nil) {
 			return false // non-nil != nil and nil != non-nil

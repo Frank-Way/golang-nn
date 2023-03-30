@@ -2,10 +2,11 @@ package loss
 
 import (
 	"fmt"
+	"nn/internal/nn"
 	"nn/pkg/wraperr"
 )
 
-func Create(kind Kind, args ...interface{}) (l ILoss, err error) {
+func Create(kind nn.Kind, args ...interface{}) (l ILoss, err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrCreate, &err)
 

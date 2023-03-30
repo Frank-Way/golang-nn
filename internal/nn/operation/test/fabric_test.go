@@ -2,6 +2,7 @@ package test
 
 import (
 	"github.com/stretchr/testify/require"
+	"nn/internal/nn"
 	"nn/internal/nn/operation"
 	"nn/internal/testutils"
 	"nn/internal/testutils/fabrics"
@@ -12,7 +13,7 @@ import (
 func TestCreate(t *testing.T) {
 	testcases := []struct {
 		testutils.Base
-		kind     operation.Kind
+		kind     nn.Kind
 		args     []interface{}
 		expected operation.IOperation
 	}{
@@ -119,7 +120,7 @@ func TestCreate(t *testing.T) {
 }
 
 func TestIs(t *testing.T) {
-	kinds := []operation.Kind{
+	kinds := []nn.Kind{
 		operation.LinearActivation,
 		operation.SigmoidActivation,
 		operation.TanhActivation,

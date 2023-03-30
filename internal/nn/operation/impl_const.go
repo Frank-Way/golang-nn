@@ -3,6 +3,7 @@ package operation
 import (
 	"fmt"
 	"math"
+	"nn/internal/nn"
 	"nn/pkg/mmath/matrix"
 	"nn/pkg/mmath/vector"
 	"nn/pkg/percent"
@@ -10,8 +11,8 @@ import (
 )
 
 const (
-	Dropout                Kind = "dropout"
-	SigmoidParamActivation Kind = "parametrized sigmoid activation"
+	Dropout                nn.Kind = "dropout"
+	SigmoidParamActivation nn.Kind = "parametrized sigmoid activation"
 )
 
 // generateMask return Matrix containing only values 0 and 1 distributed by given probability (count of 1 is defined

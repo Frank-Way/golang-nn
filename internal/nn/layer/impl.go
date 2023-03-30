@@ -2,6 +2,7 @@ package layer
 
 import (
 	"fmt"
+	"nn/internal/nn"
 	"nn/internal/nn/operation"
 	"nn/pkg/mmath/matrix"
 	"nn/pkg/mmath/vector"
@@ -10,8 +11,8 @@ import (
 )
 
 const (
-	DenseLayer     Kind = "dense layer"
-	DenseDropLayer Kind = "densedrop layer"
+	DenseLayer     nn.Kind = "dense layer"
+	DenseDropLayer nn.Kind = "densedrop layer"
 )
 
 func NewDenseLayer(weight *matrix.Matrix, bias *vector.Vector, activation operation.IOperation) (l ILayer, err error) {
@@ -41,7 +42,7 @@ func NewDenseLayer(weight *matrix.Matrix, bias *vector.Vector, activation operat
 
 	return &Layer{
 		kind:       DenseLayer,
-		operations: []operation.IOperation{w, b, activation.Copy()},
+		operations: []operation.IOperation{w, b, activation.Copy().(operation.IOperation)},
 	}, nil
 }
 

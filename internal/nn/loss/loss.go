@@ -2,6 +2,7 @@ package loss
 
 import (
 	"fmt"
+	"nn/internal/nn"
 	"nn/internal/utils"
 	"nn/pkg/mmath/matrix"
 	"nn/pkg/wraperr"
@@ -11,7 +12,7 @@ var _ ILoss = (*Loss)(nil)
 
 // Loss represent loss module that holds inputs and computed outputs
 type Loss struct {
-	kind Kind
+	kind nn.Kind
 
 	t *matrix.Matrix
 	y *matrix.Matrix
@@ -71,11 +72,11 @@ func (l *Loss) Backward() (grad *matrix.Matrix, err error) {
 	return grad, nil
 }
 
-func (l *Loss) Is(kind Kind) bool {
+func (l *Loss) Is(kind nn.Kind) bool {
 	return l.kind == kind
 }
 
-func (l *Loss) Copy() ILoss {
+func (l *Loss) Copy() nn.IModule {
 	if l == nil {
 		return nil
 	}
@@ -97,7 +98,7 @@ func (l *Loss) Copy() ILoss {
 	return res
 }
 
-func (l *Loss) Equal(loss ILoss) bool {
+func (l *Loss) Equal(loss nn.IModule) bool {
 	if l == nil || loss == nil {
 		if (l != nil && loss == nil) || (l == nil && loss != nil) {
 			return false // non-nil != nil and nil != non-nil
@@ -122,7 +123,7 @@ func (l *Loss) Equal(loss ILoss) bool {
 	return true
 }
 
-func (l *Loss) EqualApprox(loss ILoss) bool {
+func (l *Loss) EqualApprox(loss nn.IModule) bool {
 	if l == nil || loss == nil {
 		if (l != nil && loss == nil) || (l == nil && loss != nil) {
 			return false // non-nil != nil and nil != non-nil

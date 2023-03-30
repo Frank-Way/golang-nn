@@ -2,6 +2,7 @@ package operation
 
 import (
 	"fmt"
+	"nn/internal/nn"
 	"nn/internal/utils"
 	"nn/pkg/mmath/matrix"
 	"nn/pkg/wraperr"
@@ -12,7 +13,7 @@ var _ IOperation = (*Operation)(nil)
 // Operation represents main part of all operations. It stores all given and computed data. It defines operation
 // behavior.
 type Operation struct {
-	kind       Kind
+	kind       nn.Kind
 	activation bool
 
 	x *matrix.Matrix
@@ -72,7 +73,7 @@ func (o *Operation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err error) {
 	return dx, nil
 }
 
-func (o *Operation) Is(kind Kind) bool {
+func (o *Operation) Is(kind nn.Kind) bool {
 	return o.kind == kind
 }
 
@@ -80,7 +81,7 @@ func (o *Operation) IsActivation() bool {
 	return o.activation
 }
 
-func (o *Operation) Copy() IOperation {
+func (o *Operation) Copy() nn.IModule {
 	if o == nil {
 		return nil
 	}
@@ -104,7 +105,7 @@ func (o *Operation) Copy() IOperation {
 	return res
 }
 
-func (o *Operation) Equal(operation IOperation) bool {
+func (o *Operation) Equal(operation nn.IModule) bool {
 	if o == nil || operation == nil {
 		if (o != nil && operation == nil) || (o == nil && operation != nil) {
 			return false // non-nil != nil and nil != non-nil
@@ -129,7 +130,7 @@ func (o *Operation) Equal(operation IOperation) bool {
 	return true
 }
 
-func (o *Operation) EqualApprox(operation IOperation) bool {
+func (o *Operation) EqualApprox(operation nn.IModule) bool {
 	if o == nil || operation == nil {
 		if (o != nil && operation == nil) || (o == nil && operation != nil) {
 			return false // non-nil != nil and nil != non-nil

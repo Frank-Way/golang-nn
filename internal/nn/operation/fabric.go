@@ -2,13 +2,14 @@ package operation
 
 import (
 	"fmt"
+	"nn/internal/nn"
 	"nn/pkg/mmath/matrix"
 	"nn/pkg/mmath/vector"
 	"nn/pkg/percent"
 	"nn/pkg/wraperr"
 )
 
-func Create(kind Kind, args ...interface{}) (o IOperation, err error) {
+func Create(kind nn.Kind, args ...interface{}) (o IOperation, err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrCreate, &err)
 
