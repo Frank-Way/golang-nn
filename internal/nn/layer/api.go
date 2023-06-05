@@ -15,3 +15,12 @@ type ILayer interface {
 	InputsCount() int
 	Size() int
 }
+
+var layers = map[nn.Kind]struct{}{
+	DenseLayer: {}, DenseDropLayer: {},
+}
+
+func IsLayer(kind nn.Kind) bool {
+	_, ok := layers[kind]
+	return ok
+}

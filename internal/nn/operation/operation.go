@@ -74,11 +74,28 @@ func (o *Operation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err error) {
 }
 
 func (o *Operation) Is(kind nn.Kind) bool {
+	if o == nil {
+		return false
+	}
 	return o.kind == kind
+}
+
+func (o *Operation) Kind() nn.Kind {
+	return o.kind
 }
 
 func (o *Operation) IsActivation() bool {
 	return o.activation
+}
+
+var activations = map[nn.Kind]struct{}{
+	LinearActivation: {}, TanhActivation: {}, SigmoidActivation: {},
+	SigmoidParamActivation: {},
+}
+
+func IsActivation(kind nn.Kind) bool {
+	_, ok := activations[kind]
+	return ok
 }
 
 func (o *Operation) Output() *matrix.Matrix {

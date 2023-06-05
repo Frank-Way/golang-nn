@@ -19,3 +19,14 @@ type IOperation interface {
 	Output() *matrix.Matrix
 	IsActivation() bool
 }
+
+var operations = map[nn.Kind]struct{}{
+	LinearActivation: {}, TanhActivation: {}, SigmoidActivation: {},
+	SigmoidParamActivation: {}, Dropout: {},
+	WeightMultiply: {}, BiasAdd: {},
+}
+
+func IsOperation(kind nn.Kind) bool {
+	_, ok := operations[kind]
+	return ok
+}

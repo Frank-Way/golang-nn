@@ -84,7 +84,14 @@ func (l *Layer) ApplyOptim(optimizer operation.Optimizer) (err error) {
 }
 
 func (l *Layer) Is(kind nn.Kind) bool {
+	if l == nil {
+		return false
+	}
 	return l.kind == kind
+}
+
+func (l *Layer) Kind() nn.Kind {
+	return l.kind
 }
 
 func (l *Layer) Output() *matrix.Matrix {

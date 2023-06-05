@@ -45,16 +45,16 @@ func TestCreate(t *testing.T) {
 			expected: o,
 		},
 		testcase{
-			Base: testutils.Base{Name: "create param sigmoid activation, no args", Err: operation.ErrCreate},
+			Base: testutils.Base{Name: "create param sigmoid activation, no args", Err: operation.ErrFabric},
 			kind: operation.SigmoidParamActivation,
 		},
 		testcase{
-			Base: testutils.Base{Name: "create param sigmoid activation, empty args", Err: operation.ErrCreate},
+			Base: testutils.Base{Name: "create param sigmoid activation, empty args", Err: operation.ErrFabric},
 			kind: operation.SigmoidParamActivation,
 			args: []interface{}{},
 		},
 		testcase{
-			Base: testutils.Base{Name: "create param sigmoid activation, wrong args", Err: operation.ErrCreate},
+			Base: testutils.Base{Name: "create param sigmoid activation, wrong args", Err: operation.ErrFabric},
 			kind: operation.SigmoidParamActivation,
 			args: []interface{}{[]float64{1, 2, 3, 4, 5}},
 		},
@@ -69,16 +69,16 @@ func TestCreate(t *testing.T) {
 			expected: o,
 		},
 		testcase{
-			Base: testutils.Base{Name: "create dropout, no args", Err: operation.ErrCreate},
+			Base: testutils.Base{Name: "create dropout, no args", Err: operation.ErrFabric},
 			kind: operation.Dropout,
 		},
 		testcase{
-			Base: testutils.Base{Name: "create dropout, empty args", Err: operation.ErrCreate},
+			Base: testutils.Base{Name: "create dropout, empty args", Err: operation.ErrFabric},
 			kind: operation.Dropout,
 			args: []interface{}{},
 		},
 		testcase{
-			Base: testutils.Base{Name: "create dropout, wrong args", Err: operation.ErrCreate},
+			Base: testutils.Base{Name: "create dropout, wrong args", Err: operation.ErrFabric},
 			kind: operation.Dropout,
 			args: []interface{}{50},
 		},
@@ -93,16 +93,16 @@ func TestCreate(t *testing.T) {
 			expected: o,
 		},
 		testcase{
-			Base: testutils.Base{Name: "create weight, no args", Err: operation.ErrCreate},
+			Base: testutils.Base{Name: "create weight, no args", Err: operation.ErrFabric},
 			kind: operation.WeightMultiply,
 		},
 		testcase{
-			Base: testutils.Base{Name: "create weight, empty args", Err: operation.ErrCreate},
+			Base: testutils.Base{Name: "create weight, empty args", Err: operation.ErrFabric},
 			kind: operation.WeightMultiply,
 			args: []interface{}{},
 		},
 		testcase{
-			Base: testutils.Base{Name: "create weight, wrong args", Err: operation.ErrCreate},
+			Base: testutils.Base{Name: "create weight, wrong args", Err: operation.ErrFabric},
 			kind: operation.WeightMultiply,
 			args: []interface{}{50},
 		},
@@ -117,21 +117,21 @@ func TestCreate(t *testing.T) {
 			expected: o,
 		},
 		testcase{
-			Base: testutils.Base{Name: "create bias, no args", Err: operation.ErrCreate},
+			Base: testutils.Base{Name: "create bias, no args", Err: operation.ErrFabric},
 			kind: operation.BiasAdd,
 		},
 		testcase{
-			Base: testutils.Base{Name: "create bias, empty args", Err: operation.ErrCreate},
+			Base: testutils.Base{Name: "create bias, empty args", Err: operation.ErrFabric},
 			kind: operation.BiasAdd,
 			args: []interface{}{},
 		},
 		testcase{
-			Base: testutils.Base{Name: "create bias, wrong args", Err: operation.ErrCreate},
+			Base: testutils.Base{Name: "create bias, wrong args", Err: operation.ErrFabric},
 			kind: operation.BiasAdd,
 			args: []interface{}{50},
 		},
 		testcase{
-			Base: testutils.Base{Name: "unknown operation", Err: operation.ErrCreate},
+			Base: testutils.Base{Name: "unknown operation", Err: operation.ErrFabric},
 			kind: "unknown operation",
 		},
 	)

@@ -123,6 +123,7 @@ func (o *ParamOperation) Copy() nn.IModule {
 		Operation: o.Operation.Copy().(*Operation),
 		output:    o.output,
 		gradient:  o.gradient,
+		gradParam: o.gradParam,
 	}
 	if o.p != nil {
 		res.p = o.p.Copy()

@@ -73,7 +73,14 @@ func (l *Loss) Backward() (grad *matrix.Matrix, err error) {
 }
 
 func (l *Loss) Is(kind nn.Kind) bool {
+	if l == nil {
+		return false
+	}
 	return l.kind == kind
+}
+
+func (l *Loss) Kind() nn.Kind {
+	return l.kind
 }
 
 func (l *Loss) Output() float64 {

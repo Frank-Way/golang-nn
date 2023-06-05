@@ -13,3 +13,12 @@ type INetwork interface {
 	Backward() (*matrix.Matrix, error)
 	ApplyOptim(optimizer operation.Optimizer) error
 }
+
+var networks = map[nn.Kind]struct{}{
+	FFNetwork: {},
+}
+
+func IsNetwork(kind nn.Kind) bool {
+	_, ok := networks[kind]
+	return ok
+}

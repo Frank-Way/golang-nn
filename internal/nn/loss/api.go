@@ -18,3 +18,12 @@ type ILoss interface {
 
 	Output() float64
 }
+
+var losses = map[nn.Kind]struct{}{
+	MSELoss: {},
+}
+
+func IsLoss(kind nn.Kind) bool {
+	_, ok := losses[kind]
+	return ok
+}

@@ -11,7 +11,7 @@ import (
 
 func Create(kind nn.Kind, args ...interface{}) (o IOperation, err error) {
 	defer logger.CatchErr(&err)
-	defer wraperr.WrapError(ErrCreate, &err)
+	defer wraperr.WrapError(ErrFabric, &err)
 
 	switch kind {
 	case LinearActivation:

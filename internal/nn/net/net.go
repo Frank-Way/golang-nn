@@ -99,7 +99,14 @@ func (n *Network) ApplyOptim(optimizer operation.Optimizer) (err error) {
 }
 
 func (n *Network) Is(kind nn.Kind) bool {
+	if n == nil {
+		return false
+	}
 	return n.kind == kind
+}
+
+func (n *Network) Kind() nn.Kind {
+	return n.kind
 }
 
 func (n *Network) Copy() nn.IModule {

@@ -15,6 +15,7 @@ type IModule interface {
 	ShortString() string
 
 	Is(kind Kind) bool
+	Kind() Kind
 }
 
 type Kind string
