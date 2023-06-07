@@ -4,13 +4,10 @@ package percent
 import (
 	"fmt"
 	"math/rand"
-	"time"
 )
 
 // Percent meant to represent float value in [0.0; 1.0]
 type Percent uint8
-
-var rng = rand.New(rand.NewSource(time.Now().Unix()))
 
 const (
 	Percent0 Percent = 10 * iota
@@ -55,6 +52,32 @@ func (p Percent) value() uint8 {
 	return 100
 }
 
+func GetApproximate(value float64) Percent {
+	if value < 0.05 {
+		return Percent0
+	} else if value < 0.15 {
+		return Percent10
+	} else if value < 0.25 {
+		return Percent20
+	} else if value < 0.35 {
+		return Percent30
+	} else if value < 0.45 {
+		return Percent40
+	} else if value < 0.55 {
+		return Percent50
+	} else if value < 0.65 {
+		return Percent60
+	} else if value < 0.75 {
+		return Percent70
+	} else if value < 0.85 {
+		return Percent80
+	} else if value < 0.95 {
+		return Percent90
+	} else {
+		return Percent100
+	}
+}
+
 // GetI returns percent of given value as int
 //
 // Example:
@@ -66,14 +89,14 @@ func (p Percent) GetI(value int) int {
 // GetF returns percent of given value as float
 //
 // Example:
-//     Percent30.GetI(5) // 1.5
+//     Percent30.GetF(5) // 1.5
 func (p Percent) GetF(value float64) float64 {
 	return value * float64(p.value()) / 100.0
 }
 
 // Hit return true if randomly generated number less or equal to percent value, otherwise return false.
 func (p Percent) Hit() bool {
-	return rng.Float64() <= p.GetF(1)
+	return rand.Float64() <= p.GetF(1)
 }
 
 // Hit return true if randomly generated number less or equal to percent value, otherwise return false.

@@ -308,7 +308,7 @@ func TestLogger_IsEnabled(t *testing.T) {
 			Reset()
 			Setup(test.writers...)
 
-			logger := NewLogger("test-logger")
+			logger := NewLogger("losstestutils-logger")
 
 			for _, check := range test.checks {
 				require.Equal(t, check.expected, logger.IsEnabled(check.lvl))

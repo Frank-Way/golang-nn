@@ -22,7 +22,7 @@ func NewData(x *matrix.Matrix, y *matrix.Matrix) (data *Data, err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrCreate, &err)
 
-	logger.Infof("create data from x %q and y %q", x.ShortString(), y.ShortString())
+	logger.Tracef("create data from x %q and y %q", x.ShortString(), y.ShortString())
 	if x == nil {
 		return nil, fmt.Errorf("no inputs provided: %v", x)
 	} else if y == nil {
@@ -76,6 +76,30 @@ func (d *Data) ShortString() string {
 	return utils.FormatObject(d.toMap(utils.ShortString), utils.ShortFormat)
 }
 
+// Merge merges Data with another Data. Another Data entries will be written to the end of this Data.
+func (d *Data) Merge(another *Data) (res *Data, err error) {
+	defer logger.CatchErr(&err)
+	defer wraperr.WrapError(ErrMerge, &err)
+
+	if d == nil {
+		return nil, fmt.Errorf("call Merge on nil data")
+	} else if another == nil {
+		return d, nil
+	}
+
+	X, err := d.X.VStack([]*matrix.Matrix{another.X})
+	if err != nil {
+		return nil, err
+	}
+
+	Y, err := d.Y.VStack([]*matrix.Matrix{another.Y})
+	if err != nil {
+		return nil, err
+	}
+
+	return NewData(X, Y)
+}
+
 // Shuffle mixes data. Shuffle is row-based. Inputs and outputs reordering using the same random permutation.
 // Shuffle creates new Data, source Data stay untouched.
 //
@@ -84,7 +108,7 @@ func (d *Data) ShortString() string {
 //         | 2 |     | 5 |                  | 1 |     | 4 |
 //         | 3 |     | 6 |                  | 2 |     | 5 |
 func (d *Data) Shuffle() (data *Data, perm []int) {
-	logger.Infof("shuffle data: %s", d.ShortString())
+	logger.Tracef("shuffle data: %s", d.ShortString())
 	perm = rand.Perm(d.X.Rows())
 	logger.Tracef("permutation: %v", perm)
 
@@ -100,7 +124,7 @@ func (d *Data) Shuffle() (data *Data, perm []int) {
 	if data, err = NewData(xOrdered, yOrdered); err != nil {
 		panic(err)
 	} else {
-		logger.Infof("shuffled data: %s", data.ShortString())
+		logger.Tracef("shuffled data: %s", data.ShortString())
 		return data, perm
 	}
 }

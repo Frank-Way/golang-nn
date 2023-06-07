@@ -15,7 +15,7 @@ type Dataset struct {
 	Valid *Data
 }
 
-// NewDataset created Dataset for given train, test and validation Data. All the data must have same rows count.
+// NewDataset created Dataset for given train, losstestutils and validation Data. All the data must have same rows count.
 //
 // Throws ErrCreate error.
 func NewDataset(train *Data, tests *Data, valid *Data) (ds *Dataset, err error) {
@@ -65,7 +65,7 @@ func NewDatasetSplit(data *Data, parameters *DataSplitParameters) (d *Dataset, e
 	}
 
 	testSize := parameters.TestsPercent.GetI(n)
-	logger.Debugf("get test data sized %d from others sized %d", testSize, others.X.Rows())
+	logger.Debugf("get losstestutils data sized %d from others sized %d", testSize, others.X.Rows())
 	tests, valid, err := others.Split(testSize)
 	if err != nil {
 		return nil, fmt.Errorf("error during splitting to get tests and valid data: %w", err)
@@ -78,6 +78,34 @@ func NewDatasetSplit(data *Data, parameters *DataSplitParameters) (d *Dataset, e
 	}
 
 	return NewDataset(train, tests, valid)
+}
+
+// Combine combines all train, tests and valid Data to one Data
+func (d *Dataset) Combine() *Data {
+	merge, err := d.Train.Merge(d.Tests)
+	if err != nil {
+		panic(err)
+	}
+	merge, err = merge.Merge(d.Valid)
+	if err != nil {
+		panic(err)
+	}
+	return merge
+}
+
+// Shuffle shuffles all Data. First it merges all train, tests and valid Data, then Data is being shuffled,
+// and finally Data splits to Dataset again.
+func (d *Dataset) Shuffle() *Dataset {
+	combine := d.Combine()
+	parameters := parametersFromDataset(d)
+
+	combine, _ = combine.Shuffle()
+	split, err := NewDatasetSplit(combine, parameters)
+	if err != nil {
+		panic(err)
+	}
+
+	return split
 }
 
 // Copy return deep copy of Dataset

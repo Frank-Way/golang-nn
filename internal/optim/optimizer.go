@@ -8,7 +8,9 @@ import (
 	"nn/pkg/wraperr"
 )
 
-func NewSGD(parameters *SGDParameters) operation.Optimizer {
+type PostOptimizeFunc func()
+
+func NewSGD(parameters *SGDParameters) (operation.Optimizer, PostOptimizeFunc) {
 	var learnRate float64
 	var stopLearnRate float64
 	var epochsCount int
@@ -72,14 +74,11 @@ func NewSGD(parameters *SGDParameters) operation.Optimizer {
 	}
 
 	return func(param, grad *matrix.Matrix) (res *matrix.Matrix, err error) {
-		defer logger.CatchErr(&err)
-		defer wraperr.WrapError(ErrExec, &err)
+			defer logger.CatchErr(&err)
+			defer wraperr.WrapError(ErrExec, &err)
 
-		res, err = param.Sub(grad.MulNum(learnRate))
-		if err != nil {
-			return nil, err
+			return param.Sub(grad.MulNum(learnRate))
+		}, func() {
+			decrement(&learnRate)
 		}
-		decrement(&learnRate)
-		return res, nil
-	}
 }

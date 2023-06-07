@@ -99,7 +99,7 @@ func (e *Expression) Exec(x []float64) (res float64, err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrExec, &err)
 
-	logger.Infof("execute expression %q for inputs: %v", e.representation.root, x)
+	logger.Tracef("execute expression %q for inputs: %v", e.representation.root, x)
 	if e.number != nil {
 		return e.number.exec(x)
 	} else if e.symbol != nil {

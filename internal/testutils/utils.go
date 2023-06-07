@@ -3,7 +3,7 @@ package testutils
 
 import "math/rand"
 
-// Base represents common test struct
+// Base represents common losstestutils struct
 type Base struct {
 	Name string
 	Err  error
