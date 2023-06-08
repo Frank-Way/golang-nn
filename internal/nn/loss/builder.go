@@ -8,6 +8,8 @@ import (
 
 type Builder struct {
 	kind nn.Kind
+
+	resetAfterBuild bool
 }
 
 func NewBuilder(kind nn.Kind) (b *Builder, err error) {
@@ -37,4 +39,9 @@ func (b *Builder) Build() (l ILoss, err error) {
 
 	logger.Debugf("build loss %s", b.kind)
 	return NewMSELoss(), nil
+}
+
+func (b *Builder) SetResetAfterBuild(value bool) *Builder {
+	b.resetAfterBuild = value
+	return b
 }

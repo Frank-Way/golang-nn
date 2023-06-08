@@ -38,6 +38,9 @@ var (
 func FormatObject(object map[string]string, format Format) string {
 	var sb strings.Builder
 	for key, value := range object {
+		if value == "<nil>" {
+			continue
+		}
 		if format == PrettyFormat {
 			sb.WriteString(fmt.Sprintf(string(format), key, AddIndent(value, 2)))
 		} else {

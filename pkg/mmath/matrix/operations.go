@@ -584,7 +584,7 @@ func (m *Matrix) Tanh() *Matrix {
 }
 
 // SubMatrix returns sub matrix similar to vector.Slice. All inputs must be correct non-zero values (*Start < *Stop).
-// Result must have at least 1 row and 1 col. *Start index is included, *Stop index is excluded.
+// Loss must have at least 1 row and 1 col. *Start index is included, *Stop index is excluded.
 //
 // Throws ErrExec error.
 //
@@ -771,7 +771,7 @@ func (m *Matrix) Order(indices []int) (mat *Matrix, err error) {
 }
 
 // CartesianProduct perform cartesian multiplication. There is no restrictions to size of vectors.
-// Result of product is Matrix with rows count == product of lengths of all vectors and cols count == count of vectors.
+// Loss of product is Matrix with rows count == product of lengths of all vectors and cols count == count of vectors.
 //
 // Throws ErrExec error.
 //

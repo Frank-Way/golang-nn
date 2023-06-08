@@ -20,6 +20,8 @@ type Builder struct {
 	biasBuilder       *operation.Builder
 	activationBuilder *operation.Builder
 	dropoutBuilder    *operation.Builder
+
+	resetAfterBuild bool
 }
 
 func NewBuilder(kind nn.Kind) (b *Builder, err error) {
@@ -57,6 +59,14 @@ func (b *Builder) Build() (l ILayer, err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrBuilder, &err)
 	defer wraperr.WrapError(fmt.Errorf("error building"), &err)
+	defer func() {
+		if b.resetAfterBuild {
+			b.weight = nil
+			b.bias = nil
+			b.activation = nil
+			b.dropout = nil
+		}
+	}()
 
 	if b == nil {
 		return nil, ErrNil
@@ -132,7 +142,7 @@ func (b *Builder) ActivationKind(kind nn.Kind) *Builder {
 		if err != nil {
 			panic(err)
 		}
-		b.activationBuilder = builder
+		b.activationBuilder = builder.SetResetAfterBuild(b.resetAfterBuild)
 	}
 	return b
 }
@@ -159,6 +169,14 @@ func (b *Builder) ParamInitType(paramInitType operation.ParamInitType) *Builder 
 
 func (b *Builder) KeepProbability(probability percent.Percent) *Builder {
 	b.dropoutBuilder.KeepProbability(probability)
+	return b
+}
+
+func (b *Builder) SetResetAfterBuild(value bool) *Builder {
+	b.resetAfterBuild = value
+	b.weightBuilder.SetResetAfterBuild(value)
+	b.biasBuilder.SetResetAfterBuild(value)
+	b.dropoutBuilder.SetResetAfterBuild(value)
 	return b
 }
 

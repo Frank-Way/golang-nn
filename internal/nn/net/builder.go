@@ -9,6 +9,7 @@ import (
 	"nn/pkg/mmath/vector"
 	"nn/pkg/percent"
 	"nn/pkg/wraperr"
+	"sync"
 )
 
 type Builder struct {
@@ -18,6 +19,9 @@ type Builder struct {
 
 	layerBuilders []*layer.Builder
 	lossBuilder   *loss.Builder
+
+	resetAfterBuild bool
+	mu              sync.Mutex
 }
 
 func NewBuilder(kind nn.Kind) (b *Builder, err error) {
@@ -40,6 +44,14 @@ func (b *Builder) Build() (l INetwork, err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrBuilder, &err)
 	defer wraperr.WrapError(fmt.Errorf("error building"), &err)
+	defer func() {
+		if b.resetAfterBuild {
+			b.loss = nil
+			b.layers = nil
+		}
+	}()
+	b.mu.Lock()
+	defer b.mu.Unlock()
 
 	if b == nil {
 		return nil, ErrNil
@@ -65,7 +77,7 @@ func (b *Builder) LossKind(kind nn.Kind) *Builder {
 		if err != nil {
 			panic(err)
 		}
-		b.lossBuilder = builder
+		b.lossBuilder = builder.SetResetAfterBuild(b.resetAfterBuild)
 	}
 	return b
 }
@@ -81,7 +93,7 @@ func (b *Builder) AddLayerKind(kind nn.Kind) *Builder {
 		if err != nil {
 			panic(err)
 		}
-		b.layerBuilders = append(b.layerBuilders, builder)
+		b.layerBuilders = append(b.layerBuilders, builder.SetResetAfterBuild(b.resetAfterBuild))
 	}
 	return b
 }
@@ -186,7 +198,7 @@ func (b *Builder) LayerKind(index int, kind nn.Kind) *Builder {
 		if err != nil {
 			panic(err)
 		}
-		b.layerBuilders[index] = builder
+		b.layerBuilders[index] = builder.SetResetAfterBuild(b.resetAfterBuild)
 	}
 	return b
 }
@@ -309,6 +321,11 @@ func (b *Builder) KeepProbability(index int, probability percent.Percent) *Build
 		b.layerBuilders = append(b.layerBuilders, nil)
 	}
 	b.layerBuilders[index].KeepProbability(probability)
+	return b
+}
+
+func (b *Builder) SetResetAfterBuild(value bool) *Builder {
+	b.resetAfterBuild = value
 	return b
 }
 

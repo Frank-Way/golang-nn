@@ -9,13 +9,20 @@ import (
 	"nn/internal/nn/net"
 	"nn/internal/nn/operation"
 	"nn/internal/optim"
+	"nn/pkg/mylog"
+	"os"
 	"testing"
 )
 
 func TestTrain(t *testing.T) {
+	mylog.Setup(mylog.LeveledWriter{
+		Level:  mylog.Debug,
+		Writer: os.Stdout,
+	})
 	nb, err := net.NewBuilder(net.FFNetwork)
 	require.NoError(t, err)
 	nb = nb.
+		SetResetAfterBuild(true).
 		AddLayerKind(layer.DenseLayer).
 		AddInputsCount(1).
 		AddNeuronsCount(8).
@@ -27,11 +34,11 @@ func TestTrain(t *testing.T) {
 		AddActivationKind(operation.LinearActivation).
 		LossKind(loss.MSELoss)
 
-	ir, err := datagen.NewInputRange(0, 1, 128)
+	ir, err := datagen.NewInputRange(0, 1, 512)
 	require.NoError(t, err)
 
 	dp, err := datagen.NewParameters(
-		"(sin (* 3.14 (/ x0 4)))",
+		"(sin (* 3.14 x0))",
 		[]*datagen.InputRange{ir},
 		nil,
 	)
@@ -41,10 +48,12 @@ func TestTrain(t *testing.T) {
 	require.NoError(t, err)
 	ds = ds.Shuffle()
 
-	ec := 200
+	ec := 2000
 
-	p := &Parameters{
-		EpochsCount: ec,
+	p := &MultiParameters{
+		SingleParameters: SingleParameters{EpochsCount: ec},
+		RetriesCount:     2,
+		Parallel:         true,
 		NetProvider: func() (net.INetwork, error) {
 			return nb.Build()
 		},
@@ -61,6 +70,6 @@ func TestTrain(t *testing.T) {
 			return sgd, f, nil
 		},
 	}
-	_, err = Train(p)
+	_, err = MultiTrain(p)
 	require.NoError(t, err)
 }

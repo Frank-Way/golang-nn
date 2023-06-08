@@ -31,6 +31,8 @@ type Builder struct {
 	bias               *vector.Vector
 	inputsCount        int
 	neuronsCount       int
+
+	resetAfterBuild bool
 }
 
 func NewBuilder(kind nn.Kind) (b *Builder, err error) {
@@ -49,6 +51,12 @@ func (b *Builder) Build() (o IOperation, err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrBuilder, &err)
 	defer wraperr.WrapError(fmt.Errorf("error building"), &err)
+	defer func() {
+		if b.resetAfterBuild {
+			b.weight = nil
+			b.bias = nil
+		}
+	}()
 
 	if b == nil {
 		return nil, ErrNil
@@ -110,6 +118,11 @@ func (b *Builder) InputsCount(inputsCount int) *Builder {
 
 func (b *Builder) NeuronsCount(neuronsCount int) *Builder {
 	b.neuronsCount = neuronsCount
+	return b
+}
+
+func (b *Builder) SetResetAfterBuild(value bool) *Builder {
+	b.resetAfterBuild = value
 	return b
 }
 
