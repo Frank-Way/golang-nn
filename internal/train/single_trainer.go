@@ -2,6 +2,7 @@ package train
 
 import (
 	"fmt"
+	"math"
 	"nn/internal/data/dataset"
 	"nn/internal/nn/net"
 	"nn/internal/nn/operation"
@@ -55,12 +56,25 @@ func SingleTrain(parameters *SingleParameters) (r *SingleResult, err error) {
 
 	trainData := parameters.Dataset.Train.Copy()
 
+	var loss float64
+	bestLoss := math.MaxFloat64
+	var bestNetwork net.INetwork
+	var bestEpoch int
+
 	for i := 0; i < parameters.EpochsCount; i++ {
 		if i%(parameters.EpochsCount/10) == 0 {
-			_, err = calcAndPrintLoss(parameters.Network, parameters.Dataset.Tests, mylog.Debug,
+			loss, err = calcAndPrintLoss(parameters.Network, parameters.Dataset.Tests, mylog.Debug,
 				fmt.Sprintf("loss on tests data on [%d/%d] epoch", i, parameters.EpochsCount))
 			if err != nil {
 				return nil, fmt.Errorf("error calculating loss on epoch [%d]: %w", i, err)
+			}
+			if loss < bestLoss {
+				bestEpoch = i
+				bestLoss = loss
+				bestNetwork = parameters.Network.Copy().(net.INetwork)
+			} else {
+				logger.Debugf("loss [%e] became worse for epoch [%d] comparing to [%e] at epoch [%d]",
+					loss, i, bestLoss, bestEpoch)
 			}
 		}
 
@@ -79,11 +93,19 @@ func SingleTrain(parameters *SingleParameters) (r *SingleResult, err error) {
 		}
 		parameters.PostOptimizeFunc()
 	}
-	if _, err = calcAndPrintLoss(parameters.Network, parameters.Dataset.Valid, mylog.Info, "loss on valid data after train"); err != nil {
+	if validLossEndTrained, err := calcAndPrintLoss(parameters.Network, parameters.Dataset.Valid, mylog.Info, "loss on valid data after train"); err != nil {
 		return nil, err
+	} else if loss != bestLoss {
+		validLossSaved, err := calcAndPrintLoss(bestNetwork, parameters.Dataset.Valid, mylog.Trace, "")
+		if err == nil && validLossEndTrained < validLossSaved {
+			bestNetwork = parameters.Network
+		} else {
+			logger.Debugf("using network saved on [%d] epoch as it produces better loss on valid data: [%e] < [%e]",
+				bestEpoch, validLossSaved, validLossEndTrained)
+		}
 	}
 
-	loss, err := calcAndPrintLoss(parameters.Network, parameters.Dataset.Combine(), mylog.Info, "loss on all (combined) data after train")
+	loss, err = calcAndPrintLoss(bestNetwork, parameters.Dataset.Combine(), mylog.Info, "loss on all (combined) data after train")
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +113,7 @@ func SingleTrain(parameters *SingleParameters) (r *SingleResult, err error) {
 	logger.Infof("done train network [%s], loss: %e", parameters.Network.ShortString(), loss)
 
 	return &SingleResult{
-		Network: parameters.Network,
+		Network: bestNetwork,
 		Loss:    loss,
 	}, nil
 }

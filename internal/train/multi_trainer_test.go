@@ -66,11 +66,12 @@ func TestTrain(t *testing.T) {
 	ds, err := datagen.Generate(dp)
 	require.NoError(t, err)
 
-	ec := 5000
+	ec := 500
+	retries := 3
 
 	p := &MultiParameters{
 		SingleParameters: SingleParameters{EpochsCount: ec},
-		RetriesCount:     1,
+		RetriesCount:     retries,
 		Parallel:         true,
 		NetProvider: func() (net.INetwork, error) {
 			return nb.Build()
@@ -90,6 +91,8 @@ func TestTrain(t *testing.T) {
 	}
 	results, err := MultiTrain(p)
 	require.NoError(t, err)
+
+	require.Equal(t, retries, len(results.NetworkResults))
 
 	outputs, err := results.BestNetwork.Forward(ds.Valid.X)
 	require.NoError(t, err)

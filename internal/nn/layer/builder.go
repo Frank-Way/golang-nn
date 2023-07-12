@@ -60,7 +60,7 @@ func (b *Builder) Build() (l ILayer, err error) {
 	defer wraperr.WrapError(ErrBuilder, &err)
 	defer wraperr.WrapError(fmt.Errorf("error building"), &err)
 	defer func() {
-		if b.resetAfterBuild {
+		if b != nil && b.resetAfterBuild {
 			b.weight = nil
 			b.bias = nil
 			b.activation = nil
