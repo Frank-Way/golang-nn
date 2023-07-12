@@ -3,6 +3,7 @@ package train
 import (
 	"github.com/stretchr/testify/require"
 	"nn/internal/data/approx/datagen"
+	"nn/internal/data/approx/estimate"
 	"nn/internal/data/dataset"
 	"nn/internal/nn/layer"
 	"nn/internal/nn/loss"
@@ -10,6 +11,8 @@ import (
 	"nn/internal/nn/operation"
 	"nn/internal/optim"
 	"nn/pkg/mylog"
+	"nn/pkg/percent"
+	"nn/pkg/prettytable"
 	"os"
 	"testing"
 )
@@ -25,34 +28,49 @@ func TestTrain(t *testing.T) {
 		SetResetAfterBuild(true).
 		AddLayerKind(layer.DenseLayer).
 		AddInputsCount(1).
-		AddNeuronsCount(8).
+		AddNeuronsCount(16).
 		AddParamInitType(operation.GlorotInit).
 		AddActivationKind(operation.TanhActivation).
 		AddLayerKind(layer.DenseLayer).
-		AddInputsCount(8).
+		AddInputsCount(16).
 		AddNeuronsCount(1).
 		AddActivationKind(operation.LinearActivation).
 		LossKind(loss.MSELoss)
 
-	ir, err := datagen.NewInputRange(0, 1, 512)
-	require.NoError(t, err)
+	ir1 := &datagen.InputRange{Left: 0, Right: 1,
+		TrainParameters: &datagen.InputsGenerationParameters{Count: 100,
+			Extension: &datagen.ExtendParameters{Left: percent.Percent10, Right: percent.Percent20},
+		},
+		TestsParameters: &datagen.InputsGenerationParameters{Count: 50},
+		ValidParameters: &datagen.InputsGenerationParameters{Count: 25},
+	}
+
+	//ir2 := &datagen.InputRange{Left:  0, Right: 1,
+	//	TrainParameters: &datagen.InputsGenerationParameters{Count: 16},
+	//	TestsParameters: &datagen.InputsGenerationParameters{Count: 8},
+	//	ValidParameters: &datagen.InputsGenerationParameters{Count: 6},
+	//}
 
 	dp, err := datagen.NewParameters(
-		"(sin (* 3.14 x0))",
-		[]*datagen.InputRange{ir},
-		nil,
+		"(sin (* x0 (/ 3.14 4)))",
+		ir1,
 	)
+
+	//dp, err := datagen.NewParameters(
+	//	"(+ (sin (* x0 (/ 3.14 4))) x1)",
+	//	ir1,
+	//	ir2,
+	//)
 	require.NoError(t, err)
 
-	ds, err := dp.Generate()
+	ds, err := datagen.Generate(dp)
 	require.NoError(t, err)
-	ds = ds.Shuffle()
 
-	ec := 2000
+	ec := 5000
 
 	p := &MultiParameters{
 		SingleParameters: SingleParameters{EpochsCount: ec},
-		RetriesCount:     2,
+		RetriesCount:     1,
 		Parallel:         true,
 		NetProvider: func() (net.INetwork, error) {
 			return nb.Build()
@@ -70,6 +88,24 @@ func TestTrain(t *testing.T) {
 			return sgd, f, nil
 		},
 	}
-	_, err = MultiTrain(p)
+	results, err := MultiTrain(p)
 	require.NoError(t, err)
+
+	outputs, err := results.BestNetwork.Forward(ds.Valid.X)
+	require.NoError(t, err)
+	estimation, err := estimate.Estimate(outputs, ds.Valid.Y)
+	require.NoError(t, err)
+	t.Logf("\nmae %f, mrep %f %%, aae %f",
+		estimation.MaxAbsoluteError, estimation.MaxRelativeErrorPercents, estimation.AvgAbsoluteError)
+
+	table, err := prettytable.Build([]*prettytable.Group{
+		prettytable.MatrixToGroup("inputs", ds.Valid.X),
+		prettytable.MatrixToGroup("targets", ds.Valid.Y),
+		prettytable.MatrixToGroup("outputs", outputs),
+		prettytable.MatrixToGroup("deltas", estimation.Deltas),
+		prettytable.MatrixToGroup("abs deltas", estimation.AbsoluteDeltas),
+		prettytable.MatrixToGroup("rel deltas", estimation.RelativeDeltas),
+	}, false, percent.Percent0)
+	require.NoError(t, err)
+	t.Logf("\n" + table)
 }

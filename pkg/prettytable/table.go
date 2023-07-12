@@ -4,6 +4,7 @@ package prettytable
 
 import (
 	"fmt"
+	"nn/pkg/percent"
 	"strings"
 	"sync"
 )
@@ -16,7 +17,7 @@ type Column struct {
 
 // Group represents set of Column, that can be separated of other sets of Column
 type Group struct {
-	Columns []Column
+	Columns []*Column
 }
 
 // Build returns table. If fillGaps is false, then all columns of all groups must have same size.
@@ -65,7 +66,7 @@ type Group struct {
 //     //    g1_c1_v1   g1_c2_v3 |       |   g3_c1_v1   g3_c2_v3   g3_c3_v1
 //     // g1_c1_v2222            |       |   g3_c1_v2              g3_c3_v2
 //     //                        |       |   g3_c1_v3              g3_c3_v3
-func Build(groups []Group, fillGaps bool) (string, error) {
+func Build(groups []*Group, fillGaps bool, skipRowProbability percent.Percent) (string, error) {
 	if len(groups) < 1 {
 		return "", fmt.Errorf("no table column groups provided: %v", groups)
 	}
@@ -126,6 +127,9 @@ func Build(groups []Group, fillGaps bool) (string, error) {
 	defer putSB(sb)
 	sb.WriteString(builders[0].String())
 	for i := 1; i < length+2; i++ {
+		if i > 1 && skipRowProbability.Hit() {
+			continue
+		}
 		sb.WriteString(crlf)
 		sb.WriteString(builders[i].String())
 	}
@@ -199,7 +203,7 @@ func groupsSep(length int) [][]string {
 	return [][]string{result}
 }
 
-func (c Column) width() int {
+func (c *Column) width() int {
 	width := len(c.Header)
 	if len(c.Values) == 0 {
 		return width
@@ -215,11 +219,11 @@ func (c Column) width() int {
 	return width
 }
 
-func (c Column) length() int {
+func (c *Column) length() int {
 	return len(c.Values)
 }
 
-func (c Column) pad() []string {
+func (c *Column) pad() []string {
 	result := make([]string, c.length()+2)
 	w := c.width()
 	var err error
@@ -241,7 +245,7 @@ func (c Column) pad() []string {
 	return result
 }
 
-func (g Group) length() int {
+func (g *Group) length() int {
 	max := 0
 	for _, column := range g.Columns {
 		length := column.length()
@@ -252,7 +256,7 @@ func (g Group) length() int {
 	return max
 }
 
-func (g Group) pad() [][]string {
+func (g *Group) pad() [][]string {
 	result := make([][]string, 2*len(g.Columns)-1)
 	for i, column := range g.Columns {
 		result[2*i] = column.pad()

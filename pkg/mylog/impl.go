@@ -76,7 +76,7 @@ func (v *logsView) IsEnabled(lvl Level) bool {
 }
 
 func (v *logsView) Log(lvl Level, msg string) {
-	if *v.logs != nil {
+	if *v.logs != nil && msg != "" {
 		(*v.logs).log(lvl, fmt.Sprintf("%s: %s", v.name, msg))
 	}
 }

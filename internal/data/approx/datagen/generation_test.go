@@ -11,127 +11,190 @@ import (
 	"testing"
 )
 
-type ParametersParameters struct {
-	Expression string
-	Ranges     []*InputRange
-	Split      *dataset.DataSplitParameters
-}
-
-func newParameters(t *testing.T, parameters ParametersParameters) *Parameters {
-	if parameters.Expression == "" {
-		parameters.Expression = "(sin x0)"
-		parameters.Ranges = []*InputRange{newInputRange(t, InputRangeParameters{})}
-		parameters.Split = dataset.DefaultDataSplitParameters
-	}
-	params, err := NewParameters(parameters.Expression, parameters.Ranges, parameters.Split)
-	require.NoError(t, err)
-
-	return params
-}
-
 func TestNewParameters(t *testing.T) {
-	tests := []struct {
+	testcases := []struct {
 		testutils.Base
-		expr   string
-		inputs []InputRangeParameters
-		split  *dataset.DataSplitParameters
+		rawExpression string
+		ranges        []*InputRange
 	}{
 		{
-			Base:   testutils.Base{Name: "sin(x0) for x0 from 0 to 1 (11 values)"},
-			expr:   "(sin x0)",
-			inputs: []InputRangeParameters{{InputRange: &InputRange{Left: 0, Right: 1, Count: 11}}},
-			split:  dataset.DefaultDataSplitParameters,
+			Base:          testutils.Base{Name: "basic creation"},
+			rawExpression: "(sin x0)",
+			ranges: []*InputRange{
+				{
+					Left:            0,
+					Right:           1,
+					TrainParameters: &InputsGenerationParameters{Count: 11},
+				},
+			},
 		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.Name, func(t *testing.T) {
-			inputs := make([]*InputRange, len(test.inputs))
-			for i, input := range test.inputs {
-				inputs[i] = newInputRange(t, input)
-			}
-
-			_, err := NewParameters(test.expr, inputs, test.split)
-			if test.Err == nil {
-				require.NoError(t, err)
-			} else {
-				require.Error(t, err)
-				require.ErrorIs(t, err, test.Err)
-			}
-		})
-	}
-}
-
-func TestParameters_Generate(t *testing.T) {
-	tests := []struct {
-		testutils.Base
-		params   ParametersParameters
-		dsParams datasettestutils.DatasetParameters
-	}{
 		{
-			Base: testutils.Base{
-				Name: "sin(x0), 11 values from 0 to 1",
-				Err:  nil,
-			},
-			params: ParametersParameters{
-				Expression: "(sin x0)",
-				Ranges: []*InputRange{newInputRange(t, InputRangeParameters{
-					InputRange: &InputRange{
-						Left:  1,
-						Right: 2,
+			Base:          testutils.Base{Name: "wrong expression", Err: ErrCreate},
+			rawExpression: "(sin x0 1)",
+		},
+		{
+			Base:          testutils.Base{Name: "no input ranges", Err: ErrCreate},
+			rawExpression: "(sin x0)",
+		},
+		{
+			Base:          testutils.Base{Name: "empty input ranges"},
+			rawExpression: "(sin x0)",
+			ranges:        []*InputRange{},
+		},
+		{
+			Base:          testutils.Base{Name: "complex creation"},
+			rawExpression: "(sin x0)",
+			ranges: []*InputRange{
+				{
+					Left:  0,
+					Right: 1,
+					TrainParameters: &InputsGenerationParameters{
 						Count: 11,
+						Extension: &ExtendParameters{
+							Left:  percent.Percent10,
+							Right: percent.Percent10,
+						},
 					},
-				})},
-				Split: nil,
-			},
-			dsParams: datasettestutils.DatasetParameters{
-				Single: &datasettestutils.DataParameters{
-					X: testfactories.MatrixParameters{
-						Rows:   11,
-						Cols:   1,
-						Values: []float64{1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2},
+					TestsParameters: &InputsGenerationParameters{
+						Count:     6,
+						Extension: nil,
 					},
-					Y: testfactories.MatrixParameters{
-						Rows:   11,
-						Cols:   1,
-						Values: []float64{math.Sin(1), math.Sin(1.1), math.Sin(1.2), math.Sin(1.3), math.Sin(1.4), math.Sin(1.5), math.Sin(1.6), math.Sin(1.7), math.Sin(1.8), math.Sin(1.9), math.Sin(2)},
+					ValidParameters: &InputsGenerationParameters{
+						Count:     3,
+						Extension: nil,
 					},
 				},
 			},
 		},
 	}
 
-	for _, test := range tests {
-		t.Run(test.Name, func(t *testing.T) {
-			params := newParameters(t, test.params)
-			ds, err := params.Generate()
-			if test.Err == nil {
+	for _, tc := range testcases {
+		t.Run(tc.Name, func(t *testing.T) {
+			var err error
+			if tc.ranges == nil {
+				_, err = NewParameters(tc.rawExpression)
+			} else {
+				_, err = NewParameters(tc.rawExpression, tc.ranges...)
+			}
+			if tc.Err == nil {
 				require.NoError(t, err)
-				expected := datasettestutils.NewDataset(t, test.dsParams)
-				require.True(t, expected.EqualApprox(ds))
 			} else {
 				require.Error(t, err)
-				require.ErrorIs(t, err, test.Err)
+				require.ErrorIs(t, err, tc.Err)
 			}
 		})
 	}
 }
 
-func TestParameters_Strings(t *testing.T) {
-	parameters := newParameters(t, ParametersParameters{
-		Expression: "(x0 + x1)",
-		Ranges: []*InputRange{
-			{Left: 0, Right: 1, Count: 11},
-			{Left: 0, Right: 10, Count: 101},
-		},
-		Split: &dataset.DataSplitParameters{
-			TrainPercent: percent.Percent60,
-			TestsPercent: percent.Percent30,
-			ValidPercent: percent.Percent10,
-		},
-	})
+func TestGenerate(t *testing.T) {
+	newInputRange := func(left float64, right float64,
+		trainCount int, trainLeft percent.Percent, trainRight percent.Percent,
+		testsCount int, testsLeft percent.Percent, testsRight percent.Percent,
+		validCount int, validLeft percent.Percent, validRight percent.Percent) *InputRange {
+		return &InputRange{
+			Left:            left,
+			Right:           right,
+			TrainParameters: &InputsGenerationParameters{Count: trainCount, Extension: &ExtendParameters{Left: trainLeft, Right: trainRight}},
+			TestsParameters: &InputsGenerationParameters{Count: testsCount, Extension: &ExtendParameters{Left: testsLeft, Right: testsRight}},
+			ValidParameters: &InputsGenerationParameters{Count: validCount, Extension: &ExtendParameters{Left: validLeft, Right: validRight}},
+		}
+	}
 
-	t.Log("ShortString\n" + parameters.ShortString())
-	t.Log("String\n" + parameters.String())
-	t.Log("PrettyString\n" + parameters.PrettyString())
+	newParameters := func(rawExpression string, ranges ...*InputRange) *Parameters {
+		parameters, err := NewParameters(rawExpression, ranges...)
+		require.NoError(t, err)
+		return parameters
+	}
+
+	testcases := []struct {
+		testutils.Base
+		parameters *Parameters
+		expected   *dataset.Dataset
+	}{
+		{
+			Base: testutils.Base{
+				Name: "basic generation",
+				Err:  nil,
+			},
+			parameters: newParameters("(sin x0)",
+				newInputRange(0, 1,
+					11, percent.Percent10, percent.Percent10,
+					6, percent.Percent0, percent.Percent0,
+					3, percent.Percent0, percent.Percent0)),
+			expected: datasettestutils.NewDataset(t, datasettestutils.DatasetParameters{
+				Train: datasettestutils.DataParameters{
+					X: testfactories.MatrixParameters{Rows: 11, Cols: 1,
+						Values: []float64{-0.1,
+							-0.1 + 1.2/10*1,
+							-0.1 + 1.2/10*2,
+							-0.1 + 1.2/10*3,
+							-0.1 + 1.2/10*4,
+							-0.1 + 1.2/10*5,
+							-0.1 + 1.2/10*6,
+							-0.1 + 1.2/10*7,
+							-0.1 + 1.2/10*8,
+							-0.1 + 1.2/10*9,
+							1.1},
+					},
+					Y: testfactories.MatrixParameters{Rows: 11, Cols: 1,
+						Values: []float64{math.Sin(-0.1),
+							math.Sin(-0.1 + 1.2/10*1),
+							math.Sin(-0.1 + 1.2/10*2),
+							math.Sin(-0.1 + 1.2/10*3),
+							math.Sin(-0.1 + 1.2/10*4),
+							math.Sin(-0.1 + 1.2/10*5),
+							math.Sin(-0.1 + 1.2/10*6),
+							math.Sin(-0.1 + 1.2/10*7),
+							math.Sin(-0.1 + 1.2/10*8),
+							math.Sin(-0.1 + 1.2/10*9),
+							math.Sin(1.1)},
+					},
+				},
+				Tests: datasettestutils.DataParameters{
+					X: testfactories.MatrixParameters{Rows: 6, Cols: 1,
+						Values: []float64{0,
+							1.0 / 5 * 1,
+							1.0 / 5 * 2,
+							1.0 / 5 * 3,
+							1.0 / 5 * 4,
+							1},
+					},
+					Y: testfactories.MatrixParameters{Rows: 6, Cols: 1,
+						Values: []float64{math.Sin(0),
+							math.Sin(1.0 / 5 * 1),
+							math.Sin(1.0 / 5 * 2),
+							math.Sin(1.0 / 5 * 3),
+							math.Sin(1.0 / 5 * 4),
+							math.Sin(1)},
+					},
+				},
+				Valid: datasettestutils.DataParameters{
+					X: testfactories.MatrixParameters{Rows: 3, Cols: 1,
+						Values: []float64{0,
+							0.5,
+							1},
+					},
+					Y: testfactories.MatrixParameters{Rows: 3, Cols: 1,
+						Values: []float64{math.Sin(0),
+							math.Sin(0.5),
+							math.Sin(1)},
+					},
+				},
+			}),
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.Name, func(t *testing.T) {
+			actual, err := Generate(tc.parameters)
+			if tc.Err == nil {
+				require.NoError(t, err)
+				require.True(t, tc.expected.EqualApprox(actual), "expected dataset: %s\nactual dataset:   %s",
+					tc.expected.String(), actual.String())
+			} else {
+				require.Error(t, err)
+				require.ErrorIs(t, err, tc.Err)
+			}
+		})
+	}
 }

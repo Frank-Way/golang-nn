@@ -598,6 +598,7 @@ func TestLinSpace(t *testing.T) {
 		{name: "4 values in [1;2]", start: 1, stop: 2, count: 4, expected: []float64{1, 1 + 1.0/3.0, 1 + 2.0/3.0, 2}},
 		{name: "2 values in [1;2]", start: 1, stop: 2, count: 2, expected: []float64{1, 2}},
 		{name: "2 values in [2;1], error", start: 2, stop: 1, count: 2, err: ErrExec},
+		{name: "11 values in [-0.1;1.1]", start: -0.1, stop: 1.1, count: 11},
 	}
 
 	for _, test := range tests {
@@ -608,6 +609,7 @@ func TestLinSpace(t *testing.T) {
 				for i, value := range test.expected {
 					require.True(t, math.Abs(value-actual.values[i]) < 0.000001)
 				}
+				t.Logf("%s", actual.String())
 			} else {
 				require.Error(t, err)
 				require.ErrorIs(t, err, test.err)

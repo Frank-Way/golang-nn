@@ -16,45 +16,78 @@ import (
 //     * Ranges will be used to generate inputs for expression.Exec();
 //     * DataSplitParameters tells which part of generated data will be stored for training, tests and validation.
 type Parameters struct {
-	Expression string
-	Ranges     []*InputRange
-	*dataset.DataSplitParameters
+	*expression.Expression
+	InputRanges []*InputRange
 }
 
 func NewParameters(
-	expression string,
-	ranges []*InputRange,
-	dataSplitParameters *dataset.DataSplitParameters,
+	rawExpression string,
+	ranges ...*InputRange,
 ) (params *Parameters, err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrCreate, &err)
 
-	if expression == "" {
-		return nil, fmt.Errorf("no expression provided in datagen parameters: %s", expression)
-	} else if ranges == nil || len(ranges) < 1 {
-		return nil, fmt.Errorf("no input ranges provided in datagen parameters: %v", ranges)
-	} else if dataSplitParameters == nil {
-		dataSplitParameters = dataset.DefaultDataSplitParameters
+	if rawExpression == "" {
+		return nil, fmt.Errorf("no expression provided in datagen parameters: %s", rawExpression)
 	}
-	return &Parameters{Expression: expression, Ranges: ranges, DataSplitParameters: dataSplitParameters}, nil
+
+	expr, err := expression.NewExpression(rawExpression) // parse expression
+	if err != nil {
+		return nil, fmt.Errorf("error parsing expression %q: %w", rawExpression, err)
+	}
+	if ranges == nil {
+		return nil, fmt.Errorf("no input ranges provided")
+	}
+
+	for i, inRange := range ranges {
+		if err = checkInputRange(inRange); err != nil {
+			return nil, fmt.Errorf("error checking input %d'th range: %w", i, err)
+		}
+	}
+
+	return &Parameters{Expression: expr, InputRanges: ranges}, nil
 }
 
 // Generate provides Dataset from given Parameters.
 //
 // Throws ErrCreate error.
-func (p *Parameters) Generate() (ds *dataset.Dataset, err error) {
+func Generate(p *Parameters) (ds *dataset.Dataset, err error) {
 	defer logger.CatchErr(&err)
 	defer wraperr.WrapError(ErrCreate, &err)
 
-	logger.Infof("parse expression %s", p.Expression)
-	expr, err := expression.NewExpression(p.Expression) // parse expression
-	if err != nil {
-		return nil, fmt.Errorf("error parsing expression %q: %w", p.Expression, err)
+	if p == nil {
+		return nil, fmt.Errorf("no generation parameters provided")
 	}
 
-	inCols := make([]*vector.Vector, len(p.Ranges)) // generate inputs
-	for i, inRange := range p.Ranges {
-		if inCols[i], err = inRange.inputs(); err != nil {
+	trainData, err := p.generateData(func(inRange *InputRange) (*vector.Vector, error) {
+		return inRange.trainInputs()
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error generating train data: %w", err)
+	}
+
+	testsData, err := p.generateData(func(inRange *InputRange) (*vector.Vector, error) {
+		return inRange.testsInputs()
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error generating tests data: %w", err)
+	}
+
+	validData, err := p.generateData(func(inRange *InputRange) (*vector.Vector, error) {
+		return inRange.validInputs()
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error generating valid data: %w", err)
+	}
+
+	return dataset.NewDataset(trainData, testsData, validData)
+}
+
+func (p *Parameters) generateData(inGen func(inRange *InputRange) (*vector.Vector, error)) (d *dataset.Data, err error) {
+
+	inCols := make([]*vector.Vector, len(p.InputRanges)) // generate inputs
+	for i, inRange := range p.InputRanges {
+		if inCols[i], err = inGen(inRange); err != nil {
 			return nil, fmt.Errorf("error generating %d'th inputs: %w", i, err)
 		}
 	}
@@ -69,7 +102,7 @@ func (p *Parameters) Generate() (ds *dataset.Dataset, err error) {
 	logger.Debug("compute outputs of expression")
 	outRows := make([]*vector.Vector, inMat.Rows()) // compute outputs using parsed expression
 	for i := 0; i < inMat.Rows(); i++ {
-		exec, err := expr.Exec(inRaw[i])
+		exec, err := p.Expression.Exec(inRaw[i])
 		if err != nil {
 			return nil, fmt.Errorf("error computing outputs: %w", err)
 		}
@@ -83,17 +116,17 @@ func (p *Parameters) Generate() (ds *dataset.Dataset, err error) {
 		return nil, fmt.Errorf("error wrapping outputs to Matrix: %w", err)
 	}
 
-	data, err := dataset.NewData(inMat, outMat)
+	d, err = dataset.NewData(inMat, outMat)
 	if err != nil {
 		return nil, fmt.Errorf("error wrapping inputs and outputs to Data: %w", err)
 	}
 
-	return dataset.NewDatasetSplit(data, p.DataSplitParameters) // split data
+	return d, nil
 }
 
 func (p *Parameters) rangesAsSPStringers() []utils.SPStringer {
-	res := make([]utils.SPStringer, len(p.Ranges))
-	for i, rng := range p.Ranges {
+	res := make([]utils.SPStringer, len(p.InputRanges))
+	for i, rng := range p.InputRanges {
 		res[i] = rng
 	}
 	return res
@@ -104,9 +137,8 @@ func (p *Parameters) toMap(
 	stringers func(spStringers []utils.SPStringer) string,
 ) map[string]string {
 	return map[string]string{
-		"Expression":          p.Expression,
-		"Ranges":              stringers(p.rangesAsSPStringers()),
-		"DataSplitParameters": stringer(p.DataSplitParameters),
+		"Expression":  stringer(p.Expression),
+		"InputRanges": stringers(p.rangesAsSPStringers()),
 	}
 }
 

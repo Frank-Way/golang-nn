@@ -3,6 +3,7 @@ package prettytable
 import (
 	"github.com/stretchr/testify/require"
 	"math/rand"
+	"nn/pkg/percent"
 	"strings"
 	"testing"
 	"time"
@@ -41,7 +42,7 @@ type randomGroupParams struct {
 	columnsSize  int
 }
 
-func randomGroup(params randomGroupParams) Group {
+func randomGroup(params randomGroupParams) *Group {
 	if params.headerSize < 1 {
 		params.headerSize = 5 + rng.Intn(15)
 	}
@@ -52,15 +53,15 @@ func randomGroup(params randomGroupParams) Group {
 		params.columnsSize = 5 + rng.Intn(15)
 	}
 
-	columns := make([]Column, params.columnsCount)
+	columns := make([]*Column, params.columnsCount)
 	for i := 0; i < params.columnsCount; i++ {
-		columns[i] = Column{
+		columns[i] = &Column{
 			Header: randomString(params.headerSize),
 			Values: randomStrings(params.columnsSize, 0),
 		}
 	}
 
-	return Group{Columns: columns}
+	return &Group{Columns: columns}
 
 }
 
@@ -120,11 +121,11 @@ func TestBuild(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			groups := make([]Group, len(test.params))
+			groups := make([]*Group, len(test.params))
 			for i := 0; i < len(test.params); i++ {
 				groups[i] = randomGroup(test.params[i])
 			}
-			actual, err := Build(groups, test.fill)
+			actual, err := Build(groups, test.fill, percent.Percent0)
 			if test.err {
 				require.Error(t, err)
 			} else {
