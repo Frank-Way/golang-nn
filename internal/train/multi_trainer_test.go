@@ -1,6 +1,7 @@
 package train
 
 import (
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"nn/internal/data/approx/datagen"
 	"nn/internal/data/approx/estimate"
@@ -10,16 +11,18 @@ import (
 	"nn/internal/nn/net"
 	"nn/internal/nn/operation"
 	"nn/internal/optim"
+	"nn/pkg/mylog"
 	"nn/pkg/percent"
 	"nn/pkg/prettytable"
+	"os"
 	"testing"
 )
 
 func TestTrain(t *testing.T) {
-	//mylog.Setup(mylog.LeveledWriter{
-	//	Level:  mylog.Debug,
-	//	Writer: os.Stdout,
-	//})
+	mylog.Setup(mylog.LeveledWriter{
+		Level:  mylog.Debug,
+		Writer: os.Stdout,
+	})
 	nb, err := net.NewBuilder(net.FFNetwork)
 	require.NoError(t, err)
 	nb = nb.
@@ -36,11 +39,11 @@ func TestTrain(t *testing.T) {
 		LossKind(loss.MSELoss)
 
 	ir1 := &datagen.InputRange{Left: 0, Right: 1,
-		TrainParameters: &datagen.InputsGenerationParameters{Count: 100,
+		TrainParameters: &datagen.InputsGenerationParameters{Count: 1000,
 			Extension: &datagen.ExtendParameters{Left: percent.Percent10, Right: percent.Percent20},
 		},
-		TestsParameters: &datagen.InputsGenerationParameters{Count: 50},
-		ValidParameters: &datagen.InputsGenerationParameters{Count: 25},
+		TestsParameters: &datagen.InputsGenerationParameters{Count: 500},
+		ValidParameters: &datagen.InputsGenerationParameters{Count: 250},
 	}
 
 	//ir2 := &datagen.InputRange{Left:  0, Right: 1,
@@ -64,13 +67,23 @@ func TestTrain(t *testing.T) {
 	ds, err := datagen.Generate(dp)
 	require.NoError(t, err)
 
-	ec := 500
+	ec := 5000
 	retries := 2
 
 	p := &MultiParameters{
-		SingleParameters: SingleParameters{EpochsCount: ec},
-		RetriesCount:     retries,
-		Parallel:         true,
+		SingleParameters: SingleParameters{
+			TrainId: TrainId{
+				Id: uuid.New(),
+			},
+			EpochsCount: ec,
+			SaveStats:   true,
+			SaveBest:    true,
+			TestEpochPicker: func(epoch, epochs int) bool {
+				return epoch%(epochs/10) == 0
+			},
+		},
+		RetriesCount: retries,
+		Parallel:     true,
 		NetProvider: func() (net.INetwork, error) {
 			return nb.Build()
 		},
@@ -90,9 +103,9 @@ func TestTrain(t *testing.T) {
 	results, err := MultiTrain(p)
 	require.NoError(t, err)
 
-	require.Equal(t, retries, len(results.NetworkResults))
+	require.Equal(t, retries, len(results.AllResults))
 
-	outputs, err := results.BestNetwork.Forward(ds.Valid.X)
+	outputs, err := results.BestResults.Network.Forward(ds.Valid.X)
 	require.NoError(t, err)
 	estimation, err := estimate.Estimate(outputs, ds.Valid.Y)
 	require.NoError(t, err)

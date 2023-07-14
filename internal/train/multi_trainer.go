@@ -2,11 +2,12 @@ package train
 
 import (
 	"fmt"
-	"math"
+	"github.com/google/uuid"
 	"nn/internal/data/dataset"
 	"nn/internal/nn/net"
 	"nn/internal/nn/operation"
 	"nn/internal/optim"
+	"nn/internal/utils"
 	"nn/pkg/wraperr"
 	"sync"
 	"time"
@@ -14,11 +15,20 @@ import (
 
 type MultiParameters struct {
 	SingleParameters
-	RetriesCount      int
-	Parallel          bool
+
+	RetriesCount int
+	Parallel     bool
+
 	NetProvider       func() (net.INetwork, error)
 	DatasetProvider   func() (*dataset.Dataset, error)
 	OptimizerProvider func() (operation.Optimizer, optim.PostOptimizeFunc, error)
+}
+
+type MultiResults struct {
+	TrainId
+
+	BestResults *SingleResult
+	AllResults  []*SingleResult
 }
 
 func checkMultiParameters(p *MultiParameters) (err error) {
@@ -36,7 +46,12 @@ func checkMultiParameters(p *MultiParameters) (err error) {
 		return fmt.Errorf("invalid epochs count provided: %d", p.EpochsCount)
 	} else if p.RetriesCount < 1 {
 		return fmt.Errorf("invalid retries count provided: %d", p.RetriesCount)
+	} else if p.TrainId.Id.String() == "" {
+		return fmt.Errorf("no multi train uuid provided")
+	} else if p.TestEpochPicker == nil {
+		return fmt.Errorf("no test epoch picker provided")
 	}
+
 	return nil
 }
 
@@ -51,18 +66,20 @@ func preMultiTrain(parameters *MultiParameters) (sp *SingleParameters, err error
 		return nil, err
 	} else {
 		return &SingleParameters{
+			TrainId: TrainId{
+				Id:       uuid.New(),
+				ParentId: parameters.Id,
+			},
 			EpochsCount:      parameters.EpochsCount,
 			Network:          n,
 			Dataset:          ds,
 			Optimizer:        o,
 			PostOptimizeFunc: f,
+			TestEpochPicker:  parameters.TestEpochPicker,
+			SaveBest:         parameters.SaveBest,
+			SaveStats:        parameters.SaveStats,
 		}, nil
 	}
-}
-
-type MultiResults struct {
-	BestNetwork    net.INetwork
-	NetworkResults map[net.INetwork]float64
 }
 
 func MultiTrain(parameters *MultiParameters) (r *MultiResults, err error) {
@@ -79,41 +96,56 @@ func MultiTrain(parameters *MultiParameters) (r *MultiResults, err error) {
 	return multiTrainNonParallel(parameters)
 }
 
+func getBestResultFinder() func(result interface{}) interface{} {
+	var bestResult *SingleResult
+	first := true
+	return func(result interface{}) interface{} {
+		if casted, ok := result.(*SingleResult); !ok {
+			return result
+		} else if first || bestResult.Loss < casted.Loss {
+			bestResult = casted
+		}
+		return bestResult
+	}
+
+}
+
+func getBestResult(results []*SingleResult) *SingleResult {
+	resultsAsInterface := make([]interface{}, len(results))
+	for i, result := range results {
+		resultsAsInterface[i] = result
+	}
+	return utils.ApplySequentially(resultsAsInterface, getBestResultFinder()).(*SingleResult)
+}
+
 func multiTrainNonParallel(parameters *MultiParameters) (r *MultiResults, err error) {
-	bestLoss := math.MaxFloat64
-	var bestNetwork net.INetwork
-	networkResults := make(map[net.INetwork]float64)
+	r = &MultiResults{
+		TrainId:    parameters.TrainId,
+		AllResults: make([]*SingleResult, parameters.RetriesCount),
+	}
 
 	for i := 0; i < parameters.RetriesCount; i++ {
 		sp, err := preMultiTrain(parameters)
 		if err != nil {
-			return nil, fmt.Errorf("error preparing for [%d] train: %w", i, err)
+			return r, fmt.Errorf("error preparing for [%d] train: %w", i, err)
 		}
 
-		trainResults, err := SingleTrain(sp)
+		r.AllResults[i], err = SingleTrain(sp)
 		if err != nil {
-			return nil, fmt.Errorf("error running [%d] train: %w", i, err)
+			return r, fmt.Errorf("error running [%d] train: %w", i, err)
 		}
-
-		if trainResults.Loss < bestLoss {
-			bestLoss = trainResults.Loss
-			bestNetwork = trainResults.Network
-		}
-
-		networkResults[trainResults.Network] = trainResults.Loss
-
 	}
 
-	return &MultiResults{
-		BestNetwork:    bestNetwork,
-		NetworkResults: networkResults,
-	}, nil
+	r.BestResults = getBestResult(r.AllResults)
+
+	return r, nil
 }
 
 func multiTrainParallel(parameters *MultiParameters) (r *MultiResults, err error) {
-	bestLoss := math.MaxFloat64
-	var bestNetwork net.INetwork
-	networkResults := make(map[net.INetwork]float64)
+	r = &MultiResults{
+		TrainId:    parameters.TrainId,
+		AllResults: make([]*SingleResult, 0),
+	}
 
 	var wg sync.WaitGroup
 	var mu sync.Mutex
@@ -121,10 +153,8 @@ func multiTrainParallel(parameters *MultiParameters) (r *MultiResults, err error
 	errCh := make(chan error, parameters.RetriesCount)
 
 	for i := 0; i < parameters.RetriesCount; i++ {
-		//<- time.After(50 * time.Millisecond)
 		go func(wait *sync.WaitGroup, mutex *sync.Mutex, errorChanel chan<- error, iter int) {
 			defer wait.Done()
-			//defer close(errorChanel)
 
 			sp, err := preMultiTrain(parameters)
 			if err != nil {
@@ -141,12 +171,7 @@ func multiTrainParallel(parameters *MultiParameters) (r *MultiResults, err error
 			mutex.Lock()
 			defer mutex.Unlock()
 
-			if trainResults.Loss < bestLoss {
-				bestLoss = trainResults.Loss
-				bestNetwork = trainResults.Network
-			}
-
-			networkResults[trainResults.Network] = trainResults.Loss
+			r.AllResults = append(r.AllResults, trainResults)
 		}(&wg, &mu, errCh, i)
 	}
 
@@ -163,8 +188,7 @@ func multiTrainParallel(parameters *MultiParameters) (r *MultiResults, err error
 		}
 	}
 
-	return &MultiResults{
-		BestNetwork:    bestNetwork,
-		NetworkResults: networkResults,
-	}, nil
+	r.BestResults = getBestResult(r.AllResults)
+
+	return r, nil
 }

@@ -2,9 +2,21 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 )
+
+func MarshalJSON(typeName string, value interface{}) string {
+	if value == nil {
+		return "<nil>"
+	}
+	b, err := json.Marshal(value)
+	if err != nil {
+		return "invalid value"
+	}
+	return fmt.Sprintf("%s(%s)", typeName, string(b))
+}
 
 type SPStringer interface {
 	ShortString() string
