@@ -56,9 +56,9 @@ func (m *Matrix) MatMul(matrix *Matrix) (mat *Matrix, err error) {
 		return nil, fmt.Errorf("can't Mul matrices sized %dx%d and %dx%d", m.rows, m.cols, matrix.rows, matrix.cols)
 	}
 
-	if m.rows*matrix.cols > ParallelThreshold {
-		return m.matMulImplMulti(matrix)
-	}
+	//if m.rows*matrix.cols > ParallelThreshold {
+	//	return m.matMulImplMulti(matrix)
+	//}
 	return m.matMulImplSingle(matrix)
 }
 

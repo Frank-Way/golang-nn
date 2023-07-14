@@ -10,18 +10,16 @@ import (
 	"nn/internal/nn/net"
 	"nn/internal/nn/operation"
 	"nn/internal/optim"
-	"nn/pkg/mylog"
 	"nn/pkg/percent"
 	"nn/pkg/prettytable"
-	"os"
 	"testing"
 )
 
 func TestTrain(t *testing.T) {
-	mylog.Setup(mylog.LeveledWriter{
-		Level:  mylog.Debug,
-		Writer: os.Stdout,
-	})
+	//mylog.Setup(mylog.LeveledWriter{
+	//	Level:  mylog.Debug,
+	//	Writer: os.Stdout,
+	//})
 	nb, err := net.NewBuilder(net.FFNetwork)
 	require.NoError(t, err)
 	nb = nb.
@@ -67,7 +65,7 @@ func TestTrain(t *testing.T) {
 	require.NoError(t, err)
 
 	ec := 500
-	retries := 3
+	retries := 2
 
 	p := &MultiParameters{
 		SingleParameters: SingleParameters{EpochsCount: ec},
@@ -82,7 +80,7 @@ func TestTrain(t *testing.T) {
 		OptimizerProvider: func() (operation.Optimizer, optim.PostOptimizeFunc, error) {
 			sgd, f := optim.NewSGD(&optim.SGDParameters{
 				LearnRate:     0.1,
-				StopLearnRate: 0.0001,
+				StopLearnRate: 0.00001,
 				EpochsCount:   ec,
 				DecrementType: optim.LinearDecrement,
 			})
@@ -108,7 +106,7 @@ func TestTrain(t *testing.T) {
 		prettytable.MatrixToGroup("deltas", estimation.Deltas),
 		prettytable.MatrixToGroup("abs deltas", estimation.AbsoluteDeltas),
 		prettytable.MatrixToGroup("rel deltas", estimation.RelativeDeltas),
-	}, false, percent.Percent0)
+	}, false, 95)
 	require.NoError(t, err)
 	t.Logf("\n" + table)
 }

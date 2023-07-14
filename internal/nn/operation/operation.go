@@ -23,7 +23,7 @@ type Operation struct {
 	dy *matrix.Matrix
 
 	output   func(x *matrix.Matrix) (*matrix.Matrix, error)
-	gradient func(dy *matrix.Matrix) (*matrix.Matrix, error)
+	gradient func(y, dy *matrix.Matrix) (*matrix.Matrix, error)
 }
 
 func (o *Operation) Forward(x *matrix.Matrix) (y *matrix.Matrix, err error) {
@@ -63,7 +63,7 @@ func (o *Operation) Backward(dy *matrix.Matrix) (dx *matrix.Matrix, err error) {
 	if err := o.y.CheckEqualShape(dy); err != nil {
 		return nil, fmt.Errorf("error checking output and output gradient shapes: %w", err)
 	}
-	dx, err = o.gradient(dy)
+	dx, err = o.gradient(o.y.Copy(), dy)
 	if err != nil {
 		return nil, fmt.Errorf("error computing input gradient: %w", err)
 	} else if err = o.x.CheckEqualShape(dx); err != nil {

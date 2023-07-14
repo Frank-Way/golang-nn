@@ -25,57 +25,16 @@ const (
 
 // value unwraps under-laying uint
 func (p Percent) value() uint8 {
-	switch p {
-	case Percent0:
-		return 0
-	case Percent10:
-		return 10
-	case Percent20:
-		return 20
-	case Percent30:
-		return 30
-	case Percent40:
-		return 40
-	case Percent50:
-		return 50
-	case Percent60:
-		return 60
-	case Percent70:
-		return 70
-	case Percent80:
-		return 80
-	case Percent90:
-		return 90
-	case Percent100:
-		return 100
-	}
-	return 100
+	return uint8(p)
 }
 
 func GetApproximate(value float64) Percent {
-	if value < 0.05 {
+	if value < 0.1 {
 		return Percent0
-	} else if value < 0.15 {
-		return Percent10
-	} else if value < 0.25 {
-		return Percent20
-	} else if value < 0.35 {
-		return Percent30
-	} else if value < 0.45 {
-		return Percent40
-	} else if value < 0.55 {
-		return Percent50
-	} else if value < 0.65 {
-		return Percent60
-	} else if value < 0.75 {
-		return Percent70
-	} else if value < 0.85 {
-		return Percent80
-	} else if value < 0.95 {
-		return Percent90
-	} else {
+	} else if value > 0.99 {
 		return Percent100
 	}
+	return Percent(uint8(value * 100))
 }
 
 // GetI returns percent of given value as int

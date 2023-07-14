@@ -113,7 +113,7 @@ func SingleTrain(parameters *SingleParameters) (r *SingleResult, err error) {
 	logger.Infof("done train network [%s], loss: %e", parameters.Network.ShortString(), loss)
 
 	return &SingleResult{
-		Network: bestNetwork,
+		Network: parameters.Network,
 		Loss:    loss,
 	}, nil
 }
